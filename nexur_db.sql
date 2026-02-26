@@ -1,0 +1,1 @@
+SELECT * FROM nexur_db.usuario;
