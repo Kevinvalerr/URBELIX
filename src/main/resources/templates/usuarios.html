@@ -19,6 +19,23 @@
         <td th:text="${usuario.nombre}"></td>
         <td th:text="${usuario.email}"></td>
     </tr>
+    <h2>Crear Usuario</h2>
+
+    <form action="/guardar-usuario" method="post">
+        <label>Nombre:</label>
+        <input type="text" name="nombre" required><br><br>
+
+        <label>Email:</label>
+          <input type="email" name="email" required><br><br>
+            
+        <label>Password:</label>
+        <input type="password" name="password" requires><br><br>
+
+
+        <button type="submit">Guardar</button>
+
+
+    </form>
 </table>
 
 </body>
