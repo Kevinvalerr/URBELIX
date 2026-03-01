@@ -22,9 +22,9 @@
         <td th:text="${usuario.nombre}"></td>
         <td th:text="${usuario.email}"></td>
         <td>
-             <a th:href="@{/eliminar-usuario(id=${usuario.id})}">
-                Eliminar
-             </a>
+            <a th:href="@{/editar-usuario(id=${usuario.id})}">Editar</a>
+            |
+            <a th:href="@{/eliminar-usuario(id=${usuario.id})}">Eliminar</a>
         </td>
     </tr>
     <h2>Crear Usuario</h2>

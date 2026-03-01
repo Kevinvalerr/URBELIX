@@ -47,6 +47,35 @@ public class VistaController {
         usuarioService.eliminarUsuario(id);
         return "redirect:/usuarios-vista";
     }
+
+    @GetMapping("/editar-usuario")
+    public String mostrarFormularioEdicion(@RequestParam Long id, Model model){
+        Usuario usuario = usuarioService.buscarPorId(id);
+
+        model.addAttribute("usuario", usuario);
+
+        return "editar-usuario";
+    }
+
+    @PostMapping("/actualizar-usuario")
+    public String actualizarUsuario(
+        @RequestParam Long id,
+        @RequestParam String nombre,
+        @RequestParam String email,
+        @RequestParam String password) {
+     
+        Usuario usuario = new Usuario();
+        
+        usuario.setId(id);
+        usuario.setNombre(nombre);
+        usuario.setEmail(email);
+        usuario.setPassword(password);
+
+        usuarioService.guardarUsuario(usuario);
+
+        return "redirect:/usuarios-vista";
+        }
+    
 }
 
 
