@@ -12,12 +12,20 @@
         <th>ID</th>
         <th>Nombre</th>
         <th>Email</th>
+        <th>Acciones</th>
+           
     </tr>
-
+</thead>
+<tbody>
     <tr th:each="usuario : ${usuarios}">
         <td th:text="${usuario.id}"></td>
         <td th:text="${usuario.nombre}"></td>
         <td th:text="${usuario.email}"></td>
+        <td>
+             <a th:href="@{/eliminar-usuario(id=${usuario.id})}">
+                Eliminar
+             </a>
+        </td>
     </tr>
     <h2>Crear Usuario</h2>
 

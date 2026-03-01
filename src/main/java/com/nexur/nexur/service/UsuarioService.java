@@ -19,4 +19,8 @@ public class UsuarioService {
     public List<Usuario> listarUsuarios(){
         return usuarioRepository.findAll();
     }
+    public void eliminarUsuario(Long id){
+        usuarioRepository.deleteById(id);
+    }
+    
 }

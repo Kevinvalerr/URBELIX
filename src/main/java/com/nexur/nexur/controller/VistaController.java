@@ -41,6 +41,12 @@ public class VistaController {
 
         return "redirect:/usuarios-vista";
     }
+
+    @GetMapping("/eliminar-usuario")
+    public String eliminarUsuario(@RequestParam Long id){
+        usuarioService.eliminarUsuario(id);
+        return "redirect:/usuarios-vista";
+    }
 }
 
 
