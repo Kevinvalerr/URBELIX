@@ -8,43 +8,56 @@
 <h1>Lista de Usuarios</h1>
 
 <table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Nombre</th>
-        <th>Email</th>
-        <th>Acciones</th>
-           
-    </tr>
-</thead>
-<tbody>
-    <tr th:each="usuario : ${usuarios}">
-        <td th:text="${usuario.id}"></td>
-        <td th:text="${usuario.nombre}"></td>
-        <td th:text="${usuario.email}"></td>
-        <td>
-            <a th:href="@{/editar-usuario(id=${usuario.id})}">Editar</a>
-            |
-            <a th:href="@{/eliminar-usuario(id=${usuario.id})}">Eliminar</a>
-        </td>
-    </tr>
-    <h2>Crear Usuario</h2>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
 
-    <form action="/guardar-usuario" method="post">
-        <label>Nombre:</label>
-        <input type="text" name="nombre" required><br><br>
-
-        <label>Email:</label>
-          <input type="email" name="email" required><br><br>
-            
-        <label>Password:</label>
-        <input type="password" name="password" requires><br><br>
-
-
-        <button type="submit">Guardar</button>
-
-
-    </form>
+    <tbody>
+        <tr th:each="usuario : ${usuarios}">
+            <td th:text="${usuario.id}"></td>
+            <td th:text="${usuario.nombre}"></td>
+            <td th:text="${usuario.email}"></td>
+            <td>
+                <a th:href="@{/editar-usuario(id=${usuario.id})}">Editar</a>
+                |
+                <a th:href="@{/eliminar-usuario(id=${usuario.id})}">Eliminar</a>
+            </td>
+        </tr>
+    </tbody>
 </table>
+
+<h2>Crear Usuario</h2>
+
+<form action="/guardar-usuario" method="post">
+
+    <label>Nombre:</label>
+    <input type="text" name="nombre" required>
+    <br><br>
+
+    <label>Email:</label>
+    <input type="email" name="email" required>
+    <br><br>
+
+    <label>Password:</label>
+    <input type="password" name="password" required>
+    <br><br>
+
+    <label>Rol:</label>
+    <select name="rol">
+        <option value="ADMIN">ADMIN</option>
+        <option value="RESIDENTE">RESIDENTE</option>
+        <option value="PORTERIA">PORTERIA</option>
+    </select>
+    <br><br>
+
+    <button type="submit">Guardar</button>
+
+</form>
 
 </body>
 </html>

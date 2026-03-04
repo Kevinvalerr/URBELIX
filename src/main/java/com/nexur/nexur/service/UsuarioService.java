@@ -1,29 +1,44 @@
 package com.nexur.nexur.service;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import com.nexur.nexur.model.Usuario;
 import com.nexur.nexur.repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public Usuario guardarUsuario(Usuario usuario){
+    public UsuarioService(UsuarioRepository usuarioRepository,
+                          PasswordEncoder passwordEncoder) {
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public Usuario guardarUsuario(Usuario usuario) {
+
+        // Encriptamos la contraseña antes de guardar
+        usuario.setPassword(
+            passwordEncoder.encode(usuario.getPassword())
+        );
+
         return usuarioRepository.save(usuario);
     }
 
-    public List<Usuario> listarUsuarios(){
+    public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
     }
-    public void eliminarUsuario(Long id){
-        usuarioRepository.deleteById(id);
-    }
-    
-    public Usuario buscarPorId(Long id){
+
+    public Usuario buscarPorId(Long id) {
         return usuarioRepository.findById(id).orElse(null);
+    }
+
+    public void eliminarUsuario(Long id) {
+        usuarioRepository.deleteById(id);
     }
 }

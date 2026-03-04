@@ -74,6 +74,7 @@ public class VistaController {
         usuarioService.guardarUsuario(usuario);
 
         return "redirect:/usuarios-vista";
+         
         }
     
 }
