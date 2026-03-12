@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+         
+        <title>Dashboard Nexur</title>
+
+    </head>
+
+    <body>
+        <h1 th:text="${titulo}"></h1>
+
+        <p>Bienvenido al sistema Nexur</p>
+
+        <ul>
+            <li>
+                <a href="/usuarios-vista">Gestión de Usuarios</a>
+            </li>
+
+            <li>
+                <a href="#">Apartamentos</a>
+            </li>
+            <li>
+                <a href="#">Portería</a>
+            </li>        
+            <li>
+                <a href="#">Reportes</a>
+            </li>
+        </ul>
+    </body>
+</html>

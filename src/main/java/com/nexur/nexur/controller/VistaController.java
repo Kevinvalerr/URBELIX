@@ -22,7 +22,7 @@ public class VistaController {
         this.usuarioService = usuarioService;
     }
 
-    @GetMapping("/usuarios")
+    @GetMapping("/usuarios-vista")
     public String mostrarUsuarios(Model model) {
         model.addAttribute("usuarios", usuarioService.listarUsuarios());
         return "usuarios";

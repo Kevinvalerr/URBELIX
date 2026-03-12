@@ -9,7 +9,7 @@ import com.nexur.nexur.service.UsuarioService;
 
 @RestController
 
-@RequestMapping("/usuarios-vista")
+@RequestMapping("/api/usuarios")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
