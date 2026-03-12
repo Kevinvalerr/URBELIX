@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import com.nexur.nexur.service.UsuarioService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.nexur.nexur.model.Rol;
 import com.nexur.nexur.model.Usuario;
 
 
@@ -20,7 +22,7 @@ public class VistaController {
         this.usuarioService = usuarioService;
     }
 
-    @GetMapping("/usuarios-vista")
+    @GetMapping("/usuarios")
     public String mostrarUsuarios(Model model) {
         model.addAttribute("usuarios", usuarioService.listarUsuarios());
         return "usuarios";
@@ -70,7 +72,7 @@ public class VistaController {
         usuario.setNombre(nombre);
         usuario.setEmail(email);
         usuario.setPassword(password);
-
+       
         usuarioService.guardarUsuario(usuario);
 
         return "redirect:/usuarios-vista";

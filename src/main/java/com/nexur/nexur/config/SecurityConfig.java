@@ -16,7 +16,19 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+                .requestMatchers("/login").permitAll()
+                .anyRequest().authenticated()
+            )
+            .formLogin(login-> login
+                .loginPage("/login")
+                .defaultSuccessUrl("/usuarios",true)
+                .permitAll() 
+            )
+            .logout(logout -> logout
+                .logoutSuccessUrl("/login")
+                .permitAll()
+
+                   
             );
 
         return http.build();
