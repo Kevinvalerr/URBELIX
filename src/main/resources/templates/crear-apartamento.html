@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      
+      
+
+<head>
+    <title>Crear Apartamento</title>
+</html>
+
+<body>    
+    <h1>Crear Apartamento</h1>
+
+    <form th:action="@{/apartamentos}" th:object="${apartamento}" method="post">
+        <label>Número:</label>
+        <input type="text" th:field="*{numero}" />
+        <br><br>
+
+        <label>Torre:</label>
+        <input type="text" th:field="*{torre}" />
+        <br><br>
+
+        <label>Piso:</label>
+        <input type="number" th:field="*{piso}"/>
+        <br><br>
+
+        <label>Estado:</label>
+        <input type="text" th:field="*{estado}" />
+      
+      <br><br>
+
+        <button type="submit">Guardar</button>
+    
+
+    </form>
+        <br>
+        <a th:href="@{/apartamentos}">Volver</a>
+
+</body>        
+    
+</html>
