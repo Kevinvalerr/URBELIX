@@ -2,15 +2,18 @@ package com.nexur.nexur.service;
 
 import com.nexur.nexur.model.Apartamento;
 import com.nexur.nexur.repository.ApartamentoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 
 public class ApartamentoService {
-    @Autowired
-    private ApartamentoRepository apartamentoRepository;
+    
+    private final ApartamentoRepository apartamentoRepository;
+     public ApartamentoService(ApartamentoRepository apartamentoRepository){
+        this.apartamentoRepository = apartamentoRepository;
+     }
 
     public List<Apartamento> listarApartamentos(){
 

@@ -10,7 +10,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Collection;
 import java.util.List;
 
+
 @Entity
+@Table(name = "usuario")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,6 +35,11 @@ public class Usuario implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+
+       if (rol == null) {
+        return List.of();
+       }
+
         return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
     }
 

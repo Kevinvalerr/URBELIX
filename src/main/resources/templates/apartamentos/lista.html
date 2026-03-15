@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Apartamentos</title>
+    </head>
+    <body>
+        <h1>Lista de Apartamentos</h1>
+
+        <a href="/apartamentos/nuevo">Nuevo Apartamento</a>
+
+        <table border="1">
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Número</th>
+                    <th>Torre</th>
+                    <th>Piso</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+            </thead>
+
+        <thbody>
+           
+        <tr th:each="ap : ${apartamentos}">
+             <td th:text="${ap.id}"></td>
+             <td th:text="${ap.numero}"></td>
+             <td th:text="${ap.torre}"></td>
+             <td th:text="${ap.piso}"></td>
+             <td th:text="${ap.estado}"></td>
+            
+             <td>
+                <a th:ref="@{apartamentos/eliminar/{id}(id=${ap.id})}">
+
+                </a>
+             </td>
+
+           </tr>
+           </thbody>
+
+</table>
+</body>
+</html>

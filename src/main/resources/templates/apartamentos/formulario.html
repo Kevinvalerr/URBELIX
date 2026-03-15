@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http:www.thymeleaft.org">
+    <head>
+        <title>Nuevo Apartamento</title>
+    </head>
+    <body>
+
+     <h1>Registrar Apartamento</h1>
+
+     <form th:action="@{/apartamentos/guardar}"th:object="${apartamento}" method="post">
+       
+       <label>Número</label>
+       <input type="text" th:field="*{numero}" />
+       <br><br>
+      
+       <label>Torre</label>
+       <input type="text" th:field="*{torre}" />
+       <br><br>
+      
+       <label>Piso</label>
+       <input type="text" th:field="*{piso}" />
+       <br><br>
+      
+       <label>Estado</label>
+       <input type="text" th:field="*{estado}" />
+       <br><br>
+
+       <button type="submit">Guardar</button>
+
+     </form>
+
+    </body>
+</html>

@@ -7,7 +7,7 @@ import com.nexur.nexur.service.UsuarioService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.nexur.nexur.model.Rol;
+
 import com.nexur.nexur.model.Usuario;
 
 
@@ -25,7 +25,7 @@ public class VistaController {
     @GetMapping("/usuarios-vista")
     public String mostrarUsuarios(Model model) {
         model.addAttribute("usuarios", usuarioService.listarUsuarios());
-        return "usuarios";
+        return "usuarios/lista";
     }
      @PostMapping("/guardar-usuario")
  public String guardarUsuario(
@@ -56,7 +56,7 @@ public class VistaController {
 
         model.addAttribute("usuario", usuario);
 
-        return "editar-usuario";
+        return "usuarios/editar";
     }
 
     @PostMapping("/actualizar-usuario")

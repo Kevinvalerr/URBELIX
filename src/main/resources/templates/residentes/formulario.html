@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Nuevo Residente</title>
+    </head>
+    <body>
+        <h1>Registrar Residente</h1>
+
+        <form th:action="@{/residentes/guardar}" th:object="${residente}" method="post">
+
+
+            <label>Nombre:</label>
+            <input type="text" th:field="*{nombre}" />
+            <br><br>
+
+            <label>Documento:</label>
+            <input type="text" th:field="*{documento}" />
+            <br><br>
+
+            
+            <label>Teléfono:</label>
+            <input type="text" th:field="*{telefono}" />
+            <br><br>
+
+            <label>Apartamento:</label>
+            <select name="apartamentoId" required>
+
+                <option value="">Seleccione un apartamento</option>
+
+                <option th:each="ap : ${apartamentos}"
+                        th:value="${ap.id}"
+                        th:text="${ap.numero}">
+                </option>
+
+            </select>
+
+            <br><br>
+
+             <button type="submit">Guardar</button>
+
+        </form>
+
+    </body>
+</html>

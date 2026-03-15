@@ -12,7 +12,7 @@ public class DashboardController {
     
         model.addAttribute("titulo", "Dashboard");
 
-        return "dashboard";
+        return "dashboard/dashboard";
     }
     
 }

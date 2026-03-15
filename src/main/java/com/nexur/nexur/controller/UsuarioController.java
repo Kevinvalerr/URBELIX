@@ -3,7 +3,7 @@ package com.nexur.nexur.controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-import com.nexur.nexur.model.Rol;
+
 import com.nexur.nexur.model.Usuario;
 import com.nexur.nexur.service.UsuarioService;
 

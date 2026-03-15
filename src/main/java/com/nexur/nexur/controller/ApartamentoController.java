@@ -32,7 +32,7 @@ public class ApartamentoController {
 
     model.addAttribute("apartamentos", apartamentos);
 
-    return "apartamentos";
+    return "apartamentos/lista";
 
    }
 
@@ -45,7 +45,7 @@ public class ApartamentoController {
 
       model.addAttribute("apartamento", apartamento);
 
-      return "editar-apartamento";
+      return "apartamentos/editar";
 
    }
  
@@ -76,7 +76,7 @@ public class ApartamentoController {
 
         model.addAttribute("apartamento", apartamento);
 
-        return "crear-apartamento";
+        return "apartamentos/crear";
     }
 
     @PreAuthorize("hasRole('ADMIN')")

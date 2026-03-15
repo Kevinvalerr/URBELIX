@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.nexur.nexur.model.Rol;
 import com.nexur.nexur.model.Usuario;
 import com.nexur.nexur.repository.UsuarioRepository;
 
@@ -27,6 +28,9 @@ public class UsuarioService {
             passwordEncoder.encode(usuario.getPassword())
         );
 
+        if(usuario.getRol() == null){
+            usuario.setRol(Rol.RESIDENTE);
+        }
         return usuarioRepository.save(usuario);
     }
 
