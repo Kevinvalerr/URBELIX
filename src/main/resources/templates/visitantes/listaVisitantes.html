@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Lista de Visitantes</title>
+        <meta charset="UTF-8">
+    </head>
+
+    <body>
+        <h1>Lista de Visitantes</h1>
+
+        <!--Botón para registrar un nuevo visitante-->
+        <a th:href="@{/visitantes/nuevo}">Resgistrar vistante</a>
+
+        <br><br>
+
+        <table border="1">
+          <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Documento</th>
+                <th>Apartamento</th>
+                <th>Fecha Entrada</th>
+                <th>Fecha Salida</th>
+                <th>Acción</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!--th:each recorrela lista enviada desde el controller
+            "visitantes" viene del Model:
+            model.addAttribute("visitantes", lista)
+            -->
+
+            <tr th:each="visitante : ${visitantes}">
+
+                <td th:text="${visitante.nombre}"></td>
+                
+                <td th:text="${visitante.documento}"></td>
+
+                <td th:text="${visitante.apartamento.numero}"></td>
+                
+                <td th:text="${visitante.fechaEntrada}"></td>
+                
+                <td th:text="${visitante.fechaSalida}"></td>
+
+                <td>
+
+                <a th:if="${visitante.fechaSalida == null}"
+                    th:href="@{/visitantes/salida/{id}(id=${visitante.id})}">
+                    Registrar salida
+                </a>
+                
+                <!--Mostrar texto si ya salió-->
+                <span th:if="${visitante.fechaSalida != null}">
+                    Finalizado
+                </span>
+
+                </td>
+
+            </tr>
+
+          </tbody>
+        </table>
+
+</body>
+</hmtl>
