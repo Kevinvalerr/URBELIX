@@ -29,7 +29,7 @@ public class ResidenteController {
         
         model.addAttribute("residentes", residenteService.obtenerTodos());
 
-        return "residente/lista";
+        return "residentes/lista";
     }
     
     //Mostrar formulario para crear residente
