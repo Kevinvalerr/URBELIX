@@ -1,0 +1,86 @@
+/*Fondo general */
+body {
+    background-color: #F8FAFC;
+    color: #475569;
+}
+
+/*Titulos */
+h1, h2, h3, h4, h5{
+    color: #0F172A;
+    font-weight: 600;
+}
+
+/*Card estilos Saas*/
+
+.card {
+    border-radius: 12px;
+    border: 1xp solid #E2E8F0;
+}
+
+/* Header card */
+
+.card-header {
+    background-color: #FFFFFF;
+    border-bottom: 1xp solid #E2E8F0;
+}
+
+/*Botón principal */
+
+.btn-primary {
+    background-color: #3B82F6;
+    border:none;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color:  #2563EB;
+}
+
+.btn-primary:active {
+    transform: scale(0.97);
+}
+
+
+
+/*Botón éxito*/
+ .btn-success{
+    background-color: #10B981;
+ }
+
+ /*Tabla moderna */
+ .tabla th {
+    font-size: 0.85rem;
+    color: #64748B;
+    text-transform: uppercase;
+ }
+
+ .table td {
+    padding-top: 1rem;
+    padding-bottom: 1rem ;
+ }
+
+ /*Hover tabla */
+
+ .table-hover tbody tr:hover {
+    background-color: #F1f5F9;
+ }
+
+ /*LOGIN*/
+
+ body {
+    background-color: #F8FAFC;
+ }
+
+ .card {
+    border-radius: 12px;
+ }
+
+ .form-control {
+    border-radius: 8xp;
+    padding: 0.6rem 0.75rem;
+ }
+
+ .form-control:focus{
+    box-shadow: none;
+    border-color: #3B82F6;
+ }
