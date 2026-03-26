@@ -8,67 +8,52 @@
     <title>Nexur</title>
 
     <!-- 🎨 Bootstrap (framework de diseño) -->
-  <link th:src="@{/js/bootstrap.bundle.min.js}">
+  <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
     <!-- 🎨 Estilos personalizados -->
   <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
 
   <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 
-<body th:fragment="body" style="background-color: #f4f6f9;">
+<body th:fragment="body" style="background-color: #f8fAfC;">
 
 <!-- 🔝 NAVBAR GLOBAL -->
-<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #1f3a5f;">
-    <div class="container-fluid">
+<nav class="navbar navbar-dark px-4" style="background-color: #0f172A;">
+    <span class="navbar-brand fw-bold">Nexur</span>
 
+    <div class="d-flex align-items-center gap-3">
+          <!--USUARIO LOGUEADO-->
+        <span class="text-light small">Admin</span>
 
-        <!-- 🏷️ LOGO / NOMBRE -->
-        <a class="navbar-brand" th:href="@{/dashboard}">Nexur</a>
+        <form th:action="@{/logout}" method="post">
+            <button  class="btn btn-sm btn-outline-light">
+                Cerrar sesión
+            </button> 
+        </form>
 
-        <!-- 📂 MENÚ -->
-        <div class="collapse navbar-collapse">
-
-            <ul class="navbar-nav me-auto">
-
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/usuarios}">Usuarios</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/apartamentos}">Apartamentos</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/residentes}">Residentes</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/visitantes}">Visitantes</a>
-                </li>
-
-            </ul>
-
-            <!-- 🔐 LOGOUT (Spring Security) -->
-            <form th:action="@{/logout}" method="post">
-                <button class="btn btn-outline-light">
-                    Cerrar sesión
-                </button>
-            </form>
-
-        </div>
     </div>
+
 </nav>
 
+<!--LAYOUT PRINCIPAL-->
+<div class="d-flex">
+
+    <!--SIDEBAR:navegación del sistema-->
+<div th:replace="layout/sidebar :: sidebar"></div>
+
 <!-- 📦 CONTENIDO DINÁMICO -->
-<div class="container mt-4">
 
-    <!-- 🔙 BOTÓN VOLVER GLOBAL -->
-    <a href="javascript:history.back()" class="btn btn-secondary mb-3">
-        ← Volver
-    </a>
 
-    <!-- 🔄 AQUÍ SE INYECTA CADA VISTA -->
-   <div th:replace="~{usuarios/lista :: content}"></div>
+    <!-- CONTENIDO -->
+    <main class="flex-grow-1 p-4">
+
+        <a href="javascript:history.back()" class="btn btn-secondary mb-3">
+            ← Volver
+        </a>
+
+        <div th:replace="~{usuarios/lista :: content}"></div>
+
+    </main>
 
 </div>
 
@@ -78,7 +63,7 @@
 </footer>
 
 <!-- ⚡ JS Bootstrap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 
 </body>
 </html>

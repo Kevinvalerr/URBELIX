@@ -10,9 +10,11 @@
 </head>
 
 
-<body class="d-flex align-items-center justify-content-center vh-100">
+<body class="d-flex align-items-center justify-content-center vh-100 bg-light">
 
 <div class="container">
+
+    <div class="row justify-content-center"> 
 
  <div class="col-md-4">
 
@@ -29,7 +31,7 @@
        <form th:action="@{/login}" method="post">
         
         <div class="mb-3">
-            <label class="for-label">Correo</label>
+            <label class="form-label">Correo</label>
             <input type="email" name="username" class="form-control" placeholder="correo@ejemplo.com" required>
         </div>
 
@@ -39,15 +41,17 @@
         </div>
         
         <div class="d-grid mt-4">
-            <button type="subimt" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary">
                 Ingresar
             </button>
         </div>
 
        </form>         
 
-    </div>
- </div>
+       </div>
+  </div>
+</div>
+
 </div>
 
 

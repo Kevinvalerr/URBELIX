@@ -26,7 +26,7 @@ public class VistaController {
     public String mostrarUsuarios(Model model) {
         model.addAttribute("usuarios", usuarioService.listarUsuarios());
        
-        
+        model.addAttribute("currentPath", "/usuarios-vista");
           
         return "layout/base";
     }

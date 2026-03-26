@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<div class="card shadowp-4">
-<body>
+       
+
+<head>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
 
 <div th:fragment="content">
+    <div class="container mt-4">
+     <div class="card-body">
 
-   <h2 class="mb-4 fw-bold text-primary">Usuarios</h2>
+   <h5 class="fw-bold mb-3">Usuarios</h5>
 
   <a th:href="@{/usuarios/nuevo}" class="btn btn-primary mb-3">
      +Nuevo Usuario
@@ -77,5 +83,8 @@
 
 </form>
 </div>
+
 </div>
+
+</body>
 </html>
