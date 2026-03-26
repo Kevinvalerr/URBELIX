@@ -12,6 +12,15 @@ h1, h2, h3, h4, h5{
 
 /*Card estilos Saas*/
 
+.card{
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 8px 20px rgba(0,0,0,0.08);
+}
+
 .card {
     border-radius: 12px;
     border: 1xp solid #E2E8F0;

@@ -1,35 +1,106 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-    <head>
-         
-        <title>Dashboard Nexur</title>
+  
+<head>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+</head>
 
-    </head>
 
-    <body>
-        <h1 th:text="${titulo}"></h1>
+    <!-- 🔰 HEADER -->
+    <div class="mb-4">
+        <h2 class="fw-bold">Dashboard</h2>
+        <p class="text-muted">Bienvenido al sistema Nexur</p>
+    </div>
 
-        <p>Bienvenido al sistema Nexur</p>
+    <!-- 📊 MÉTRICAS -->
+    <div class="row g-4 mb-4">
 
-        <ul>
-            <li>
-                <a href="/usuarios-vista">Gestión de Usuarios</a>
-            </li>
+        <div class="col-md-3">
 
-            <li>
-                <a href="/apartamentos">Apartamentos</a>
-            </li>
-            <li>
-                <a href="/residentes">Residentes</a>
-            </li>
-            
-            <li>
-                <a href="#">Portería</a>
-            </li>        
-            <li>
-                <a href="#">Reportes</a>
-            </li>
-            
-        </ul>
+            <div class="card border-0 shadow-sm p-4">
+
+             <div class="d-flex justify-content-between aling-items-center">
+
+                <div>
+                <p class="text-muted mb-1">Usuarios</p>
+                <h3 class="fw-bold" style="color:#0F172A;">12</h3>
+            </div>
+             
+            <i class="bi bi-people-fill fs-2 text-primary"></i>
+
+        </div>
+    </div>
+
+</div>
+
+<!--APARTAMENTOS-->
+   <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm p-4">
+
+             <div class="d-flex justify-content-between aling-items-center">
+
+                <div>
+                <p class="text-muted mb-1">Apartamentos</p>
+                <h3 class="fw-bold">8</h3>
+            </div>
+             
+            <i class="bi bi-building fs-2 text-success"></i>
+
+        </div>
+    </div>
+
+</div>
+        <!-- VISITANTES -->
+      <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm p-4">
+
+             <div class="d-flex justify-content-between aling-items-center">
+
+                <div>
+                <p class="text-muted mb-1">Visitantes</p>
+                <h3 class="fw-bold">5</h3>
+            </div>
+             
+            <i class="bi bi-door-open fs-2 text-danger"></i>
+
+        </div>
+    </div>
+
+</div>
+
+    <!-- 🚀 ACCESOS RÁPIDOS -->
+    <div class="card shadow-sm border-0 p-4">
+
+        <h5 class="fw-bold mb-3">Accesos rápidos</h5>
+
+        <div class="d-flex flex-wrap gap-3">
+
+            <a href="/usuarios-vista" class="btn btn-primary px-4">
+                Usuarios
+            </a>
+
+            <a href="/apartamentos" class="btn btn-primary px-4">
+                Apartamentos
+            </a>
+
+            <a href="/residentes" class="btn btn-primary px-4">
+                Residentes
+            </a>
+
+            <!-- 🔥 NUEVO -->
+            <a href="/visitantes" class="btn btn-primary px-4">
+                Visitantes
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
     </body>
 </html>
