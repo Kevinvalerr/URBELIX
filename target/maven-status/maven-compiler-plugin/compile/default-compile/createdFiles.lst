@@ -1,0 +1,4 @@
+com\nexur\nexur\NexurApplication.class
+com\nexur\nexur\service\UsuarioService.class
+com\nexur\nexur\model\Usuario.class
+com\nexur\nexur\repository\UsuarioRepository.class
