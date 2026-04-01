@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+  <head>
+    <title>Apartamentos</title>
+  </head>
+
+
+  <body>
+    <h1>Lista de Apartamentos</h1>
+
+    <a th:href="@{/apartamentos/nuevo}"
+    sec:authorize="hasRole('ADMIN')">
+    Crear nuevo apartamento
+  </a>
+        
+    
+
+    <br><br>
+
+    <table border="1">
+
+        <thead>
+  
+            <tr>
+                
+               <th>ID</th>
+               <th>Número</th>
+                <th>Torre</th>
+                <th>Piso</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+            <tr th:each="apartamento : ${apartamentos}">
+
+              <td th:text="${apartamento.id}"></td>
+
+              <td th:text="${apartamento.numero}"></td>
+
+              <td th:text="${apartamento.torre}"></td>
+              
+              <td th:text="${apartamento.piso}"></td>
+              
+              <td th:text="${apartamento.estado}"></td>
+
+              <td sec:authorize="hasRole('ADMIN')">
+
+                <a th:href="@{/apartamentos/editar/{id}(id=${apartamento.id})}" >
+                    Editar
+                </a>
+
+                |
+
+                <a th:href="@{/apartamentos/eliminar/{id}(id=${apartamento.id})}">
+                    Eliminar
+                </a>
+
+              </td>
+
+            </tr>
+
+        </tbody>
+   </table>     
+
+  </body>
+
+</html>

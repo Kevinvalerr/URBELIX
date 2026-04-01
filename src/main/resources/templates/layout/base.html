@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+
+<!-- <link rel="stylesheet" th:href="@{/css/styles.css}"> -->
+<head>
+    <meta charset="UTF-8">
+    <title>Nexur</title>
+
+    <!-- 🎨 Bootstrap (framework de diseño) -->
+  <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <!-- 🎨 Estilos personalizados -->
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body th:fragment="body" style="background-color: #f8fAfC;">
+
+<!-- 🔝 NAVBAR GLOBAL -->
+<nav class="navbar navbar-dark px-4" style="background-color: #0f172A;">
+    <span class="navbar-brand fw-bold">Nexur</span>
+
+    <div class="d-flex align-items-center gap-3">
+          <!--USUARIO LOGUEADO-->
+        <span class="text-light small">Admin</span>
+
+        <form th:action="@{/logout}" method="post">
+            <button  class="btn btn-sm btn-outline-light">
+                Cerrar sesión
+            </button> 
+        </form>
+
+    </div>
+
+</nav>
+
+<!--LAYOUT PRINCIPAL-->
+<div class="d-flex">
+
+    <!--SIDEBAR:navegación del sistema-->
+<div th:replace="layout/sidebar :: sidebar"></div>
+
+<!-- 📦 CONTENIDO DINÁMICO -->
+
+
+    <!-- CONTENIDO -->
+    <main class="flex-grow-1 p-4">
+
+        <a href="javascript:history.back()" class="btn btn-secondary mb-3">
+            ← Volver
+        </a>
+
+        <div th:replace="~{usuarios/lista :: content}"></div>
+
+    </main>
+
+</div>
+
+<!-- 🔻 FOOTER -->
+<footer class="text-center mt-5 p-3 bg-dark text-white">
+   NEXUR - 
+</footer>
+
+<!-- ⚡ JS Bootstrap -->
+
+
+</body>
+</html>
