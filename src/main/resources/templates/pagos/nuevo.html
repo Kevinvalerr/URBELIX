@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Registrar Pago'">
+        <section class="page-top-section mb-4">
+            <div>
+                <h1>Registrar Pago</h1>
+                <p class="text-muted">Registra aquí los pagos de los residentes y mantén el historial financiero al día.</p>
+            </div>
+        </section>
+
+        <div class="form-card">
+            <form th:action="@{/pagos/guardar}" method="post" class="form-grid">
+                <div class="form-group">
+                    <label for="residente">Residente</label>
+                    <input id="residente" name="residente" type="text" placeholder="Nombre del residente" required />
+                </div>
+                <div class="form-group">
+                    <label for="monto">Monto</label>
+                    <input id="monto" name="monto" type="text" placeholder="Ej. 350000" required />
+                </div>
+                <div class="form-group">
+                    <label for="metodo">Método de pago</label>
+                    <select id="metodo" name="metodo" required>
+                        <option value="">Seleccione método</option>
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Tarjeta">Tarjeta</option>
+                        <option value="Transferencia">Transferencia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fecha">Fecha</label>
+                    <input id="fecha" name="fecha" type="date" required />
+                </div>
+                <div class="form-actions">
+                    <a href="/dashboard" class="btn btn-outline-primary">Volver al dashboard</a>
+                    <button type="submit" class="btn btn-primary btn-main-action">
+                        <i class="bi bi-cash-stack me-2"></i>Guardar pago
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</html>

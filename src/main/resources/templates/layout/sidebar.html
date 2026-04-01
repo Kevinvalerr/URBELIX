@@ -1,38 +1,38 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
+<div th:fragment="sidebar" class="sidebar-panel">
+    <div class="sidebar-brand mb-4">
+        <div class="sidebar-brand-icon">
+            <i class="bi bi-building"></i>
+        </div>
+        <div class="sidebar-brand-text">
+            <span class="sidebar-brand-name">NEXUR</span>
+            <span class="sidebar-brand-subtitle">Panel administrativo</span>
+        </div>
+    </div>
 
-<div th:fragment="sidebar"
-class="d-flex flex-column p-3"
-style="width: 240px; min-height: 100vh; background-color:#0F172A;">
-
-<div class="p-3">
-    <h6 class="text-muted text-uppercase small">Menú</h6>
-
-    <!--TITULO-->
-    <h6 class="text-uppercase small text-secondary">Menú</h6>
-
-    <!--LINKS-->
-    <ul class="nav flex-column mt-3">
-
-        <li class="nav-item">
-            <a  class="nav-link text-dark" href="/dashboard">
-                Dashboard
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="/usuarios-vista"
-            class="nav-link text-white sidebar-link"
-             th:classappend="${currentPath == '/usuarios-vista'} ? ' active' : ''"
-                Usuarios
-            </a>
-        </li>
-
-
-    </ul>
-
+    <nav class="nav flex-column gap-2">
+        <a href="/dashboard" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/dashboard'} ? ' active' : ''">
+            <i class="bi bi-speedometer2 me-2"></i>
+            Dashboard
+        </a>
+        <a href="/residentes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/residentes'} ? ' active' : ''">
+            <i class="bi bi-people-fill me-2"></i>
+            Residentes
+        </a>
+        <a href="/usuarios-vista" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/usuarios-vista'} ? ' active' : ''">
+            <i class="bi bi-person-badge me-2"></i>
+            Usuarios
+        </a>
+        <a href="/visitantes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/visitantes'} ? ' active' : ''">
+            <i class="bi bi-door-open-fill me-2"></i>
+            Visitantes
+        </a>
+        <a href="/pagos/nuevo" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/pagos/nuevo'} ? ' active' : ''">
+            <i class="bi bi-cash-stack me-2"></i>
+            Registrar pago
+        </a>
+        <a href="/reservas/nueva" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/reservas/nueva'} ? ' active' : ''">
+            <i class="bi bi-calendar-check me-2"></i>
+            Crear reserva
+        </a>
+    </nav>
 </div>
-
-</div>
-</body>
-</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Crear Reserva'">
+        <section class="page-top-section mb-4">
+            <div>
+                <h1>Crear Reserva</h1>
+                <p class="text-muted">Gestiona la reserva de áreas comunes y servicios con un formulario rápido y sencillo.</p>
+            </div>
+        </section>
+
+        <div class="form-card">
+            <form th:action="@{/reservas/guardar}" method="post" class="form-grid">
+                <div class="form-group">
+                    <label for="solicitante">Solicitante</label>
+                    <input id="solicitante" name="solicitante" type="text" placeholder="Nombre del solicitante" required />
+                </div>
+                <div class="form-group">
+                    <label for="area">Área a reservar</label>
+                    <select id="area" name="area" required>
+                        <option value="">Seleccione área</option>
+                        <option value="Salón social">Salón social</option>
+                        <option value="Gimnasio">Gimnasio</option>
+                        <option value="Piscina">Piscina</option>
+                        <option value="Cancha">Cancha deportiva</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fecha">Fecha de reserva</label>
+                    <input id="fecha" name="fecha" type="date" required />
+                </div>
+                <div class="form-group">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" name="observaciones" rows="4" placeholder="Notas o detalles adicionales"></textarea>
+                </div>
+                <div class="form-actions">
+                    <a href="/dashboard" class="btn btn-outline-primary">Volver al dashboard</a>
+                    <button type="submit" class="btn btn-primary btn-main-action">
+                        <i class="bi bi-calendar-check-fill me-2"></i>Reservar ahora
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</html>

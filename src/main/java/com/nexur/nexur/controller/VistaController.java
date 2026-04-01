@@ -25,10 +25,8 @@ public class VistaController {
     @GetMapping("/usuarios-vista")
     public String mostrarUsuarios(Model model) {
         model.addAttribute("usuarios", usuarioService.listarUsuarios());
-       
         model.addAttribute("currentPath", "/usuarios-vista");
-          
-        return "layout/base";
+        return "usuarios/lista";
     }
      @PostMapping("/guardar-usuario")
  public String guardarUsuario(

@@ -1,70 +1,44 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="page">
 
 
 
 <!-- <link rel="stylesheet" th:href="@{/css/styles.css}"> -->
 <head>
     <meta charset="UTF-8">
-    <title>Nexur</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} ?: 'NEXUR'">NEXUR</title>
 
-    <!-- 🎨 Bootstrap (framework de diseño) -->
-  <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-    <!-- 🎨 Estilos personalizados -->
-  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
-
-  <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </head>
 
-<body th:fragment="body" style="background-color: #f8fAfC;">
+<body class="layout-body">
 
-<!-- 🔝 NAVBAR GLOBAL -->
-<nav class="navbar navbar-dark px-4" style="background-color: #0f172A;">
-    <span class="navbar-brand fw-bold">Nexur</span>
-
+<nav class="navbar navbar-dark px-4 navbar-main">
+    <span class="navbar-brand fw-bold">NEXUR</span>
     <div class="d-flex align-items-center gap-3">
-          <!--USUARIO LOGUEADO-->
         <span class="text-light small">Admin</span>
-
         <form th:action="@{/logout}" method="post">
-            <button  class="btn btn-sm btn-outline-light">
-                Cerrar sesión
-            </button> 
+            <button class="btn btn-sm btn-outline-light">Cerrar sesión</button>
         </form>
-
     </div>
-
 </nav>
 
-<!--LAYOUT PRINCIPAL-->
-<div class="d-flex">
-
-    <!--SIDEBAR:navegación del sistema-->
-<div th:replace="layout/sidebar :: sidebar"></div>
-
-<!-- 📦 CONTENIDO DINÁMICO -->
-
-
-    <!-- CONTENIDO -->
-    <main class="flex-grow-1 p-4">
-
-        <a href="javascript:history.back()" class="btn btn-secondary mb-3">
-            ← Volver
-        </a>
-
-        <div th:replace="~{usuarios/lista :: content}"></div>
-
+<div class="d-flex layout-shell">
+    <div th:replace="layout/sidebar :: sidebar"></div>
+    <main class="flex-grow-1 p-4 layout-main">
+        <a href="javascript:history.back()" class="btn btn-secondary mb-3">← Volver</a>
+        <div th:insert="~{::content}"></div>
     </main>
-
 </div>
 
-<!-- 🔻 FOOTER -->
-<footer class="text-center mt-5 p-3 bg-dark text-white">
-   NEXUR - 
-</footer>
-
-<!-- ⚡ JS Bootstrap -->
-
+<footer class="text-center mt-5 p-3 footer-bar">NEXUR - Panel de gestión residencial</footer>
 
 </body>
 </html>

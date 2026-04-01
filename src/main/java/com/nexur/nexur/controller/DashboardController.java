@@ -9,9 +9,8 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     public String mostrarDashboard(Model model) {
-    
         model.addAttribute("titulo", "Dashboard");
-
+        model.addAttribute("currentPath", "/dashboard");
         return "dashboard/dashboard";
     }
     

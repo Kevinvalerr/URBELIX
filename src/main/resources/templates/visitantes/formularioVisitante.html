@@ -1,42 +1,37 @@
 <!DOCTYPE html>
-<html xmlns="http:www.thymeleaf.org">
-    <head>
-        <title>Registrar Visitantes</title>
-        <meta charset="UTF-8">
-    </head>
-    <body>
-        <h1>Registrar Visitante</h1>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Registrar Visitante | NEXUR'">
+        <section class="page-top-section">
+            <div>
+                <h1>Registrar Visitante</h1>
+                <p class="text-muted">Registra la entrada de un visitante con los datos del apartamento y mantén el control ordenado.</p>
+            </div>
+        </section>
 
-        <form th:action="@{/visitantes/guardar}" th:object="${visitante}" method="post">
-             
-            <label>Nombre:</label>
-            <input type="text" th:field="*{nombre}" required />
-            <br><br>
-            
-            <label>Documento:</label>
-            <input type="text" th:field="*{documento}" required />
-            <br><br>
-            
-            <label>Apartamento</label>
-            <select th:field="*{apartamento}" required >
-
-            <option value="">Seleccione un apartamento</option>
-
-            <option th:each="apto :${apartamentos}"
-                    th:value="${apto.id}"
-                    th:text="${apto.numero}">
-            </option>
-
-            </select> 
-            
-            <br><br>
-
-            <button type="submit">Registrar Entrada</button>
-        </form>
-
-        <br>
-
-        <a th:href="@{/visitantes}">Volver a la lista</a>
-
-</body>
+        <div class="card form-card">
+            <div class="card-body">
+                <form th:action="@{/visitantes/guardar}" th:object="${visitante}" method="post" class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" th:field="*{nombre}" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Documento</label>
+                        <input type="text" th:field="*{documento}" class="form-control" required />
+                    </div>
+                    <div class="form-group form-full-width">
+                        <label class="form-label">Apartamento</label>
+                        <select th:field="*{apartamento}" class="form-select" required>
+                            <option value="">Seleccione un apartamento</option>
+                            <option th:each="apto : ${apartamentos}" th:value="${apto.id}" th:text="${apto.numero}"></option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-main-action">Registrar entrada</button>
+                        <a th:href="@{/visitantes}" class="btn btn-outline-primary">Volver a la lista</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </html>

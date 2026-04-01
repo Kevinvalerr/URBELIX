@@ -1,66 +1,51 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Lista de Visitantes</title>
-        <meta charset="UTF-8">
-    </head>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Visitantes | NEXUR'">
+        <section class="page-top-section">
+            <div>
+                <h1>Visitantes</h1>
+                <p class="text-muted">Registra entradas y salidas de visitantes con un flujo de trabajo claro y ordenado.</p>
+            </div>
+            <div class="page-actions">
+                <a th:href="@{/visitantes/nuevo}" class="btn btn-primary btn-main-action">Registrar visitante</a>
+            </div>
+        </section>
 
-    <body>
-        <h1>Lista de Visitantes</h1>
-
-        <!--Botón para registrar un nuevo visitante-->
-        <a th:href="@{/visitantes/nuevo}">Resgistrar vistante</a>
-
-        <br><br>
-
-        <table border="1">
-          <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Documento</th>
-                <th>Apartamento</th>
-                <th>Fecha Entrada</th>
-                <th>Fecha Salida</th>
-                <th>Acción</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <!--th:each recorrela lista enviada desde el controller
-            "visitantes" viene del Model:
-            model.addAttribute("visitantes", lista)
-            -->
-
-            <tr th:each="visitante : ${visitantes}">
-
-                <td th:text="${visitante.nombre}"></td>
-                
-                <td th:text="${visitante.documento}"></td>
-
-                <td th:text="${visitante.apartamento.numero}"></td>
-                
-                <td th:text="${visitante.fechaEntrada}"></td>
-                
-                <td th:text="${visitante.fechaSalida}"></td>
-
-                <td>
-
-                <a th:if="${visitante.fechaSalida == null}"
-                    th:href="@{/visitantes/salida/{id}(id=${visitante.id})}">
-                    Registrar salida
-                </a>
-                
-                <!--Mostrar texto si ya salió-->
-                <span th:if="${visitante.fechaSalida != null}">
-                    Finalizado
-                </span>
-
-                </td>
-
-            </tr>
-
-          </tbody>
-        </table>
-
-</body>
-</hmtl>
+        <div class="card table-card">
+            <div class="card-body">
+                <div class="table-dashboard">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Documento</th>
+                                <th>Apartamento</th>
+                                <th>Entrada</th>
+                                <th>Salida</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="visitante : ${visitantes}">
+                                <td th:text="${visitante.nombre}"></td>
+                                <td th:text="${visitante.documento}"></td>
+                                <td th:text="${visitante.apartamento.numero}"></td>
+                                <td th:text="${visitante.fechaEntrada}"></td>
+                                <td th:text="${visitante.fechaSalida} ?: '—'"></td>
+                                <td>
+                                    <a th:if="${visitante.fechaSalida == null}"
+                                       th:href="@{/visitantes/salida/{id}(id=${visitante.id})}"
+                                       class="btn btn-sm btn-success">Registrar salida</a>
+                                    <span th:if="${visitante.fechaSalida != null}" class="badge bg-secondary">Finalizado</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(visitantes)}">
+                                <td colspan="6" class="text-center text-muted">No hay visitantes registrados todavía.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</html>

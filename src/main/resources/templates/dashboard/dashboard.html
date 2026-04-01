@@ -1,106 +1,126 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-  
-<head>
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
-    <link rel="stylesheet" th:href="@{/css/app.css}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-</head>
-
-
-    <!-- 🔰 HEADER -->
-    <div class="mb-4">
-        <h2 class="fw-bold">Dashboard</h2>
-        <p class="text-muted">Bienvenido al sistema Nexur</p>
-    </div>
-
-    <!-- 📊 MÉTRICAS -->
-    <div class="row g-4 mb-4">
-
-        <div class="col-md-3">
-
-            <div class="card border-0 shadow-sm p-4">
-
-             <div class="d-flex justify-content-between aling-items-center">
-
-                <div>
-                <p class="text-muted mb-1">Usuarios</p>
-                <h3 class="fw-bold" style="color:#0F172A;">12</h3>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Dashboard | NEXUR'">
+        <section class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Dashboard</h1>
+                <p class="dashboard-description">Resumen del sistema residencial y métricas clave para el equipo administrativo.</p>
             </div>
-             
-            <i class="bi bi-people-fill fs-2 text-primary"></i>
+        </section>
 
-        </div>
-    </div>
-
-</div>
-
-<!--APARTAMENTOS-->
-   <div class="col-md-3">
-
-            <div class="card border-0 shadow-sm p-4">
-
-             <div class="d-flex justify-content-between aling-items-center">
-
-                <div>
-                <p class="text-muted mb-1">Apartamentos</p>
-                <h3 class="fw-bold">8</h3>
+        <div class="dashboard-summary-card">
+            <div>
+                <h3>Bienvenido de nuevo, equipo</h3>
+                <p>Administra residentes, pagos, reservas y visitantes desde un solo panel con claridad y rapidez.</p>
             </div>
-             
-            <i class="bi bi-building fs-2 text-success"></i>
-
         </div>
-    </div>
 
-</div>
-        <!-- VISITANTES -->
-      <div class="col-md-3">
+        <div class="dashboard-actions mb-4">
+            <a href="/residentes/nuevo" class="action-card action-primary">
+                <i class="bi bi-person-plus-fill"></i>
+                Nuevo residente
+            </a>
+            <a href="/pagos/nuevo" class="action-card action-success">
+                <i class="bi bi-cash-stack"></i>
+                Registrar pago
+            </a>
+            <a href="/reservas/nueva" class="action-card action-secondary">
+                <i class="bi bi-calendar-check"></i>
+                Nueva reserva
+            </a>
+            <a href="/visitantes" class="action-card action-info">
+                <i class="bi bi-door-open-fill"></i>
+                Ver visitantes
+            </a>
+            <a href="/usuarios-vista" class="action-card action-muted">
+                <i class="bi bi-people-fill"></i>
+                Ver usuarios
+            </a>
+        </div>
 
-            <div class="card border-0 shadow-sm p-4">
-
-             <div class="d-flex justify-content-between aling-items-center">
-
-                <div>
-                <p class="text-muted mb-1">Visitantes</p>
-                <h3 class="fw-bold">5</h3>
+        <div class="metric-grid mb-4">
+            <div class="card metric-card apartments">
+                <div class="metric-card-header">
+                    <span class="metric-chip">Apartamentos</span>
+                    <i class="bi bi-building"></i>
+                </div>
+                <div class="metric-card-body">
+                    <p class="metric-label">Total activos</p>
+                    <h2 class="metric-value">28</h2>
+                </div>
             </div>
-             
-            <i class="bi bi-door-open fs-2 text-danger"></i>
-
-        </div>
-    </div>
-
-</div>
-
-    <!-- 🚀 ACCESOS RÁPIDOS -->
-    <div class="card shadow-sm border-0 p-4">
-
-        <h5 class="fw-bold mb-3">Accesos rápidos</h5>
-
-        <div class="d-flex flex-wrap gap-3">
-
-            <a href="/usuarios-vista" class="btn btn-primary px-4">
-                Usuarios
-            </a>
-
-            <a href="/apartamentos" class="btn btn-primary px-4">
-                Apartamentos
-            </a>
-
-            <a href="/residentes" class="btn btn-primary px-4">
-                Residentes
-            </a>
-
-            <!-- 🔥 NUEVO -->
-            <a href="/visitantes" class="btn btn-primary px-4">
-                Visitantes
-            </a>
-
+            <div class="card metric-card residents">
+                <div class="metric-card-header">
+                    <span class="metric-chip">Residentes</span>
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="metric-card-body">
+                    <p class="metric-label">Con acceso hoy</p>
+                    <h2 class="metric-value">184</h2>
+                </div>
+            </div>
+            <div class="card metric-card payments">
+                <div class="metric-card-header">
+                    <span class="metric-chip">Pagos</span>
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <div class="metric-card-body">
+                    <p class="metric-label">Pendientes</p>
+                    <h2 class="metric-value">12</h2>
+                </div>
+            </div>
+            <div class="card metric-card reservas">
+                <div class="metric-card-header">
+                    <span class="metric-chip">Reservas</span>
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div class="metric-card-body">
+                    <p class="metric-label">Activas</p>
+                    <h2 class="metric-value">7</h2>
+                </div>
+            </div>
         </div>
 
+        <div class="card activity-card">
+            <h5>Actividad reciente</h5>
+            <div class="table-dashboard mt-3">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Acción</th>
+                            <th>Fecha</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>María López</td>
+                            <td>Registró nueva reserva</td>
+                            <td>Hoy - 10:24</td>
+                            <td><span class="badge bg-primary">Reserva</span></td>
+                        </tr>
+                        <tr>
+                            <td>Carlos Díaz</td>
+                            <td>Confirmó pago mensual</td>
+                            <td>Ayer - 16:38</td>
+                            <td><span class="badge bg-success">Pago</span></td>
+                        </tr>
+                        <tr>
+                            <td>Alba Gómez</td>
+                            <td>Creó perfil de residente</td>
+                            <td>Ayer - 12:09</td>
+                            <td><span class="badge bg-primary">Nuevo</span></td>
+                        </tr>
+                        <tr>
+                            <td>Jorge Ramírez</td>
+                            <td>Solicitó acceso de visitante</td>
+                            <td>2 días - 09:14</td>
+                            <td><span class="badge bg-primary">Visita</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-
-</div>
-
-    </body>
 </html>

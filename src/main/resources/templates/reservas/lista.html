@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Reservas'">
+        <section class="page-top-section mb-4">
+            <div>
+                <h1>Reservas</h1>
+                <p class="text-muted">Consulta las reservas activas y gestiona nuevas solicitudes de áreas comunes.</p>
+            </div>
+            <div class="page-actions">
+                <a href="/reservas/nueva" class="btn btn-primary btn-main-action">
+                    <i class="bi bi-calendar-check-fill me-2"></i>Crear reserva
+                </a>
+            </div>
+        </section>
+
+        <div class="card activity-card">
+            <h5>Listado de reservas</h5>
+            <div class="table-dashboard mt-3">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Solicitante</th>
+                            <th>Área</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Alba Gómez</td>
+                            <td>Salón social</td>
+                            <td>2026-04-05</td>
+                            <td><span class="badge bg-success">Confirmada</span></td>
+                        </tr>
+                        <tr>
+                            <td>Jorge Ramírez</td>
+                            <td>Piscina</td>
+                            <td>2026-04-10</td>
+                            <td><span class="badge bg-primary">Pendiente</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</html>

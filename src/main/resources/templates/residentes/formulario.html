@@ -1,44 +1,41 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Nuevo Residente</title>
-    </head>
-    <body>
-        <h1>Registrar Residente</h1>
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Registrar Residente'">
+        <section class="page-top-section mb-4">
+            <div>
+                <h1>Registrar Residente</h1>
+                <p class="text-muted">Completa los datos para crear el perfil del residente y asignarlo a su apartamento.</p>
+            </div>
+        </section>
 
-        <form th:action="@{/residentes/guardar}" th:object="${residente}" method="post">
-
-
-            <label>Nombre:</label>
-            <input type="text" th:field="*{nombre}" />
-            <br><br>
-
-            <label>Documento:</label>
-            <input type="text" th:field="*{documento}" />
-            <br><br>
-
-            
-            <label>Teléfono:</label>
-            <input type="text" th:field="*{telefono}" />
-            <br><br>
-
-            <label>Apartamento:</label>
-            <select name="apartamentoId" required>
-
-                <option value="">Seleccione un apartamento</option>
-
-                <option th:each="ap : ${apartamentos}"
-                        th:value="${ap.id}"
-                        th:text="${ap.numero}">
-                </option>
-
-            </select>
-
-            <br><br>
-
-             <button type="submit">Guardar</button>
-
-        </form>
-
-    </body>
+        <div class="form-card">
+            <form th:action="@{/residentes/guardar}" th:object="${residente}" method="post" class="form-grid">
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input id="nombre" type="text" th:field="*{nombre}" placeholder="Ingrese nombre completo" required />
+                </div>
+                <div class="form-group">
+                    <label for="documento">Documento</label>
+                    <input id="documento" type="text" th:field="*{documento}" placeholder="Número de documento" required />
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input id="telefono" type="text" th:field="*{telefono}" placeholder="Ej. 3101234567" required />
+                </div>
+                <div class="form-group">
+                    <label for="apartamentoId">Apartamento</label>
+                    <select id="apartamentoId" name="apartamentoId" required>
+                        <option value="">Seleccione un apartamento</option>
+                        <option th:each="ap : ${apartamentos}" th:value="${ap.id}" th:text="${ap.numero}"></option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <a href="/residentes" class="btn btn-outline-primary">Volver a residentes</a>
+                    <button type="submit" class="btn btn-primary btn-main-action">
+                        <i class="bi bi-save me-2"></i>Guardar residente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </html>

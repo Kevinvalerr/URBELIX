@@ -1,43 +1,48 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Residentes</title>
-    </head>
-    <body>
-        <h1>Lista de Residentes</h1>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Residentes | NEXUR'">
+        <section class="page-top-section">
+            <div>
+                <h1>Residentes</h1>
+                <p class="text-muted">Lista de residentes activos con control rápido para agregar o eliminar perfiles.</p>
+            </div>
+            <div class="page-actions">
+                <a href="/residentes/nuevo" class="btn btn-primary btn-main-action">Nuevo residente</a>
+            </div>
+        </section>
 
-        <a href="/residentes/nuevo">Nuevo Residente</a>
-
-        <table border="1">
-
-              <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Documento</th>
-                    <th>Teléfono</th>
-                    <th>Apartamento</th>
-                    <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-
-                <tr th:each="residente: ${residentes}">
-                    <td th:text="${residente.id}"></td>"
-                    <td th:text="${residente.nombre}"></td>"
-                    <td th:text="${residente.documento}"></td>"
-                    <td th:text="${residente.telefono}"></td>"
-                    <td th:text="${residente.apartamento.numero}"></td>
-
-                    <td> 
-                        <a th:href="@{/residentes/eliminar/{id}(id=${residente.id})}">
-                            Eliminar
-                        </a>
-                    </td>
-                </tr>
-
-              </tbody>
-
-        </table>
-        
-    </body>
+        <div class="card table-card">
+            <div class="card-body">
+                <div class="table-dashboard">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Documento</th>
+                                <th>Teléfono</th>
+                                <th>Apartamento</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="residente : ${residentes}">
+                                <td th:text="${residente.id}"></td>
+                                <td th:text="${residente.nombre}"></td>
+                                <td th:text="${residente.documento}"></td>
+                                <td th:text="${residente.telefono}"></td>
+                                <td th:text="${residente.apartamento.numero}"></td>
+                                <td>
+                                    <a th:href="@{/residentes/eliminar/{id}(id=${residente.id})}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(residentes)}">
+                                <td colspan="6" class="text-center text-muted">No hay residentes registrados todavía.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </html>
