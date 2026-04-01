@@ -45,12 +45,7 @@ public Collection<? extends GrantedAuthority> getAuthorities() {
     return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
 }
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
+   @Override
     public boolean isAccountNonExpired() {
         return true;
     }
@@ -68,6 +63,12 @@ public Collection<? extends GrantedAuthority> getAuthorities() {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public String getUsername() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getUsername'");
     }
 
 }
