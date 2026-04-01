@@ -1,12 +1,23 @@
-<div th:fragment="sidebar" class="sidebar-panel">
+<div xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="sidebar" class="sidebar-panel">
     <div class="sidebar-brand mb-4">
         <div class="sidebar-brand-icon">
             <i class="bi bi-building"></i>
         </div>
         <div class="sidebar-brand-text">
             <span class="sidebar-brand-name">NEXUR</span>
-            <span class="sidebar-brand-subtitle">Panel administrativo</span>
+            <span class="sidebar-brand-subtitle">
+                <span sec:authorize="hasRole('ADMIN')">Panel administrativo</span>
+                <span sec:authorize="hasRole('RESIDENTE')">Panel de residente</span>
+                <span sec:authorize="hasRole('PORTERIA')">Panel de portería</span>
+                <span sec:authorize="isAnonymous()">Panel</span>
+            </span>
         </div>
+    </div>
+
+    <div class="sidebar-user mb-4" sec:authorize="isAuthenticated()">
+        <p class="mb-1 text-muted small">Bienvenido</p>
+        <strong th:text="${currentUser}">Usuario</strong>
+        <p class="mb-0 text-muted small" th:text="${currentRole}">Rol</p>
     </div>
 
     <nav class="nav flex-column gap-2">
@@ -14,23 +25,35 @@
             <i class="bi bi-speedometer2 me-2"></i>
             Dashboard
         </a>
-        <a href="/residentes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/residentes'} ? ' active' : ''">
-            <i class="bi bi-people-fill me-2"></i>
-            Residentes
-        </a>
-        <a href="/usuarios-vista" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/usuarios-vista'} ? ' active' : ''">
-            <i class="bi bi-person-badge me-2"></i>
-            Usuarios
-        </a>
-        <a href="/visitantes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/visitantes'} ? ' active' : ''">
+
+        <div sec:authorize="hasRole('ADMIN')">
+            <a href="/residentes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/residentes'} ? ' active' : ''">
+                <i class="bi bi-people-fill me-2"></i>
+                Residentes
+            </a>
+            <a href="/apartamentos" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/apartamentos'} ? ' active' : ''">
+                <i class="bi bi-building me-2"></i>
+                Apartamentos
+            </a>
+            <a href="/usuarios-vista" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/usuarios-vista'} ? ' active' : ''">
+                <i class="bi bi-person-badge me-2"></i>
+                Usuarios
+            </a>
+            <a href="/reportes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/reportes'} ? ' active' : ''">
+                <i class="bi bi-bar-chart-line me-2"></i>
+                Reportes
+            </a>
+        </div>
+
+        <a href="/visitantes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/visitantes'} ? ' active' : ''" sec:authorize="hasAnyRole('ADMIN','PORTERIA','RESIDENTE')">
             <i class="bi bi-door-open-fill me-2"></i>
             Visitantes
         </a>
-        <a href="/pagos/nuevo" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/pagos/nuevo'} ? ' active' : ''">
+        <a href="/pagos/nuevo" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/pagos/nuevo'} ? ' active' : ''" sec:authorize="isAuthenticated()">
             <i class="bi bi-cash-stack me-2"></i>
             Registrar pago
         </a>
-        <a href="/reservas/nueva" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/reservas/nueva'} ? ' active' : ''">
+        <a href="/reservas/nueva" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/reservas/nueva'} ? ' active' : ''" sec:authorize="isAuthenticated()">
             <i class="bi bi-calendar-check me-2"></i>
             Crear reserva
         </a>

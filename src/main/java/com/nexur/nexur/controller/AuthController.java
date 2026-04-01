@@ -4,13 +4,18 @@ import com.nexur.nexur.model.Rol;
 import com.nexur.nexur.model.Usuario;
 import com.nexur.nexur.repository.UsuarioRepository;
 import com.nexur.nexur.service.UsuarioService;
+import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.security.Principal;
 
 @Controller
 public class AuthController {
@@ -21,6 +26,14 @@ public class AuthController {
     public AuthController(UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
         this.usuarioService = usuarioService;
         this.usuarioRepository = usuarioRepository;
+    }
+
+    @GetMapping({"/", "/home"})
+    public String home(Principal principal) {
+        if (principal != null) {
+            return "redirect:/dashboard";
+        }
+        return "redirect:/login";
     }
 
     @GetMapping("/login")
@@ -46,29 +59,26 @@ public class AuthController {
         if (error != null) {
             model.addAttribute("formError", error);
         }
+        model.addAttribute("usuario", new Usuario());
         return "auth/register";
     }
 
     @PostMapping("/register")
-    public String submitRegister(@RequestParam String nombre,
-                                 @RequestParam String email,
-                                 @RequestParam String password,
+    public String submitRegister(@Valid @ModelAttribute("usuario") Usuario usuario,
+                                 BindingResult bindingResult,
                                  @RequestParam String confirmPassword,
+                                 Model model,
                                  RedirectAttributes redirectAttributes) {
-        if (!password.equals(confirmPassword)) {
-            redirectAttributes.addAttribute("error", "Las contraseñas no coinciden.");
-            return "redirect:/register";
+        if (!confirmPassword.equals(usuario.getPassword())) {
+            bindingResult.rejectValue("password", "Match", "Las contraseñas no coinciden.");
+        }
+        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
+            bindingResult.rejectValue("email", "Duplicate", "Ya existe una cuenta registrada con ese correo.");
+        }
+        if (bindingResult.hasErrors()) {
+            return "auth/register";
         }
 
-        if (usuarioRepository.existsByEmail(email)) {
-            redirectAttributes.addAttribute("error", "Ya existe una cuenta registrada con ese correo.");
-            return "redirect:/register";
-        }
-
-        Usuario usuario = new Usuario();
-        usuario.setNombre(nombre);
-        usuario.setEmail(email);
-        usuario.setPassword(password);
         usuario.setRol(Rol.RESIDENTE);
         usuarioService.guardarUsuario(usuario);
 

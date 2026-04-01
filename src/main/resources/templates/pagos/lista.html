@@ -20,26 +20,22 @@
                     <thead>
                         <tr>
                             <th>Residente</th>
+                            <th>Apartamento</th>
                             <th>Monto</th>
                             <th>Método</th>
                             <th>Fecha</th>
-                            <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>María López</td>
-                            <td>$350,000</td>
-                            <td>Transferencia</td>
-                            <td>2026-04-01</td>
-                            <td><span class="badge bg-success">Pagado</span></td>
+                        <tr th:each="pago : ${pagos}">
+                            <td th:text="${pago.residente}">Residente</td>
+                            <td th:text="${pago.apartamento != null ? pago.apartamento.numero : '—'}">Apartamento</td>
+                            <td th:text="${pago.monto}">$0</td>
+                            <td th:text="${pago.metodo}">Método</td>
+                            <td th:text="${pago.fecha}">Fecha</td>
                         </tr>
-                        <tr>
-                            <td>Carlos Díaz</td>
-                            <td>$420,000</td>
-                            <td>Tarjeta</td>
-                            <td>2026-03-28</td>
-                            <td><span class="badge bg-warning text-dark">Pendiente</span></td>
+                        <tr th:if="${#lists.isEmpty(pagos)}">
+                            <td colspan="5" class="text-center text-muted">No hay pagos registrados todavía.</td>
                         </tr>
                     </tbody>
                 </table>

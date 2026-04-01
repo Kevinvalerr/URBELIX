@@ -20,23 +20,22 @@
                     <thead>
                         <tr>
                             <th>Solicitante</th>
+                            <th>Apartamento</th>
                             <th>Área</th>
                             <th>Fecha</th>
-                            <th>Estado</th>
+                            <th>Observaciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Alba Gómez</td>
-                            <td>Salón social</td>
-                            <td>2026-04-05</td>
-                            <td><span class="badge bg-success">Confirmada</span></td>
+                        <tr th:each="reserva : ${reservas}">
+                            <td th:text="${reserva.solicitante}">Solicitante</td>
+                            <td th:text="${reserva.apartamento != null ? reserva.apartamento.numero : '—'}">Apartamento</td>
+                            <td th:text="${reserva.area}">Área</td>
+                            <td th:text="${reserva.fecha}">Fecha</td>
+                            <td th:text="${reserva.observaciones}">Observaciones</td>
                         </tr>
-                        <tr>
-                            <td>Jorge Ramírez</td>
-                            <td>Piscina</td>
-                            <td>2026-04-10</td>
-                            <td><span class="badge bg-primary">Pendiente</span></td>
+                        <tr th:if="${#lists.isEmpty(reservas)}">
+                            <td colspan="5" class="text-center text-muted">No hay reservas registradas todavía.</td>
                         </tr>
                     </tbody>
                 </table>

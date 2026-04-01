@@ -9,31 +9,42 @@
         </section>
 
         <div class="form-card">
-            <form th:action="@{/reservas/guardar}" method="post" class="form-grid">
+            <form th:action="@{/reservas/guardar}" th:object="${reserva}" method="post" class="form-grid">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="form-group">
                     <label for="solicitante">Solicitante</label>
-                    <input id="solicitante" name="solicitante" type="text" placeholder="Nombre del solicitante" required />
+                    <input id="solicitante" th:field="*{solicitante}" type="text" placeholder="Nombre del solicitante" required />
+                    <p class="form-error" th:if="${#fields.hasErrors('solicitante')}" th:errors="*{solicitante}"></p>
+                </div>
+                <div class="form-group">
+                    <label for="apartamentoId">Apartamento</label>
+                    <select id="apartamentoId" th:field="*{apartamento.id}" class="form-select" required>
+                        <option value="">Seleccione un apartamento</option>
+                        <option th:each="apto : ${apartamentos}" th:value="${apto.id}" th:text="${apto.numero} + ' - Torre ' + ${apto.torre} + ' - Piso ' + ${apto.piso}"></option>
+                    </select>
+                    <p class="form-error" th:if="${#fields.hasErrors('apartamento')}" th:errors="*{apartamento}"></p>
                 </div>
                 <div class="form-group">
                     <label for="area">Área a reservar</label>
-                    <select id="area" name="area" required>
+                    <select id="area" th:field="*{area}" required>
                         <option value="">Seleccione área</option>
                         <option value="Salón social">Salón social</option>
                         <option value="Gimnasio">Gimnasio</option>
                         <option value="Piscina">Piscina</option>
                         <option value="Cancha">Cancha deportiva</option>
                     </select>
+                    <p class="form-error" th:if="${#fields.hasErrors('area')}" th:errors="*{area}"></p>
                 </div>
                 <div class="form-group">
                     <label for="fecha">Fecha de reserva</label>
-                    <input id="fecha" name="fecha" type="date" required />
+                    <input id="fecha" th:field="*{fecha}" type="date" required />
+                    <p class="form-error" th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}"></p>
                 </div>
                 <div class="form-group">
                     <label for="observaciones">Observaciones</label>
-                    <textarea id="observaciones" name="observaciones" rows="4" placeholder="Notas o detalles adicionales"></textarea>
+                    <textarea id="observaciones" th:field="*{observaciones}" rows="4" placeholder="Notas o detalles adicionales"></textarea>
                 </div>
                 <div class="form-actions">
-                    <a href="/dashboard" class="btn btn-outline-primary">Volver al dashboard</a>
                     <button type="submit" class="btn btn-primary btn-main-action">
                         <i class="bi bi-calendar-check-fill me-2"></i>Reservar ahora
                     </button>

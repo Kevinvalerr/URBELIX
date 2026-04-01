@@ -1,6 +1,8 @@
 package com.nexur.nexur.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,8 +13,10 @@ public class Visitante {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Nombre del visitante es obligatorio")
     private String nombre;
 
+    @NotBlank(message = "Documento del visitante es obligatorio")
     private String documento;
 
     private LocalDateTime fechaEntrada;

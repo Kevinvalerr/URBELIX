@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:fragment="page">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="page">
 
 
 
@@ -23,8 +23,11 @@
 <nav class="navbar navbar-dark px-4 navbar-main">
     <span class="navbar-brand fw-bold">NEXUR</span>
     <div class="d-flex align-items-center gap-3">
-        <span class="text-light small">Admin</span>
+        <span class="text-light small" sec:authorize="hasRole('ADMIN')">Admin</span>
+        <span class="text-light small" sec:authorize="hasRole('RESIDENTE')">Residente</span>
+        <span class="text-light small" sec:authorize="hasRole('PORTERIA')">Portería</span>
         <form th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <button class="btn btn-sm btn-outline-light">Cerrar sesión</button>
         </form>
     </div>
@@ -33,7 +36,9 @@
 <div class="d-flex layout-shell">
     <div th:replace="layout/sidebar :: sidebar"></div>
     <main class="flex-grow-1 p-4 layout-main">
-        <a href="javascript:history.back()" class="btn btn-secondary mb-3">← Volver</a>
+        <div th:if="${currentPath != '/dashboard'}">
+            <a th:if="${volverUrl != null}" th:href="${volverUrl}" class="btn btn-secondary mb-3">← Volver</a>
+        </div>
         <div th:insert="~{::content}"></div>
     </main>
 </div>

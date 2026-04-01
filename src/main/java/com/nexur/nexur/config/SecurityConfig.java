@@ -25,8 +25,9 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                .requestMatchers("/login", "/register", "/forgot-password").permitAll()
-                .requestMatchers("/usuarios-vista").hasRole("ADMIN")
+                .requestMatchers("/", "/home", "/login", "/register", "/forgot-password").permitAll()
+                .requestMatchers("/usuarios-vista", "/usuarios/**", "/guardar-usuario", "/eliminar-usuario", "/editar-usuario", "/actualizar-usuario").hasRole("ADMIN")
+                .requestMatchers("/reportes/**").hasRole("ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/visitantes/**").hasAnyRole("ADMIN", "PORTERIA", "RESIDENTE")
                 .anyRequest().authenticated()

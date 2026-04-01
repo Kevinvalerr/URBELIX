@@ -9,8 +9,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+import org.springframework.security.access.prepost.PreAuthorize;
 
+@Controller
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/residentes")
 public class ResidenteController {
   
@@ -28,6 +30,8 @@ public class ResidenteController {
     public String listarResidentes(Model model) {
         
         model.addAttribute("residentes", residenteService.obtenerTodos());
+        model.addAttribute("currentPath", "/residentes");
+        model.addAttribute("volverUrl", "/dashboard");
 
         return "residentes/lista";
     }
@@ -41,11 +45,29 @@ public class ResidenteController {
       residente.setApartamento(new Apartamento());
 
       model.addAttribute("residente", residente);
-
       model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
+      model.addAttribute("currentPath", "/residentes");
+      model.addAttribute("volverUrl", "/residentes");
+      model.addAttribute("titulo", "Registrar Residente");
         
       return "residentes/formulario";
 
+    }
+
+    @GetMapping("/editar/{id}")
+    public String editarResidente(@PathVariable Long id, Model model) {
+        Residente residente = residenteService.buscarPorId(id).orElse(new Residente());
+        if (residente.getApartamento() == null) {
+            residente.setApartamento(new Apartamento());
+        }
+
+        model.addAttribute("residente", residente);
+        model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
+        model.addAttribute("currentPath", "/residentes");
+        model.addAttribute("volverUrl", "/residentes");
+        model.addAttribute("titulo", "Editar Residente");
+
+        return "residentes/formulario";
     }
 
     // Guardar residente

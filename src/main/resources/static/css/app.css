@@ -53,6 +53,8 @@ body, button, input, select, textarea {
     display: flex;
     gap: 1.5rem;
     padding: 1.5rem 1.5rem 2.5rem;
+    position: relative;
+    z-index: 0;
 }
 
 .sidebar-panel {
@@ -63,6 +65,8 @@ body, button, input, select, textarea {
     background: var(--sidebar-gradient);
     box-shadow: 0 32px 80px rgba(15, 23, 42, 0.18);
     border: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    z-index: 2;
 }
 
 .layout-main {
@@ -71,6 +75,8 @@ body, button, input, select, textarea {
     min-height: calc(100vh - 92px);
     box-shadow: 0 30px 80px rgba(15, 23, 42, 0.08);
     border: 1px solid rgba(226, 232, 240, 0.75);
+    position: relative;
+    z-index: 1;
 }
 
 .sidebar-brand {
@@ -111,6 +117,23 @@ body, button, input, select, textarea {
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.14em;
+}
+
+.sidebar-user {
+    padding: 0.9rem 0.6rem 1.1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 18px;
+}
+
+.sidebar-user p,
+.sidebar-user strong {
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.sidebar-user strong {
+    display: block;
+    font-size: 1rem;
+    margin-bottom: 0.15rem;
 }
 
 .sidebar-link {
@@ -197,6 +220,19 @@ body, button, input, select, textarea {
 .navbar-main {
     background-color: #0F172A !important;
     border-bottom: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    z-index: 10;
+}
+
+.layout-main {
+    position: relative;
+    z-index: 1;
+}
+
+.layout-main a,
+.layout-main button {
+    position: relative;
+    z-index: 2;
 }
 
 .footer-bar {
@@ -314,7 +350,12 @@ body, button, input, select, textarea {
     color: var(--text-secondary);
 }
 
-.form-group input,
+.form-error {
+    margin-top: 0.35rem;
+    color: #dc2626;
+    font-size: 0.875rem;
+}
+
 .form-group select {
     width: 100%;
     padding: 0.95rem 1rem;
@@ -447,15 +488,7 @@ body, button, input, select, textarea {
 }
 
 .metric-card::after {
-    content: '';
-    position: absolute;
-    right: 1.5rem;
-    top: 1.5rem;
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    background: rgba(37, 99, 235, 0.08);
-    z-index: 0;
+    display: none;
 }
 
 .metric-card .metric-card-header {
@@ -472,11 +505,43 @@ body, button, input, select, textarea {
     z-index: 1;
 }
 
-.dashboard-summary-card {
-    min-height: 138px;
-    padding: 1.75rem 1.8rem;
-    display: flex;
+.dashboard-hero-card {
+    padding: 1.9rem 2rem;
+    border-radius: 28px;
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: flex-start;
+    min-height: 200px;
+}
+
+.hero-chip {
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    padding: 0.55rem 0.95rem;
+    margin-bottom: 1rem;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(37, 99, 235, 0.16);
+    color: #1D4ED8;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.85rem;
+    justify-content: flex-end;
+}
+
+.hero-actions .btn {
+    min-width: 160px;
 }
 
 .dashboard-actions {
@@ -494,10 +559,32 @@ body, button, input, select, textarea {
     padding: 1rem;
     border-radius: 18px;
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.07);
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+.dashboard-actions a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    min-height: 68px;
+    padding: 1rem;
+    border-radius: 18px;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.07);
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
 }
 
 .dashboard-actions a i {
     font-size: 1.25rem;
+}
+
+.dashboard-actions {
+    position: relative;
+    z-index: 1;
 }
 
 @media (max-width: 991px) {
@@ -545,8 +632,41 @@ body, button, input, select, textarea {
 
 .metric-card-body .metric-value {
     margin: 0.75rem 0 0;
-    font-size: 2rem;
+    font-size: 1.6rem;
+    line-height: 1.25;
     color: var(--text-primary);
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.metric-card-body .metric-label {
+    font-size: 0.9rem;
+}
+
+.metric-card.residents .metric-card-body .metric-value,
+.metric-card.apartments .metric-card-body .metric-value,
+.metric-card.parqueadero .metric-card-body .metric-value {
+    font-size: 1.35rem;
+}
+
+.metric-card.apartments {
+    background: linear-gradient(180deg, #eef4ff 0%, #f8fbff 100%);
+}
+
+.metric-card.residents {
+    background: linear-gradient(180deg, #ecfdf5 0%, #f5faf7 100%);
+}
+
+.metric-card.payments {
+    background: linear-gradient(180deg, #fffbeb 0%, #fff7eb 100%);
+}
+
+.metric-card.reservas {
+    background: linear-gradient(180deg, #f5f3ff 0%, #faf7ff 100%);
+}
+
+.metric-card.parqueadero {
+    background: linear-gradient(180deg, #eff6ff 0%, #eef2ff 100%);
 }
 
 .metric-card .metric-icon {
@@ -601,6 +721,54 @@ body, button, input, select, textarea {
     padding: 1.8rem;
     border: none;
     background: #ffffff;
+}
+
+.user-summary-card p,
+.user-summary-card ul {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.6rem;
+}
+
+.user-summary-card ul {
+    padding-left: 1.25rem;
+}
+
+.user-summary-card ul li {
+    margin-bottom: 0.35rem;
+}
+
+.metric-card.parqueadero .metric-card-body .metric-value,
+.metric-card.parqueadero .metric-card-body .metric-label {
+    font-size: 1.15rem;
+}
+
+.table-dashboard td,
+.table-dashboard th {
+    font-size: 0.92rem;
+}
+
+.action-card {
+    min-width: auto;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.action-card i {
+    font-size: 1.1rem;
+}
+
+.dashboard-actions a {
+    text-decoration: none;
+}
+
+.dashboard-actions a span,
+.dashboard-actions a {
+    color: inherit;
+}
+
+.dashboard-actions a:hover {
+    text-decoration: none;
 }
 
 .dashboard-summary-card {

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Reportes | NEXUR'">
+        <section class="page-top-section mb-4">
+            <div>
+                <h1>Reportes</h1>
+                <p class="text-muted">Genera reportes por tipo y rango de fechas para analizar pagos, reservas y visitas.</p>
+            </div>
+        </section>
+
+        <div class="card form-card mb-4">
+            <div class="card-body">
+                <form th:action="@{/reportes}" method="get" class="form-grid">
+                    <div class="form-group">
+                        <label for="tipo">Tipo de reporte</label>
+                        <select id="tipo" name="tipo" class="form-select">
+                            <option value="TODOS" th:selected="${tipo == null or tipo == 'TODOS'}">Todos</option>
+                            <option value="PAGOS" th:selected="${tipo == 'PAGOS'}">Pagos</option>
+                            <option value="RESERVAS" th:selected="${tipo == 'RESERVAS'}">Reservas</option>
+                            <option value="VISITANTES" th:selected="${tipo == 'VISITANTES'}">Visitas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fechaInicio">Fecha inicio</label>
+                        <input id="fechaInicio" name="fechaInicio" type="date" class="form-control" th:value="${fechaInicio}" />
+                    </div>
+                    <div class="form-group">
+                        <label for="fechaFin">Fecha fin</label>
+                        <input id="fechaFin" name="fechaFin" type="date" class="form-control" th:value="${fechaFin}" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-main-action">Filtrar reportes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card activity-card">
+            <div class="card-body">
+                <h5>Resultados del reporte</h5>
+                <div class="table-dashboard mt-3">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Entidad</th>
+                                <th>Usuario</th>
+                                <th>Descripción</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="registro : ${registros}">
+                                <td th:text="${registro.tipo}">Tipo</td>
+                                <td th:text="${registro.entidad}">Entidad</td>
+                                <td th:text="${registro.usuario}">Usuario</td>
+                                <td th:text="${registro.descripcion}">Descripción</td>
+                                <td th:text="${#temporals.format(registro.fechaHora, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                            </tr>
+                            <tr th:if="${registros.isEmpty()}">
+                                <td colspan="5" class="text-center text-muted">No se encontraron registros para estos filtros.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</html>

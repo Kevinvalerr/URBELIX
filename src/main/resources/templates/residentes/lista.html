@@ -33,6 +33,7 @@
                                 <td th:text="${residente.telefono}"></td>
                                 <td th:text="${residente.apartamento.numero}"></td>
                                 <td>
+                                    <a th:href="@{/residentes/editar/{id}(id=${residente.id})}" class="btn btn-sm btn-warning me-2">Editar</a>
                                     <a th:href="@{/residentes/eliminar/{id}(id=${residente.id})}" class="btn btn-sm btn-outline-danger">Eliminar</a>
                                 </td>
                             </tr>

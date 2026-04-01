@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
-    <div th:fragment="content" th:with="titulo='Registrar Residente'">
+    <div th:fragment="content" th:with="titulo=${titulo}">
         <section class="page-top-section mb-4">
             <div>
                 <h1>Registrar Residente</h1>
@@ -10,6 +10,8 @@
 
         <div class="form-card">
             <form th:action="@{/residentes/guardar}" th:object="${residente}" method="post" class="form-grid">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:field="*{id}" />
                 <div class="form-group">
                     <label for="nombre">Nombre</label>
                     <input id="nombre" type="text" th:field="*{nombre}" placeholder="Ingrese nombre completo" required />
@@ -26,7 +28,11 @@
                     <label for="apartamentoId">Apartamento</label>
                     <select id="apartamentoId" name="apartamentoId" required>
                         <option value="">Seleccione un apartamento</option>
-                        <option th:each="ap : ${apartamentos}" th:value="${ap.id}" th:text="${ap.numero}"></option>
+                        <option th:each="ap : ${apartamentos}"
+                                th:value="${ap.id}"
+                                th:text="${ap.numero}"
+                                th:selected="${residente.apartamento != null and residente.apartamento.id == ap.id}">
+                        </option>
                     </select>
                 </div>
                 <div class="form-actions">

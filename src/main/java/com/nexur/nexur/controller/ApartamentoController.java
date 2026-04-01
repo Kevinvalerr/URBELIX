@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 
 @Controller
-
+@PreAuthorize("hasRole('ADMIN')")
 public class ApartamentoController {
     @Autowired
     private ApartamentoService apartamentoService;
@@ -31,6 +31,9 @@ public class ApartamentoController {
    List<Apartamento> apartamentos = apartamentoService.listarApartamentos();
 
     model.addAttribute("apartamentos", apartamentos);
+    model.addAttribute("titulo", "Apartamentos");
+    model.addAttribute("currentPath", "/apartamentos");
+    model.addAttribute("volverUrl", "/dashboard");
 
     return "apartamentos/lista";
 
@@ -44,6 +47,9 @@ public class ApartamentoController {
     Apartamento apartamento = apartamentoService.obtenerApartamentoPorId(id);
 
       model.addAttribute("apartamento", apartamento);
+      model.addAttribute("titulo", "Editar Apartamento");
+      model.addAttribute("currentPath", "/apartamentos");
+      model.addAttribute("volverUrl", "/apartamentos");
 
       return "apartamentos/editar";
 
@@ -75,6 +81,9 @@ public class ApartamentoController {
         Apartamento apartamento = new Apartamento();
 
         model.addAttribute("apartamento", apartamento);
+        model.addAttribute("titulo", "Crear Apartamento");
+        model.addAttribute("currentPath", "/apartamentos");
+        model.addAttribute("volverUrl", "/apartamentos");
 
         return "apartamentos/crear";
     }

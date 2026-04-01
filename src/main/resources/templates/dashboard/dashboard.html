@@ -1,44 +1,32 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
     <div th:fragment="content" th:with="titulo='Dashboard | NEXUR'">
-        <section class="dashboard-header">
+        <div class="dashboard-hero-card mb-4">
             <div>
-                <h1 class="dashboard-title">Dashboard</h1>
-                <p class="dashboard-description">Resumen del sistema residencial y métricas clave para el equipo administrativo.</p>
-            </div>
-        </section>
-
-        <div class="dashboard-summary-card">
-            <div>
-                <h3>Bienvenido de nuevo, equipo</h3>
-                <p>Administra residentes, pagos, reservas y visitantes desde un solo panel con claridad y rapidez.</p>
+                <span class="hero-chip">Dashboard</span>
+                <h1 class="dashboard-title">Control total en un solo lugar</h1>
+                <p class="dashboard-description">Monitorea el condominio, administra residentes, pagos, reservas y visitas con una interfaz clara, moderna y lista para la acción.</p>
+                <p class="dashboard-welcome mt-3">Bienvenido, <strong th:text="${currentUser}">Usuario</strong></p>
+                <p class="dashboard-role mb-2">Rol: <strong th:text="${currentRole}">Usuario</strong></p>
             </div>
         </div>
 
-        <div class="dashboard-actions mb-4">
-            <a href="/residentes/nuevo" class="action-card action-primary">
-                <i class="bi bi-person-plus-fill"></i>
-                Nuevo residente
-            </a>
-            <a href="/pagos/nuevo" class="action-card action-success">
+        <div sec:authorize="hasRole('RESIDENTE')" class="dashboard-actions mb-4">
+            <a href="/pagos/nuevo" class="action-card action-primary">
                 <i class="bi bi-cash-stack"></i>
                 Registrar pago
             </a>
             <a href="/reservas/nueva" class="action-card action-secondary">
                 <i class="bi bi-calendar-check"></i>
-                Nueva reserva
+                Crear reserva
             </a>
             <a href="/visitantes" class="action-card action-info">
                 <i class="bi bi-door-open-fill"></i>
                 Ver visitantes
             </a>
-            <a href="/usuarios-vista" class="action-card action-muted">
-                <i class="bi bi-people-fill"></i>
-                Ver usuarios
-            </a>
         </div>
 
-        <div class="metric-grid mb-4">
+        <div sec:authorize="hasRole('ADMIN')" class="metric-grid mb-4">
             <div class="card metric-card apartments">
                 <div class="metric-card-header">
                     <span class="metric-chip">Apartamentos</span>
@@ -46,7 +34,7 @@
                 </div>
                 <div class="metric-card-body">
                     <p class="metric-label">Total activos</p>
-                    <h2 class="metric-value">28</h2>
+                    <h2 class="metric-value" th:text="${apartamentosCount}">0</h2>
                 </div>
             </div>
             <div class="card metric-card residents">
@@ -55,8 +43,8 @@
                     <i class="bi bi-people"></i>
                 </div>
                 <div class="metric-card-body">
-                    <p class="metric-label">Con acceso hoy</p>
-                    <h2 class="metric-value">184</h2>
+                    <p class="metric-label">Registrados</p>
+                    <h2 class="metric-value" th:text="${residentesCount}">0</h2>
                 </div>
             </div>
             <div class="card metric-card payments">
@@ -65,8 +53,8 @@
                     <i class="bi bi-wallet2"></i>
                 </div>
                 <div class="metric-card-body">
-                    <p class="metric-label">Pendientes</p>
-                    <h2 class="metric-value">12</h2>
+                    <p class="metric-label">Totales</p>
+                    <h2 class="metric-value" th:text="${pagosCount}">0</h2>
                 </div>
             </div>
             <div class="card metric-card reservas">
@@ -75,9 +63,64 @@
                     <i class="bi bi-calendar-check"></i>
                 </div>
                 <div class="metric-card-body">
-                    <p class="metric-label">Activas</p>
-                    <h2 class="metric-value">7</h2>
+                    <p class="metric-label">Pendientes</p>
+                    <h2 class="metric-value" th:text="${reservasCount}">0</h2>
                 </div>
+            </div>
+        </div>
+
+        <div sec:authorize="hasRole('RESIDENTE')" class="metric-grid mb-4">
+            <div class="card metric-card payments">
+                <div class="metric-card-header">
+                    <span class="metric-chip">Mis pagos</span>
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <div class="metric-card-body">
+                    <p class="metric-label">Registrados</p>
+                    <h2 class="metric-value" th:text="${misPagosCount}">0</h2>
+                </div>
+            </div>
+            <div class="card metric-card reservas">
+                <div class="metric-card-header">
+                    <span class="metric-chip">Mis reservas</span>
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div class="metric-card-body">
+                    <p class="metric-label">Solicitadas</p>
+                    <h2 class="metric-value" th:text="${misReservasCount}">0</h2>
+                </div>
+            </div>
+            <div class="card metric-card apartments">
+                <div class="metric-card-header">
+                    <span class="metric-chip">Mi apartamento</span>
+                    <i class="bi bi-house-door"></i>
+                </div>
+                <div class="metric-card-body">
+                    <p class="metric-label">Número</p>
+                    <h2 class="metric-value" th:text="${miApartamento}">Sin apartamento</h2>
+                </div>
+            </div>
+            <div class="card metric-card residents parqueadero">
+                <div class="metric-card-header">
+                    <span class="metric-chip">Parqueadero</span>
+                    <i class="bi bi-car-front"></i>
+                </div>
+                <div class="metric-card-body">
+                    <p class="metric-label">Horario</p>
+                    <h2 class="metric-value resident-value" th:text="${parqueaderoHorario}">—</h2>
+                </div>
+            </div>
+        </div>
+
+        <div sec:authorize="hasRole('RESIDENTE')" class="card user-summary-card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Resumen de residente</h5>
+                <p><strong>Mora:</strong> <span th:text="${estadoMora}">No hay mora registrada</span></p>
+                <p><strong>Multa:</strong> <span th:text="${multa}">No se han registrado multas</span></p>
+                <p><strong>Notificaciones:</strong></p>
+                <ul>
+                    <li th:each="nota : ${notificaciones}" th:text="${nota}">Notificación</li>
+                </ul>
             </div>
         </div>
 
@@ -90,33 +133,17 @@
                             <th>Usuario</th>
                             <th>Acción</th>
                             <th>Fecha</th>
-                            <th></th>
+                            <th>Tipo</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>María López</td>
-                            <td>Registró nueva reserva</td>
-                            <td>Hoy - 10:24</td>
-                            <td><span class="badge bg-primary">Reserva</span></td>
-                        </tr>
-                        <tr>
-                            <td>Carlos Díaz</td>
-                            <td>Confirmó pago mensual</td>
-                            <td>Ayer - 16:38</td>
-                            <td><span class="badge bg-success">Pago</span></td>
-                        </tr>
-                        <tr>
-                            <td>Alba Gómez</td>
-                            <td>Creó perfil de residente</td>
-                            <td>Ayer - 12:09</td>
-                            <td><span class="badge bg-primary">Nuevo</span></td>
-                        </tr>
-                        <tr>
-                            <td>Jorge Ramírez</td>
-                            <td>Solicitó acceso de visitante</td>
-                            <td>2 días - 09:14</td>
-                            <td><span class="badge bg-primary">Visita</span></td>
+                        <tr th:each="actividad : ${actividades}">
+                            <td th:text="${actividad.usuario}">Usuario</td>
+                            <td th:text="${actividad.accion}">Acción</td>
+                            <td th:text="${actividad.fecha}">Fecha</td>
+                            <td>
+                                <span class="badge bg-secondary text-dark" th:text="${actividad.tipo}">Tipo</span>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
