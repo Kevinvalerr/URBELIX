@@ -25,27 +25,24 @@ public class Usuario implements UserDetails {
 
     private String nombre;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Rol rol;
 
-@Override
-public Collection<? extends GrantedAuthority> getAuthorities() {
-
-    System.out.println("ROL DEL USUARIO: " + rol);
-
-    if (rol == null) {
-        return List.of();
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (rol == null) {
+            return List.of();
+        }
+        return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
     }
 
-    return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
-}
-
-   @Override
+    @Override
     public boolean isAccountNonExpired() {
         return true;
     }
@@ -67,8 +64,7 @@ public Collection<? extends GrantedAuthority> getAuthorities() {
 
     @Override
     public String getUsername() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUsername'");
+        return email;
     }
 
 }

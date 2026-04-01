@@ -1,0 +1,202 @@
+:root {
+    --primary: #1D4ED8;
+    --primary-dark: #1E3A8A;
+    --secondary: #22C55E;
+    --secondary-hover: #16A34A;
+    --accent: #7C3AED;
+    --background: #F8FAFC;
+    --surface: #FFFFFF;
+    --text-primary: #0F172A;
+    --text-secondary: #334155;
+    --text-muted: #94A3B8;
+    --border: #E2E8F0;
+    --radius: 12px;
+    --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Roboto", sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+}
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--surface);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 2.25rem;
+}
+
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(29, 78, 216, 0.12);
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.auth-heading {
+    margin: 0;
+    font-family: "Montserrat", sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.auth-subtitle {
+    margin: 0.75rem 0 2rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.95rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.95rem;
+    background: #fff;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.alert {
+    margin-bottom: 1.5rem;
+    border-radius: 0.9rem;
+}
+
+.primary-button {
+    width: 100%;
+    padding: 1rem 1.1rem;
+    border: none;
+    border-radius: 0.95rem;
+    background: var(--primary);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.25s ease, transform 0.2s ease;
+}
+
+.primary-button:hover,
+.primary-button:focus {
+    background: var(--secondary);
+    transform: translateY(-1px);
+}
+
+.secondary-button {
+    width: 100%;
+    padding: 0.95rem 1rem;
+    border: 1px solid rgba(29, 78, 216, 0.15);
+    border-radius: 0.95rem;
+    background: #fff;
+    color: var(--primary-dark);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.secondary-button:hover,
+.secondary-button:focus {
+    background: rgba(29, 78, 216, 0.08);
+    border-color: var(--primary);
+}
+
+.forgot-link {
+    display: block;
+    margin-top: 1rem;
+    text-align: right;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.forgot-link:hover {
+    color: var(--primary-dark);
+}
+
+.link-group {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.link-group a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.link-group a:hover {
+    color: var(--primary);
+}
+
+.helper-text {
+    margin: 0 0 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 576px) {
+    .auth-card {
+        padding: 1.75rem;
+    }
+
+    .auth-heading {
+        font-size: 1.75rem;
+    }
+}
