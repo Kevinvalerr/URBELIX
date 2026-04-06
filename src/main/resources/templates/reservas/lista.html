@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    
+<div th:if="${success}" class="alert alert-success">
+    <span th:text="${success}"></span>
+    </div>
+
     <div th:fragment="content" th:with="titulo='Reservas'">
         <section class="page-top-section mb-4">
             <div>
@@ -24,18 +29,31 @@
                             <th>Área</th>
                             <th>Fecha</th>
                             <th>Observaciones</th>
+                           <th th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}">Acciones</th>
+                            <th>Estado</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr th:each="reserva : ${reservas}">
-                            <td th:text="${reserva.solicitante}">Solicitante</td>
-                            <td th:text="${reserva.apartamento != null ? reserva.apartamento.numero : '—'}">Apartamento</td>
-                            <td th:text="${reserva.area}">Área</td>
-                            <td th:text="${reserva.fecha}">Fecha</td>
-                            <td th:text="${reserva.observaciones}">Observaciones</td>
-                        </tr>
+                    <tbody><tr th:each="reserva : ${reservas}">
+    <td th:text="${reserva.residente != null ? reserva.residente.nombre : 'N/A'}"></td>
+    <td th:text="${reserva.apartamento != null ? reserva.apartamento.numero : '—'}"></td>
+    <td th:text="${reserva.tipoEspacio}"></td>
+    <td th:text="${#temporals.format(reserva.fechaInicio, 'yyyy-MM-dd HH:mm')}"></td>
+    <td th:text="${reserva.observaciones}"></td>
+    <td th:text="${reserva.estado}"></td>
+<td th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}">
+    <form th:action="@{/reservas/aprobar/{id}(id=${reserva.id})}" method="post" style="display:inline;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">Aprobar</button>
+    </form>
+
+    <form th:action="@{/reservas/rechazar/{id}(id=${reserva.id})}" method="post" style="display:inline;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">Rechazar</button>
+    </form>
+</td>
+</tr>
                         <tr th:if="${#lists.isEmpty(reservas)}">
-                            <td colspan="5" class="text-center text-muted">No hay reservas registradas todavía.</td>
+                            <td colspan="6" class="text-center text-muted">No hay reservas registradas todavía.</td>
                         </tr>
                     </tbody>
                 </table>

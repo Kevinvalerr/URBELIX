@@ -43,14 +43,16 @@ public class ReporteService {
         LocalDateTime fin = fechaFin.atTime(LocalTime.MAX);
 
         List<ReporteRegistro> registros = new ArrayList<>();
+          
+
         if (tipo == null || tipo.isBlank() || "TODOS".equalsIgnoreCase(tipo)) {
             registros.addAll(mapPagos(pagoRepository.findByFechaBetween(fechaInicio, fechaFin)));
-            registros.addAll(mapReservas(reservaRepository.findByFechaBetween(fechaInicio, fechaFin)));
+            registros.addAll(mapReservas(reservaRepository.findByFechaInicioBetween(inicio, fin)));
             registros.addAll(mapVisitantes(visitanteRepository.findByFechaEntradaBetween(inicio, fin)));
         } else if ("PAGOS".equalsIgnoreCase(tipo)) {
             registros.addAll(mapPagos(pagoRepository.findByFechaBetween(fechaInicio, fechaFin)));
         } else if ("RESERVAS".equalsIgnoreCase(tipo)) {
-            registros.addAll(mapReservas(reservaRepository.findByFechaBetween(fechaInicio, fechaFin)));
+            registros.addAll(mapReservas(reservaRepository.findByFechaInicioBetween(inicio, fin)));
         } else if ("VISITANTES".equalsIgnoreCase(tipo)) {
             registros.addAll(mapVisitantes(visitanteRepository.findByFechaEntradaBetween(inicio, fin)));
         }
@@ -76,8 +78,8 @@ public class ReporteService {
                 .map(reserva -> new ReporteRegistro(
                         "Reserva",
                         "Reserva #" + reserva.getId(),
-                        reserva.getSolicitante(),
-                        "Reserva de " + reserva.getArea() + " para apto " + (reserva.getApartamento() != null ? reserva.getApartamento().getNumero() : "N/A"),
+                        reserva.getResidente() != null ? reserva.getResidente().getNombre() : "N/A",
+                        "Reserva de " + reserva.getTipoEspacio() + " para apto " + (reserva.getApartamento() != null ? reserva.getApartamento().getNumero() : "N/A"),
                         reserva.getCreadoEn()
                 ))
                 .collect(Collectors.toList());
