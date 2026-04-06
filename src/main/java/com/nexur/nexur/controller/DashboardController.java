@@ -80,9 +80,8 @@ public class DashboardController {
             List<Pago> misPagos = pagoService.listarPagos().stream()
                     .filter(pago -> pago.getResidente() != null && pago.getResidente().equalsIgnoreCase(usuarioActual))
                     .collect(Collectors.toList());
-            List<Reserva> misReservas = reservaService.listarReservas().stream()
-                    .filter(reserva -> reserva.getSolicitante() != null && reserva.getSolicitante().equalsIgnoreCase(usuarioActual))
-                    .collect(Collectors.toList());
+            List<Reserva> misReservas = reservaService.listarReservas();
+                  
 
             model.addAttribute("misPagosCount", misPagos.size());
             model.addAttribute("misReservasCount", misReservas.size());
@@ -140,10 +139,10 @@ public class DashboardController {
         }
 
         for (Reserva reserva : reservaService.listarReservas()) {
-            if (isAdmin || (reserva.getSolicitante() != null && reserva.getSolicitante().equalsIgnoreCase(usuarioActual))) {
+            if (true) {
                 actividades.add(new DashboardActivity(
-                        reserva.getSolicitante(),
-                        "Solicitó reserva en " + reserva.getArea() + " para apto " + (reserva.getApartamento() != null ? reserva.getApartamento().getNumero() : "—"),
+                        reserva.getResidente() != null ? reserva.getResidente().getNombre() : "N/A",
+                        "Solicitó reserva en " + reserva.getTipoEspacio() + " para apto " + (reserva.getApartamento() != null ? reserva.getApartamento().getNumero() : "—"),
                         reserva.getCreadoEn() != null ? reserva.getCreadoEn().format(formatter) : "Sin fecha",
                         "Reserva",
                         reserva.getCreadoEn())

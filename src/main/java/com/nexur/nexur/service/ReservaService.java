@@ -2,6 +2,8 @@ package com.nexur.nexur.service;
 
 import com.nexur.nexur.model.Apartamento;
 import com.nexur.nexur.model.Reserva;
+import com.nexur.nexur.model.enums.EstadoReserva;
+import com.nexur.nexur.model.enums.TipoEspacio;
 import com.nexur.nexur.repository.ApartamentoRepository;
 import com.nexur.nexur.repository.ReservaRepository;
 import org.springframework.stereotype.Service;
@@ -32,17 +34,58 @@ public class ReservaService {
         Apartamento apartamento = apartamentoRepository.findById(apartamentoId)
                 .orElseThrow(() -> new RuntimeException("Apartamento no encontrado"));
         reserva.setApartamento(apartamento);
-        if (reserva.getEstado() == null || reserva.getEstado().isBlank()) {
-            reserva.setEstado("Pendiente");
-        }
-        return reservaRepository.save(reserva);
-    }
+
+        List<Reserva> conflictos = reservaRepository
+            .findByTipoEspacioAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+                    reserva.getTipoEspacio(),
+                    reserva.getFechaFin(),
+                    reserva.getFechaInicio()
+            );
+
+           if (!conflictos.isEmpty()) {
+          throw new RuntimeException("Ya existe una reserva en ese horario para este espacio");
+         }
+
+         if (reserva.getObservaciones() == null || reserva.getObservaciones().isBlank()) {
+    reserva.setObservaciones(generarObservaciones(reserva.getTipoEspacio()));
+}
+          return reservaRepository.save(reserva);
+          }
 
     public long contarReservas() {
         return reservaRepository.count();
     }
 
     public long contarReservasPendientes() {
-        return reservaRepository.countByEstado("Pendiente");
+        return reservaRepository.countByEstado(
+             com.nexur.nexur.model.enums.EstadoReserva.PENDIENTE
+        );
     }
+    
+
+    private String generarObservaciones(TipoEspacio tipoEspacio) {
+    return switch (tipoEspacio) {
+        case PISCINA -> "Debe usar gorro y traje adecuado para piscina y llevar gorro ";
+        case BBQ -> "Debe limpiar el área después de usarla ";
+        case GIMNASIO -> "Usar toalla y desinfectar equipos por favor no tirar material al suelo";
+        case SALON_SOCIAL -> "Respetar horarios y normas de ruido";
+    };
+}
+
+   public void aprobarReserva(Long id) {
+    Reserva reserva = reservaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
+    reserva.setEstado(EstadoReserva.APROBADA);
+    reservaRepository.save(reserva);
+}
+
+public void rechazarReserva(Long id) {
+    Reserva reserva = reservaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
+    reserva.setEstado(EstadoReserva.RECHAZADA);
+    reservaRepository.save(reserva);
+}
+
 }

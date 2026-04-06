@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.nexur.nexur.model.enums.EstadoReserva;
+import com.nexur.nexur.model.enums.TipoEspacio;
+
 @Entity
 @Table(name = "reservas")
 public class Reserva {
@@ -14,17 +17,25 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "El solicitante es obligatorio")
-    private String solicitante;
+  
+    
+   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "residente_id", nullable = true)
+   private Residente residente;
 
-    @NotBlank(message = "El área de reserva es obligatoria")
-    private String area;
+    @NotNull(message = "El área de reserva es obligatoria")
+    @Enumerated(EnumType.STRING)
+    private TipoEspacio tipoEspacio;
 
     @NotNull(message = "La fecha de reserva es obligatoria")
-    private LocalDate fecha;
+    private LocalDateTime fechaInicio;
+    private LocalDateTime fechaFin;
 
     private String observaciones;
-    private String estado;
+
+   @Enumerated(EnumType.STRING)
+   private EstadoReserva estado;
+
     private LocalDateTime creadoEn;
 
     @ManyToOne
@@ -32,7 +43,7 @@ public class Reserva {
     private Apartamento apartamento;
 
     public Reserva() {
-        this.estado = "Pendiente";
+        this.estado = EstadoReserva.PENDIENTE;
         this.creadoEn = LocalDateTime.now();
     }
 
@@ -40,28 +51,37 @@ public class Reserva {
         return id;
     }
 
-    public String getSolicitante() {
-        return solicitante;
+    public Residente getResidente() {
+        return residente;
     }
 
-    public void setSolicitante(String solicitante) {
-        this.solicitante = solicitante;
+    public void setResidente(Residente residente) {
+    this.residente = residente;
+}
+
+    public TipoEspacio getTipoEspacio() {
+        return tipoEspacio;
     }
 
-    public String getArea() {
-        return area;
+    public void setTipoEspacio(TipoEspacio tipoEspacio) {
+        this.tipoEspacio = tipoEspacio;
     }
 
-    public void setArea(String area) {
-        this.area = area;
+    public LocalDateTime getFechaInicio() {
+        return fechaInicio;
     }
 
-    public LocalDate getFecha() {
-        return fecha;
+    public void setFechaInicio(LocalDateTime fechaInicio) {
+        this.fechaInicio = fechaInicio;
+
     }
 
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
+    public LocalDateTime getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(LocalDateTime fechaFin) {
+        this.fechaFin = fechaFin;
     }
 
     public String getObservaciones() {
@@ -72,11 +92,11 @@ public class Reserva {
         this.observaciones = observaciones;
     }
 
-    public String getEstado() {
+    public EstadoReserva getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(EstadoReserva estado) {
         this.estado = estado;
     }
 

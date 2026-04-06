@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 
 @Controller
-@RequestMapping("/admin") // 🔐 protegido por ADMIN
+@RequestMapping("/admin") // protegido por ADMIN
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -20,7 +20,7 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    // 📄 Mostrar lista de usuarios (HTML)
+    //  Mostrar lista de usuarios (HTML)
     @GetMapping ("/usuarios-vista")
     public String listar(Model model) {
 
