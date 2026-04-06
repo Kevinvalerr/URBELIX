@@ -1,41 +1,64 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
-    <div th:fragment="content" th:with="titulo='Pagos'">
-        <section class="page-top-section mb-4">
-            <div>
-                <h1>Pagos</h1>
-                <p class="text-muted">Revisa los pagos registrados y agrega nuevos movimientos rápidamente.</p>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Pagos | NEXUR'">
+        <!-- Page Header -->
+        <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
+            <div class="welcome-content" style="gap: 2rem;">
+                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(34, 197, 94, 0.15));">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div class="welcome-text">
+                    <h1 class="welcome-title">Gestión de Pagos</h1>
+                    <p class="welcome-subtitle">Administra todos los pagos del condominio</p>
+                </div>
             </div>
-            <div class="page-actions">
-                <a href="/pagos/nuevo" class="btn btn-primary btn-main-action">
-                    <i class="bi bi-cash-stack me-2"></i>Registrar pago
-                </a>
+            <div class="welcome-stats">
+                <div class="stat-item">
+                    <div class="stat-number" th:text="${pagos.size()}">0</div>
+                    <div class="stat-label">Total Pagos</div>
+                </div>
             </div>
-        </section>
+        </div>
 
-        <div class="card activity-card">
-            <h5>Listado de pagos</h5>
-            <div class="table-dashboard mt-3">
-                <table class="table align-middle mb-0">
+        <!-- Register Payment Button -->
+        <div style="margin-bottom: 2rem;">
+            <a href="/pagos/nuevo" class="btn btn-primary" style="background: linear-gradient(135deg, #2563EB, #06B6D4); border: none; padding: 0.75rem 2rem; border-radius: 12px; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: all 0.3s ease;">
+                <i class="bi bi-plus-circle"></i>
+                Registrar Nuevo Pago
+            </a>
+        </div>
+
+        <!-- Payments Table -->
+        <div class="timeline-container" style="padding: 2rem;">
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: transparent;">
                     <thead>
-                        <tr>
-                            <th>Residente</th>
-                            <th>Apartamento</th>
-                            <th>Monto</th>
-                            <th>Método</th>
-                            <th>Fecha</th>
+                        <tr style="border-bottom: 2px solid rgba(37, 99, 235, 0.1);">
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Residente</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Apartamento</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Monto</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Método</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Fecha</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="pago : ${pagos}">
-                            <td th:text="${pago.residente}">Residente</td>
-                            <td th:text="${pago.apartamento != null ? pago.apartamento.numero : '—'}">Apartamento</td>
-                            <td th:text="${pago.monto}">$0</td>
-                            <td th:text="${pago.metodo}">Método</td>
-                            <td th:text="${pago.fecha}">Fecha</td>
+                        <tr th:each="pago : ${pagos}" style="border-bottom: 1px solid rgba(37, 99, 235, 0.06); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(37, 99, 235, 0.02)'" onmouseout="this.style.backgroundColor='transparent'">
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${pago.residente}"></td>
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${pago.apartamento != null ? pago.apartamento.numero : '—'}"></td>
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 600; color: #16A34A;" th:text="'$' + ${pago.monto}"></td>
+                            <td style="padding: 1rem;">
+                                <span th:if="${pago.metodo == 'EFECTIVO'}" style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Efectivo</span>
+                                <span th:if="${pago.metodo == 'TRANSFERENCIA'}" style="background: rgba(37, 99, 235, 0.1); color: #2563EB; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Transferencia</span>
+                                <span th:if="${pago.metodo != 'EFECTIVO' and pago.metodo != 'TRANSFERENCIA'}" style="background: rgba(148, 163, 184, 0.1); color: #64748B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;" th:text="${pago.metodo}"></span>
+                            </td>
+                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${pago.fecha}"></td>
                         </tr>
-                        <tr th:if="${#lists.isEmpty(pagos)}">
-                            <td colspan="5" class="text-center text-muted">No hay pagos registrados todavía.</td>
+                        <tr th:if="${#lists.isEmpty(pagos)}" style="border-bottom: none;">
+                            <td colspan="5" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
+                                <i class="bi bi-cash-stack" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                                <br>
+                                No hay pagos registrados
+                            </td>
                         </tr>
                     </tbody>
                 </table>

@@ -16,8 +16,14 @@
 
     <div class="sidebar-user mb-4" sec:authorize="isAuthenticated()">
         <p class="mb-1 text-muted small">Bienvenido</p>
-        <strong th:text="${currentUser}">Usuario</strong>
-        <p class="mb-0 text-muted small" th:text="${currentRole}">Rol</p>
+        <strong class="sidebar-user-name" th:text="${currentUser}">Usuario</strong>
+        <p class="sidebar-user-role">
+            Rol:
+            <span class="role-pill"
+                  th:text="${currentRole == 'ADMIN'} ? 'Administrador' : (${currentRole == 'RESIDENTE'} ? 'Residente' : (${currentRole == 'PORTERIA'} ? 'Portería' : currentRole))">
+                Rol
+            </span>
+        </p>
     </div>
 
     <nav class="nav flex-column gap-2">

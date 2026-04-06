@@ -1,48 +1,74 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
     <div th:fragment="content" th:with="titulo='Residentes | NEXUR'">
-        <section class="page-top-section">
-            <div>
-                <h1>Residentes</h1>
-                <p class="text-muted">Lista de residentes activos con control rápido para agregar o eliminar perfiles.</p>
-            </div>
-            <div class="page-actions">
-                <a href="/residentes/nuevo" class="btn btn-primary btn-main-action">Nuevo residente</a>
-            </div>
-        </section>
-
-        <div class="card table-card">
-            <div class="card-body">
-                <div class="table-dashboard">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Documento</th>
-                                <th>Teléfono</th>
-                                <th>Apartamento</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="residente : ${residentes}">
-                                <td th:text="${residente.id}"></td>
-                                <td th:text="${residente.nombre}"></td>
-                                <td th:text="${residente.documento}"></td>
-                                <td th:text="${residente.telefono}"></td>
-                                <td th:text="${residente.apartamento.numero}"></td>
-                                <td>
-                                    <a th:href="@{/residentes/editar/{id}(id=${residente.id})}" class="btn btn-sm btn-warning me-2">Editar</a>
-                                    <a th:href="@{/residentes/eliminar/{id}(id=${residente.id})}" class="btn btn-sm btn-outline-danger">Eliminar</a>
-                                </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(residentes)}">
-                                <td colspan="6" class="text-center text-muted">No hay residentes registrados todavía.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <!-- Page Header -->
+        <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
+            <div class="welcome-content" style="gap: 2rem;">
+                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(168, 85, 247, 0.15));">
+                    <i class="bi bi-people"></i>
                 </div>
+                <div class="welcome-text">
+                    <h1 class="welcome-title">Gestión de Residentes</h1>
+                    <p class="welcome-subtitle">Administra todos los residentes del condominio</p>
+                </div>
+            </div>
+            <div class="welcome-stats">
+                <div class="stat-item">
+                    <div class="stat-number" th:text="${residentes.size()}">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Resident Button -->
+        <div style="margin-bottom: 2rem;">
+            <a href="/residentes/nuevo" class="btn btn-primary" style="background: linear-gradient(135deg, #2563EB, #06B6D4); border: none; padding: 0.75rem 2rem; border-radius: 12px; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: all 0.3s ease;">
+                <i class="bi bi-person-plus"></i>
+                Nuevo Residente
+            </a>
+        </div>
+
+        <!-- Residents Table -->
+        <div class="timeline-container" style="padding: 2rem;">
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: transparent;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid rgba(37, 99, 235, 0.1);">
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">ID</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Nombre</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Documento</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Teléfono</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Apartamento</th>
+                            <th style="padding: 1rem; text-align: center; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="residente : ${residentes}" style="border-bottom: 1px solid rgba(37, 99, 235, 0.06); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(37, 99, 235, 0.02)'" onmouseout="this.style.backgroundColor='transparent'">
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${residente.id}"></td>
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${residente.nombre}"></td>
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${residente.documento}"></td>
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${residente.telefono}"></td>
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${residente.apartamento.numero}"></td>
+                            <td style="padding: 1rem; text-align: center;">
+                                <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                    <a th:href="@{/residentes/editar/{id}(id=${residente.id})}" style="background: rgba(251, 191, 36, 0.1); color: #D97706; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(251, 191, 36, 0.2)'" onmouseout="this.style.background='rgba(251, 191, 36, 0.1)'">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                    <a th:href="@{/residentes/eliminar/{id}(id=${residente.id})}" style="background: rgba(239, 68, 68, 0.1); color: #DC2626; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'" onclick="return confirm('¿Estás seguro de que quieres eliminar este residente?')">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(residentes)}" style="border-bottom: none;">
+                            <td colspan="6" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
+                                <i class="bi bi-people" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                                <br>
+                                No hay residentes registrados
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

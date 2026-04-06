@@ -100,6 +100,8 @@ public class DashboardController {
             model.addAttribute("misReservasCount", misReservas.size());
             model.addAttribute("misPagos", misPagos);
             model.addAttribute("misReservas", misReservas);
+            model.addAttribute("reservasActivas", misReservas);
+            model.addAttribute("estadoPago", misPagos.isEmpty() ? "AL_DIA" : "PENDIENTE");
 
             String apartamentoAsignado = null;
             for (Pago pago : misPagos) {
@@ -145,6 +147,14 @@ public class DashboardController {
                 notificaciones.addAll(notificacionesReservas);
             }
             model.addAttribute("notificaciones", notificaciones);
+            model.addAttribute("notificacionesCount", notificaciones.size());
+            model.addAttribute("ultimaNotificacion", notificaciones.isEmpty() ? null : notificaciones.get(0));
+            model.addAttribute("proximaReserva", misReservas.stream()
+                    .filter(reserva -> reserva.getFechaInicio() != null)
+                    .sorted(Comparator.comparing(Reserva::getFechaInicio))
+                    .findFirst()
+                    .map(reserva -> reserva.getTipoEspacio() + " - " + reserva.getFechaInicio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")))
+                    .orElse(null));
             model.addAttribute("estadoMora", misPagos.isEmpty() ? "No hay mora registrada" : "Revisa tus pagos pendientes con administración");
             model.addAttribute("multa", "No se han registrado multas en tu cuenta");
             model.addAttribute("parqueaderoHorario", "Lunes a sábado: 06:00 - 22:00");

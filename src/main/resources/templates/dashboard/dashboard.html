@@ -1,173 +1,273 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
     <div th:fragment="content" th:with="titulo='Dashboard | NEXUR'">
-        <div class="dashboard-hero-card mb-4">
-            <div>
-                <span class="hero-chip">Dashboard</span>
-                <h1 class="dashboard-title">Control total en un solo lugar</h1>
-                <p class="dashboard-description">Monitorea el condominio, administra residentes, pagos, reservas y visitas con una interfaz clara, moderna y lista para la acción.</p>
-                <p class="dashboard-welcome mt-3">Bienvenido, <strong th:text="${currentUser}">Usuario</strong></p>
-                <p class="dashboard-role mb-2">Rol: <strong th:text="${currentRole}">Usuario</strong></p>
-            </div>
-        </div>
-
-        <div sec:authorize="hasRole('RESIDENTE')" class="dashboard-actions mb-4">
-            <a href="/pagos/nuevo" class="action-card action-primary">
-                <i class="bi bi-cash-stack"></i>
-                Registrar pago
-            </a>
-            <a href="/reservas/nueva" class="action-card action-secondary">
-                <i class="bi bi-calendar-check"></i>
-                Crear reserva
-            </a>
-            <a href="/visitantes" class="action-card action-info">
-                <i class="bi bi-door-open-fill"></i>
-                Ver visitantes
-            </a>
-        </div>
-
-        <div sec:authorize="hasRole('ADMIN')" class="metric-grid mb-4">
-            <div class="card metric-card apartments">
-                <div class="metric-card-header">
-                    <span class="metric-chip">Apartamentos</span>
-                    <i class="bi bi-building"></i>
+        <!-- Welcome Header -->
+        <div class="dashboard-welcome-header">
+            <div class="welcome-content">
+                <div class="welcome-avatar">
+                    <i class="bi bi-person-circle"></i>
                 </div>
-                <div class="metric-card-body">
-                    <p class="metric-label">Total activos</p>
-                    <h2 class="metric-value" th:text="${apartamentosCount}">0</h2>
-                </div>
-            </div>
-            <div class="card metric-card residents">
-                <div class="metric-card-header">
-                    <span class="metric-chip">Residentes</span>
-                    <i class="bi bi-people"></i>
-                </div>
-                <div class="metric-card-body">
-                    <p class="metric-label">Registrados</p>
-                    <h2 class="metric-value" th:text="${residentesCount}">0</h2>
-                </div>
-            </div>
-            <div class="card metric-card payments">
-                <div class="metric-card-header">
-                    <span class="metric-chip">Pagos</span>
-                    <i class="bi bi-wallet2"></i>
-                </div>
-                <div class="metric-card-body">
-                    <p class="metric-label">Totales</p>
-                    <h2 class="metric-value" th:text="${pagosCount}">0</h2>
-                </div>
-            </div>
-            <div class="card metric-card reservas">
-                <div class="metric-card-header">
-                    <span class="metric-chip">Reservas</span>
-                    <i class="bi bi-calendar-check"></i>
-                </div>
-                <div class="metric-card-body">
-                    <p class="metric-label">Pendientes</p>
-                    <h2 class="metric-value" th:text="${reservasCount}">0</h2>
-                </div>
-            </div>
-            <div class="card metric-card visitors">
-                <div class="metric-card-header">
-                    <span class="metric-chip">Visitantes</span>
-                    <i class="bi bi-person-badge"></i>
-                </div>
-                <div class="metric-card-body">
-                    <p class="metric-label">Activos</p>
-                    <h2 class="metric-value" th:text="${visitantesActivosCount}">0</h2>
+                <div class="welcome-text">
+                    <h1 class="welcome-title">¡Hola, <span th:text="${currentUser}">Usuario</span>!</h1>
+                    <p class="welcome-subtitle" sec:authorize="hasRole('ADMIN')">Administrador del sistema</p>
+                    <p class="welcome-subtitle" sec:authorize="hasRole('RESIDENTE')">Residente</p>
+                    <div class="welcome-badges">
+                        <span class="badge-pill" sec:authorize="hasRole('ADMIN')">Control central</span>
+                        <span class="badge-pill" sec:authorize="hasRole('RESIDENTE')">Resumen personal</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div sec:authorize="hasRole('RESIDENTE')" class="metric-grid mb-4">
-            <div class="card metric-card payments">
-                <div class="metric-card-header">
-                    <span class="metric-chip">Mis pagos</span>
-                    <i class="bi bi-wallet2"></i>
+        <!-- Admin Overview -->
+        <div sec:authorize="hasRole('ADMIN')" class="admin-overview-section">
+            <div class="overview-header">
+                <div>
+                    <h2 class="section-title">Vista General</h2>
+                    <p class="section-subtitle">Un panel limpio para supervisar el estado de la comunidad.</p>
                 </div>
-                <div class="metric-card-body">
-                    <p class="metric-label">Registrados</p>
-                    <h2 class="metric-value" th:text="${misPagosCount}">0</h2>
-                </div>
-            </div>
-            <div class="card metric-card reservas">
-                <div class="metric-card-header">
-                    <span class="metric-chip">Mis reservas</span>
-                    <i class="bi bi-calendar-check"></i>
-                </div>
-                <div class="metric-card-body">
-                    <p class="metric-label">Solicitadas</p>
-                    <h2 class="metric-value" th:text="${misReservasCount}">0</h2>
+                <div class="overview-period">
+                    <span class="period-label">Este mes</span>
                 </div>
             </div>
-            <div class="card metric-card apartments">
-                <div class="metric-card-header">
-                    <span class="metric-chip">Mi apartamento</span>
-                    <i class="bi bi-house-door"></i>
+
+            <div class="activity-timeline-section">
+                <div class="timeline-header">
+                    <h3>Actividad Reciente</h3>
+                    <a href="/reportes" class="view-all-link">Ver todo</a>
                 </div>
-                <div class="metric-card-body">
-                    <p class="metric-label">Número</p>
-                    <h2 class="metric-value" th:text="${miApartamento}">Sin apartamento</h2>
+                <div class="timeline-container">
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <p class="timeline-time">Ahora</p>
+                            <h5>Nuevo residente registrado</h5>
+                            <p>Se añadió un nuevo usuario al edificio.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <p class="timeline-time">Hace 1 hora</p>
+                            <h5>Pago registrado</h5>
+                            <p>Se procesó un pago para el apartamento 304.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <p class="timeline-time">Ayer</p>
+                            <h5>Reserva confirmada</h5>
+                            <p>La reserva de la piscina fue confirmada para mañana.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card metric-card visitors">
-                <div class="metric-card-header">
-                    <span class="metric-chip">Visitantes</span>
-                    <i class="bi bi-person-badge"></i>
-                </div>
-                <div class="metric-card-body">
-                    <p class="metric-label">Activos</p>
-                    <h2 class="metric-value" th:text="${visitantesActivosCount}">0</h2>
-                </div>
-            </div>
-            <div class="card metric-card residents parqueadero">
-                <div class="metric-card-header">
-                    <span class="metric-chip">Parqueadero</span>
-                    <i class="bi bi-car-front"></i>
-                </div>
-                <div class="metric-card-body">
-                    <p class="metric-label">Horario</p>
-                    <h2 class="metric-value resident-value" th:text="${parqueaderoHorario}">—</h2>
+
+            <!-- Admin Widgets -->
+            <div class="admin-widgets-section">
+                <div class="admin-widgets-grid">
+                    <div class="widget-card alerts">
+                        <div class="widget-header">
+                            <div class="widget-icon">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <h4>Alertas del Sistema</h4>
+                        </div>
+                        <div class="widget-content">
+                            <div class="alert-item">
+                                <div class="alert-indicator warning"></div>
+                                <div class="alert-info">
+                                    <span class="alert-title">Moras Pendientes</span>
+                                    <span class="alert-count" th:text="${morasCount ?: '3'}">3</span>
+                                </div>
+                            </div>
+                            <div class="alert-item">
+                                <div class="alert-indicator danger"></div>
+                                <div class="alert-info">
+                                    <span class="alert-title">Multas Activas</span>
+                                    <span class="alert-count" th:text="${multasCount ?: '1'}">1</span>
+                                </div>
+                            </div>
+                            <div class="alert-item">
+                                <div class="alert-indicator info"></div>
+                                <div class="alert-info">
+                                    <span class="alert-title">Reservas Pendientes</span>
+                                    <span class="alert-count" th:text="${reservasPendientes ?: '5'}">5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="widget-card performance secondary-card">
+                        <div class="widget-header">
+                            <div class="widget-icon">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <div>
+                                <h4>Rendimiento General</h4>
+                                <small style="color: var(--text-secondary);">Información secundaria</small>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="performance-metric">
+                                <div class="metric-label">Ocupación</div>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" style="width: 92%; background: linear-gradient(90deg, #06B6D4, #0891B2);"></div>
+                                </div>
+                                <div class="metric-value">92%</div>
+                            </div>
+                            <div class="performance-metric">
+                                <div class="metric-label">Cobranza</div>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" style="width: 85%; background: linear-gradient(90deg, #16A34A, #15803D);"></div>
+                                </div>
+                                <div class="metric-value">85%</div>
+                            </div>
+                            <div class="performance-metric">
+                                <div class="metric-label">Satisfacción</div>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" style="width: 95%; background: linear-gradient(90deg, #F59E0B, #D97706);"></div>
+                                </div>
+                                <div class="metric-value">95%</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div sec:authorize="hasRole('RESIDENTE')" class="card user-summary-card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Resumen de residente</h5>
-                <p><strong>Mora:</strong> <span th:text="${estadoMora}">No hay mora registrada</span></p>
-                <p><strong>Multa:</strong> <span th:text="${multa}">No se han registrado multas</span></p>
-                <p><strong>Notificaciones:</strong></p>
-                <ul>
-                    <li th:each="nota : ${notificaciones}" th:text="${nota}">Notificación</li>
-                </ul>
+        <!-- Resident Summary -->
+        <div sec:authorize="hasRole('RESIDENTE')" class="resident-summary-section">
+            <div class="resident-summary-top">
+                <div>
+                    <h2 class="section-title">Mi Panel Personal</h2>
+                    <p class="section-subtitle">Todo lo que necesitas ver de un vistazo como residente.</p>
+                </div>
+                <div class="resident-actions">
+                    <a href="/pagos/nuevo" class="action-pill action-info">Pagar ahora</a>
+                    <a href="/reservas/nueva" class="action-pill action-primary">Reservar espacio</a>
+                </div>
+            </div>
+            <div class="summary-cards">
+                <div class="summary-card status-good">
+                    <div class="summary-icon">
+                        <i class="bi bi-house-door"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h4>Mi Apartamento</h4>
+                        <p class="summary-value" th:text="${miApartamento != null ? miApartamento : 'Sin asignar'}">Apt 101</p>
+                        <div class="status-indicator">
+                            <span class="status-dot active"></span>
+                            Activo
+                        </div>
+                    </div>
+                </div>
+                <div class="summary-card status-info">
+                    <div class="summary-icon">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h4>Mis Pagos</h4>
+                        <p class="summary-value" th:text="${misPagosCount != null ? misPagosCount : 0} + ' registrados'">3 registrados</p>
+                        <div class="payment-status" th:if="${estadoPago == 'AL_DIA'}" style="color: #16A34A; font-size: 0.85rem; font-weight: 600;">
+                            <i class="bi bi-check-circle"></i> Al día
+                        </div>
+                        <div class="payment-status" th:if="${estadoPago == 'PENDIENTE'}" style="color: #D97706; font-size: 0.85rem; font-weight: 600;">
+                            <i class="bi bi-exclamation-triangle"></i> Pendiente
+                        </div>
+                    </div>
+                </div>
+                <div class="summary-card status-primary">
+                    <div class="summary-icon">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h4>Mis Reservas</h4>
+                        <p class="summary-value" th:text="${misReservasCount != null ? misReservasCount : 0} + ' activas'">2 activas</p>
+                        <div class="next-reservation" th:if="${proximaReserva}">
+                            <small style="color: var(--text-secondary);">Próxima: <span th:text="${proximaReserva}">Piscina - Hoy 15:00</span></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="summary-card status-warning">
+                    <div class="summary-icon">
+                        <i class="bi bi-bell"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h4>Notificaciones</h4>
+                        <p class="summary-value" th:text="${notificacionesCount != null ? notificacionesCount : 0} + ' nuevas'">1 nueva</p>
+                        <div class="notification-preview" th:if="${ultimaNotificacion}">
+                            <small style="color: var(--text-secondary);" th:text="${ultimaNotificacion}">Recordatorio de pago</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="card activity-card">
-            <h5>Actividad reciente</h5>
-            <div class="table-dashboard mt-3">
-                <table class="table align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Acción</th>
-                            <th>Fecha</th>
-                            <th>Tipo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="actividad : ${actividades}">
-                            <td th:text="${actividad.usuario}">Usuario</td>
-                            <td th:text="${actividad.accion}">Acción</td>
-                            <td th:text="${actividad.fecha}">Fecha</td>
-                            <td>
-                                <span class="badge bg-secondary text-dark" th:text="${actividad.tipo}">Tipo</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Status Alerts -->
+        <div sec:authorize="hasRole('RESIDENTE')" class="status-alerts-section">
+            <div class="alert-card warning" th:if="${estadoMora != null and estadoMora != 'Sin mora'}">
+                <div class="alert-icon warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h4>Estado de Mora</h4>
+                    <p th:text="${estadoMora}">Tienes una mora pendiente</p>
+                    <div class="alert-action">
+                        <a href="/pagos/nuevo" class="alert-btn">Pagar Ahora</a>
+                    </div>
+                </div>
+            </div>
+            <div class="alert-card danger" th:if="${multa != null and multa != 'Sin multas'}">
+                <div class="alert-icon danger">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h4>Multas Pendientes</h4>
+                    <p th:text="${multa}">Tienes multas por pagar</p>
+                    <div class="alert-action">
+                        <a href="/pagos/nuevo" class="alert-btn">Ver Detalles</a>
+                    </div>
+                </div>
+            </div>
+            <div class="alert-card success" th:if="${#lists.size(reservasActivas) > 0}">
+                <div class="alert-icon success">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h4>Reservas Activas</h4>
+                    <p th:text="${#lists.size(reservasActivas)} + ' reservas confirmadas'">Tienes reservas activas</p>
+                    <div class="alert-action">
+                        <a href="/reservas" class="alert-btn">Ver Reservas</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.metric-card-large, .summary-card, .widget-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
 </html>

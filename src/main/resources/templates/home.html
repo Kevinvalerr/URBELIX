@@ -119,6 +119,9 @@
         }
 
         .btn-hero-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             background: rgba(37, 99, 235, 0.95);
             color: white;
             border: none;
@@ -128,12 +131,22 @@
             text-decoration: none;
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.18);
+            cursor: pointer;
         }
 
         .btn-hero-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
             color: white;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
         }
 
         .btn-hero-secondary {
@@ -145,7 +158,7 @@
             font-weight: 600;
             text-decoration: none;
             transition: all 0.3s ease;
-            margin-left: 16px;
+            margin: 0;
         }
 
         .btn-hero-secondary:hover {
@@ -716,9 +729,9 @@
                 <div class="col-lg-6 hero-content">
                     <h1 class="hero-title">Nexur</h1>
                     <p class="hero-subtitle">Gestión inteligente para comunidades modernas. Digitaliza la administración de tu torre residencial y mejora la convivencia entre residentes.</p>
-                    <div>
-                        <a href="/login" class="btn-hero-primary">Iniciar Sesión</a>
+                    <div class="hero-buttons">
                         <a href="#benefits" class="btn-hero-secondary">Conocer Más</a>
+                        <a href="/login" th:href="@{/login}" class="btn-hero-primary" role="button">Iniciar Sesión</a>
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -898,7 +911,7 @@
                         sus torres residenciales de manera eficiente y moderna.
                         Configura tu comunidad en minutos y mantén todos los procesos bajo control.
                     </p>
-                    <a href="/login" class="btn-cta">Comenzar Ahora</a>
+                    <a href="/login" th:href="@{/login}" class="btn-cta">Comenzar Ahora</a>
                 </div>
             </div>
         </div>
@@ -1062,6 +1075,13 @@
                 }
             });
         });
+
+        const heroLoginBtn = document.getElementById('hero-login-btn');
+        if (heroLoginBtn) {
+            heroLoginBtn.addEventListener('click', function () {
+                window.location.href = '/login';
+            });
+        }
 
         // Add fade-in-up animation to sections
         const sections = document.querySelectorAll('section > .container > .row:first-child');

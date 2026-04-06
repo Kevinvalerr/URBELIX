@@ -1,68 +1,90 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
     <div th:fragment="content" th:with="titulo='Reportes | NEXUR'">
-        <section class="page-top-section mb-4">
-            <div>
-                <h1>Reportes</h1>
-                <p class="text-muted">Genera reportes por tipo y rango de fechas para analizar pagos, reservas y visitas.</p>
+        <!-- Page Header -->
+        <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
+            <div class="welcome-content" style="gap: 2rem;">
+                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(251, 191, 36, 0.15));">
+                    <i class="bi bi-bar-chart-line"></i>
+                </div>
+                <div class="welcome-text">
+                    <h1 class="welcome-title">Reportes del Sistema</h1>
+                    <p class="welcome-subtitle">Genera reportes detallados de pagos, reservas y visitas</p>
+                </div>
             </div>
-        </section>
-
-        <div class="card form-card mb-4">
-            <div class="card-body">
-                <form th:action="@{/reportes}" method="get" class="form-grid">
-                    <div class="form-group">
-                        <label for="tipo">Tipo de reporte</label>
-                        <select id="tipo" name="tipo" class="form-select">
-                            <option value="TODOS" th:selected="${tipo == null or tipo == 'TODOS'}">Todos</option>
-                            <option value="PAGOS" th:selected="${tipo == 'PAGOS'}">Pagos</option>
-                            <option value="RESERVAS" th:selected="${tipo == 'RESERVAS'}">Reservas</option>
-                            <option value="VISITANTES" th:selected="${tipo == 'VISITANTES'}">Visitas</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="fechaInicio">Fecha inicio</label>
-                        <input id="fechaInicio" name="fechaInicio" type="date" class="form-control" th:value="${fechaInicio}" />
-                    </div>
-                    <div class="form-group">
-                        <label for="fechaFin">Fecha fin</label>
-                        <input id="fechaFin" name="fechaFin" type="date" class="form-control" th:value="${fechaFin}" />
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary btn-main-action">Filtrar reportes</button>
-                    </div>
-                </form>
+            <div class="welcome-stats">
+                <div class="stat-item">
+                    <div class="stat-number" th:text="${registros.size()}">0</div>
+                    <div class="stat-label">Registros</div>
+                </div>
             </div>
         </div>
 
-        <div class="card activity-card">
-            <div class="card-body">
-                <h5>Resultados del reporte</h5>
-                <div class="table-dashboard mt-3">
-                    <table class="table align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>Entidad</th>
-                                <th>Usuario</th>
-                                <th>Descripción</th>
-                                <th>Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="registro : ${registros}">
-                                <td th:text="${registro.tipo}">Tipo</td>
-                                <td th:text="${registro.entidad}">Entidad</td>
-                                <td th:text="${registro.usuario}">Usuario</td>
-                                <td th:text="${registro.descripcion}">Descripción</td>
-                                <td th:text="${#temporals.format(registro.fechaHora, 'dd/MM/yyyy HH:mm')}">Fecha</td>
-                            </tr>
-                            <tr th:if="${registros.isEmpty()}">
-                                <td colspan="5" class="text-center text-muted">No se encontraron registros para estos filtros.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <!-- Filter Form -->
+        <div class="timeline-container" style="padding: 2rem; margin-bottom: 2rem;">
+            <h3 style="color: var(--text-primary); font-weight: 700; margin-bottom: 1.5rem; font-size: 1.3rem;">Filtros de Reporte</h3>
+            <form th:action="@{/reportes}" method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; align-items: end;">
+                <div>
+                    <label for="tipo" style="display: block; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; font-size: 0.9rem;">Tipo de Reporte</label>
+                    <select id="tipo" name="tipo" style="width: 100%; padding: 0.75rem; border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 8px; background: white; font-size: 0.95rem; transition: border-color 0.3s ease;" onfocus="this.style.borderColor='rgba(37, 99, 235, 0.5)'" onblur="this.style.borderColor='rgba(37, 99, 235, 0.2)'">
+                        <option value="TODOS" th:selected="${tipo == null or tipo == 'TODOS'}">Todos</option>
+                        <option value="PAGOS" th:selected="${tipo == 'PAGOS'}">Pagos</option>
+                        <option value="RESERVAS" th:selected="${tipo == 'RESERVAS'}">Reservas</option>
+                        <option value="VISITANTES" th:selected="${tipo == 'VISITANTES'}">Visitas</option>
+                    </select>
                 </div>
+                <div>
+                    <label for="fechaInicio" style="display: block; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; font-size: 0.9rem;">Fecha Inicio</label>
+                    <input id="fechaInicio" name="fechaInicio" type="date" style="width: 100%; padding: 0.75rem; border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 8px; background: white; font-size: 0.95rem; transition: border-color 0.3s ease;" onfocus="this.style.borderColor='rgba(37, 99, 235, 0.5)'" onblur="this.style.borderColor='rgba(37, 99, 235, 0.2)'" th:value="${fechaInicio}" />
+                </div>
+                <div>
+                    <label for="fechaFin" style="display: block; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; font-size: 0.9rem;">Fecha Fin</label>
+                    <input id="fechaFin" name="fechaFin" type="date" style="width: 100%; padding: 0.75rem; border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 8px; background: white; font-size: 0.95rem; transition: border-color 0.3s ease;" onfocus="this.style.borderColor='rgba(37, 99, 235, 0.5)'" onblur="this.style.borderColor='rgba(37, 99, 235, 0.2)'" th:value="${fechaFin}" />
+                </div>
+                <div>
+                    <button type="submit" style="background: linear-gradient(135deg, #2563EB, #06B6D4); border: none; padding: 0.75rem 2rem; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(37, 99, 235, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <i class="bi bi-search" style="margin-right: 0.5rem;"></i>Filtrar Reportes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Table -->
+        <div class="timeline-container" style="padding: 2rem;">
+            <h3 style="color: var(--text-primary); font-weight: 700; margin-bottom: 1.5rem; font-size: 1.3rem;">Resultados del Reporte</h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: transparent;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid rgba(37, 99, 235, 0.1);">
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Tipo</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Entidad</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Usuario</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Descripción</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Fecha y Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="registro : ${registros}" style="border-bottom: 1px solid rgba(37, 99, 235, 0.06); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(37, 99, 235, 0.02)'" onmouseout="this.style.backgroundColor='transparent'">
+                            <td style="padding: 1rem;">
+                                <span th:if="${registro.tipo == 'PAGO'}" style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Pago</span>
+                                <span th:if="${registro.tipo == 'RESERVA'}" style="background: rgba(6, 182, 212, 0.1); color: #06B6D4; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Reserva</span>
+                                <span th:if="${registro.tipo == 'VISITA'}" style="background: rgba(14, 165, 233, 0.1); color: #0EA5E9; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Visita</span>
+                                <span th:if="${registro.tipo != 'PAGO' and registro.tipo != 'RESERVA' and registro.tipo != 'VISITA'}" style="background: rgba(148, 163, 184, 0.1); color: #64748B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;" th:text="${registro.tipo}"></span>
+                            </td>
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${registro.entidad}"></td>
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${registro.usuario}"></td>
+                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${registro.descripcion}"></td>
+                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${#temporals.format(registro.fechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+                        </tr>
+                        <tr th:if="${registros.isEmpty()}" style="border-bottom: none;">
+                            <td colspan="5" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
+                                <i class="bi bi-search" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                                <br>
+                                No se encontraron registros para estos filtros
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
