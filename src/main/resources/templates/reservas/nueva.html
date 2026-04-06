@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
     <div th:fragment="content" th:with="titulo='Crear Reserva'">
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <section class="page-top-section mb-4">
             <div>
                 <h1>Crear Reserva</h1>
@@ -33,19 +37,19 @@
                 </div>
             <div class="form-group">
                 <label for="fechaInicio">Fecha y hora inicio</label>
-                <input id="fechaInicio" type="datetime-local" th:field="*{fechaInicio}" required />
+                <input id="fechaInicio" type="datetime-local" th:field="*{fechaInicio}" class="form-control" required />
              </div>
 
             <div class="form-group">
                  <label for="fechaFin">Fecha y hora fin</label>
-                <input id="fechaFin" type="datetime-local" th:field="*{fechaFin}" required />
+                <input id="fechaFin" type="datetime-local" th:field="*{fechaFin}" class="form-control" required />
             </div>
                 <div class="form-group">
                     <label for="observaciones">Observaciones</label>
-                    <textarea id="observaciones" th:field="*{observaciones}" rows="4" placeholder="Notas o detalles adicionales"></textarea>
+                    <textarea id="observaciones" th:field="*{observaciones}" class="form-control" rows="4" placeholder="Notas o detalles adicionales"></textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary btn-main-action">
+                    <button type="submit" class="btn btn-primary btn-main-action btn-sm">
                         <i class="bi bi-calendar-check-fill me-2"></i>Reservar ahora
                     </button>
                 </div>

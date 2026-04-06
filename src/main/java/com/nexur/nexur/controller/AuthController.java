@@ -33,7 +33,7 @@ public class AuthController {
         if (principal != null) {
             return "redirect:/dashboard";
         }
-        return "redirect:/login";
+        return "home";
     }
 
     @GetMapping("/login")

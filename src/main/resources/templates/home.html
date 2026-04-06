@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexur - Gestión Inteligente para Comunidades Modernas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #0f172a;
+            --accent-color: #06b6d4;
+            --accent-soft: #c7dafe;
+            --success-color: #0ea5e9;
+            --light-bg: #eff6ff;
+            --dark-text: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.14);
+            --glass-border: rgba(255, 255, 255, 0.24);
+            --shadow-strong: rgba(15, 23, 42, 0.18);
+        }
+
+        * {
+            scroll-behavior: auto;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #0f172a;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            background: linear-gradient(180deg, #f8fbff 0%, #eff7ff 20%, #e3f1ff 45%, #d4ebff 75%, #c5e4ff 100%);
+            background-attachment: fixed;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(110deg, rgba(147, 197, 253, 0.45) 0%, transparent 28%, transparent 45%, rgba(147, 197, 253, 0.35) 65%, transparent 100%),
+                linear-gradient(25deg, rgba(96, 165, 250, 0.38) 0%, transparent 32%, transparent 52%, rgba(96, 165, 250, 0.28) 78%, transparent 100%),
+                radial-gradient(ellipse 950px 700px at 15% 20%, rgba(59, 130, 246, 0.32), transparent 45%),
+                radial-gradient(ellipse 800px 600px at 75% 35%, rgba(96, 165, 250, 0.28), transparent 48%);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.97;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(160deg, rgba(147, 197, 253, 0.32) 12%, transparent 35%, transparent 55%, rgba(96, 165, 250, 0.25) 78%, transparent 100%),
+                radial-gradient(ellipse 1000px 650px at 45% 70%, rgba(59, 130, 246, 0.22), transparent 50%),
+                radial-gradient(ellipse 750px 550px at 20% 60%, rgba(96, 165, 250, 0.18), transparent 42%);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.85;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: #ffffff;
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 8%;
+            right: -5%;
+            width: 420px;
+            height: 420px;
+            background: rgba(179, 209, 255, 0.22);
+            filter: blur(105px);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: -40px;
+            width: 340px;
+            height: 340px;
+            background: rgba(203, 219, 255, 0.16);
+            filter: blur(100px);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: #0d2a4a;
+            text-shadow: none;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            color: #1a3a5a;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+
+        .btn-hero-primary {
+            background: rgba(37, 99, 235, 0.95);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.18);
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            color: white;
+        }
+
+        .btn-hero-secondary {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-left: 16px;
+        }
+
+        .btn-hero-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .hero-carousel-container {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 28px 70px rgba(15, 23, 42, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(12px);
+        }
+
+        .hero-carousel {
+            position: relative;
+        }
+
+        .custom-carousel {
+            position: relative;
+            width: 100%;
+            height: 380px;
+            overflow: hidden;
+            border-radius: 24px;
+        }
+
+        .carousel-slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            animation: fadeInSlide 1s ease-in-out forwards;
+        }
+
+        .carousel-slide.fade-in {
+            display: block;
+            opacity: 1;
+            animation: fadeInSlide 1s ease-in-out forwards;
+        }
+
+        @keyframes fadeInSlide {
+            from {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 2.5s ease-out;
+        }
+
+        .carousel-slide.fade-in img {
+            transform: scale(1.02);
+        }
+
+        .carousel-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dot.active {
+            background: white;
+            transform: scale(1.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .dot:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Benefits Section */
+        .benefits-section {
+            padding: 80px 0;
+            background: linear-gradient(180deg, #d4e8f7 0%, #c2ddf2 50%, #b0d2ed 100%);
+            position: relative;
+            border-bottom: 1px solid rgba(203, 214, 230, 0.55);
+        }
+
+        .benefits-section h2,
+        .core-features-section h2 {
+            color: #0d2a4a;
+            font-size: 2.5rem;
+            line-height: 1.05;
+        }
+
+        .benefits-section p.lead,
+        .core-features-section p.lead {
+            color: #1a3b5a;
+            max-width: 680px;
+            margin: 0 auto;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .benefits-section::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            width: 260px;
+            height: 260px;
+            background: rgba(37, 99, 235, 0.08);
+            filter: blur(90px);
+            border-radius: 50%;
+        }
+
+        .benefits-section::after {
+            content: '';
+            position: absolute;
+            bottom: 20%;
+            left: 5%;
+            width: 180px;
+            height: 180px;
+            background: rgba(6, 182, 212, 0.08);
+            filter: blur(70px);
+            border-radius: 50%;
+        }
+
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 18px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .benefit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .benefit-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        }
+
+        .benefit-card.animate {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .benefit-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .benefit-card:hover .benefit-icon {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .core-features-section {
+            padding: 35px 0;
+            background: linear-gradient(180deg, #edf4fc 0%, #dcebf8 60%, #c7def2 100%);
+            position: relative;
+            border-bottom: 1px solid rgba(203, 214, 230, 0.55);
+        }
+
+        .core-features-section h2 {
+            color: #0d2a4a;
+            font-size: 2.5rem;
+        }
+
+        .core-features-section p.lead {
+            color: #1c3b5b;
+            max-width: 680px;
+            margin: 0 auto;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .core-features-section::before {
+            content: '';
+            position: absolute;
+            top: 12%;
+            right: 8%;
+            width: 160px;
+            height: 160px;
+            background: rgba(37, 99, 235, 0.08);
+            filter: blur(90px);
+            border-radius: 50%;
+        }
+
+        .feature-carousel-wrapper {
+            position: relative;
+            overflow: hidden;
+            padding: 0.4rem 0 0;
+        }
+
+        .feature-carousel {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-bottom: 0;
+            scroll-behavior: smooth;
+        }
+
+        .feature-card {
+            min-width: 280px;
+            max-width: 280px;
+            flex: 0 0 280px;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            padding: 1.2rem;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            scroll-snap-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12);
+        }
+
+        .feature-image {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            border-radius: 14px;
+            margin-bottom: 0.85rem;
+            background: #eef6fd;
+        }
+
+        .feature-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            display: block;
+        }
+
+        .feature-card h5 {
+            color: #0d2a4a;
+            margin-bottom: 0.75rem;
+            font-size: 1.18rem;
+        }
+
+        .feature-card p {
+            color: rgba(15, 23, 42, 0.8);
+            line-height: 1.7;
+            font-size: 0.98rem;
+        }
+
+        .feature-dots {
+            margin-top: 0.5rem;
+        }
+
+        .feature-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .feature-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(13, 42, 74, 0.2);
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .feature-dot.active {
+            background: #0f4acf;
+            transform: scale(1.2);
+        }
+
+
+        /* Value Section */
+        .value-section {
+            padding: 80px 0;
+            background: #f5f5f5;
+            color: var(--dark-text);
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(203, 214, 230, 0.55);
+        }
+
+        .value-section::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: 50%;
+            width: 420px;
+            height: 420px;
+            background: rgba(179, 209, 255, 0.28);
+            filter: blur(120px);
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+        .value-section::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            right: 8%;
+            width: 320px;
+            height: 320px;
+            background: rgba(179, 209, 255, 0.20);
+            filter: blur(105px);
+            border-radius: 50%;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            border-radius: 18px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(191, 219, 255, 0.9);
+            transition: all 0.3s ease;
+            min-height: 240px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: rgba(37, 99, 235, 0.14);
+            color: #2563eb;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .stat-value {
+            display: inline-flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-number {
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: #1d4ed8;
+            line-height: 1;
+        }
+
+        .stat-suffix {
+            font-size: 1.25rem;
+            color: rgba(29, 78, 216, 0.85);
+            margin-bottom: 0.18rem;
+        }
+
+        .stat-label {
+            color: rgba(15, 23, 42, 0.75);
+            font-size: 0.98rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 0;
+            background: linear-gradient(180deg, #2a5a8a 0%, #1f4a75 50%, #164060 100%);
+            color: white;
+            position: relative;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 5%;
+            width: 220px;
+            height: 220px;
+            background: rgba(56, 189, 248, 0.18);
+            filter: blur(90px);
+            border-radius: 50%;
+        }
+
+        .cta-section::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            right: -30px;
+            width: 320px;
+            height: 320px;
+            background: rgba(37, 99, 235, 0.14);
+            filter: blur(100px);
+            border-radius: 50%;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-section p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .btn-cta {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 28px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1a202c;
+            color: #a0aec0;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            .btn-hero-primary, .btn-hero-secondary {
+                display: block;
+                margin: 8px 0;
+                width: 100%;
+            }
+            .btn-hero-secondary {
+                margin-left: 0;
+            }
+            .hero-carousel-container {
+                margin-top: 2rem;
+            }
+            .hero-carousel .carousel-item {
+                height: 250px;
+            }
+            .feature-carousel {
+                gap: 1rem;
+            }
+            .feature-card {
+                min-width: auto;
+                flex: 1 0 100%;
+                max-width: 100%;
+                padding: 1.6rem;
+            }
+            .feature-image {
+                aspect-ratio: 16 / 10;
+            }
+            .feature-card h5 {
+                font-size: 1.12rem;
+            }
+            .feature-card p {
+                font-size: 0.96rem;
+            }
+            .cta-title {
+                font-size: 2rem;
+            }
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <h1 class="hero-title">Nexur</h1>
+                    <p class="hero-subtitle">Gestión inteligente para comunidades modernas. Digitaliza la administración de tu torre residencial y mejora la convivencia entre residentes.</p>
+                    <div>
+                        <a href="/login" class="btn-hero-primary">Iniciar Sesión</a>
+                        <a href="#benefits" class="btn-hero-secondary">Conocer Más</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-carousel-container">
+                        <div class="custom-carousel">
+                            <div class="carousel-slide fade-in">
+                                <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Torre residencial moderna" />
+                            </div>
+                            <div class="carousel-slide">
+                                <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Edificio de apartamentos" />
+                            </div>
+                            <div class="carousel-slide">
+                                <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Fachada de apartamentos" />
+                            </div>
+                            <div class="carousel-slide">
+                                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Vista exterior de conjunto residencial" />
+                            </div>
+                            <div class="carousel-slide">
+                                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Torre de apartamentos" />
+                            </div>
+                        </div>
+                        <div class="carousel-dots">
+                            <span class="dot active" onclick="currentSlide(1)"></span>
+                            <span class="dot" onclick="currentSlide(2)"></span>
+                            <span class="dot" onclick="currentSlide(3)"></span>
+                            <span class="dot" onclick="currentSlide(4)"></span>
+                            <span class="dot" onclick="currentSlide(5)"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section id="benefits" class="benefits-section">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-12">
+                    <h2 class="display-5 fw-bold mb-3 fade-in-up">¿Por qué elegir Nexur?</h2>
+                    <p class="lead text-muted mb-5 fade-in-up">Tecnología avanzada para simplificar la gestión residencial de torres y conjuntos, con control claro sobre pagos, reservas y comunicaciones.</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="bi bi-lightning-charge"></i>
+                        </div>
+                        <h5 class="fw-bold">Automatización Total</h5>
+                        <p>Elimina procesos manuales y reduce errores administrativos con nuestra plataforma inteligente.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h5 class="fw-bold">Seguridad Garantizada</h5>
+                        <p>Control total de accesos y datos sensibles con encriptación de nivel empresarial.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <h5 class="fw-bold">Ahorra Tiempo</h5>
+                        <p>Gestión eficiente que te permite dedicar más tiempo a lo que realmente importa.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Features Section -->
+    <section class="core-features-section">
+        <div class="container">
+            <div class="row text-center mb-4">
+                <div class="col-12">
+                    <h2 class="display-5 fw-bold mb-3 fade-in-up">Funcionalidad Principal</h2>
+                    <p class="lead text-muted mb-4">Nexur reúne las funciones clave para operar tu comunidad desde una sola plataforma, con controles claros y resultados previsibles.</p>
+                </div>
+            </div>
+            <div class="feature-carousel-wrapper">
+                <div class="feature-carousel">
+                    <div class="feature-card">
+                        <div class="feature-image">
+                            <img src="https://images.unsplash.com/photo-1513258496099-48168024aec0?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80" alt="Pagos en línea y facturación digital" />
+                        </div>
+                        <h5 class="fw-bold">Pagos en línea</h5>
+                        <p>Centraliza cobros de administración, cuotas y servicios en un proceso digital seguro. Los residentes reciben comprobantes automáticos y el sistema concilia pagos sin intervención manual.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-image">
+                            <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80" alt="Gestión de usuarios, perfiles y accesos" />
+                        </div>
+                        <h5 class="fw-bold">Gestión de usuarios</h5>
+                        <p>Organiza perfiles de residentes, propietarios y proveedores en un único directorio. Asigna roles, controla accesos y mantén el historial actualizado sin perder trazabilidad.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-image">
+                            <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80" alt="Automatización de procesos y flujos de trabajo digitales" />
+                        </div>
+                        <h5 class="fw-bold">Automatización de procesos</h5>
+                        <p>Activa flujos automáticos para reservas, aprobaciones y recordatorios. Reduce tareas repetitivas y mantén el servicio al día con reglas inteligentes y seguimiento continuo.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-image">
+                            <img src="https://images.unsplash.com/photo-1556155092-490a1ba16284?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80" alt="Reportes y analítica con gráficos y dashboards" />
+                        </div>
+                        <h5 class="fw-bold">Reportes y analítica</h5>
+                        <p>Visualiza métricas de ocupación, ingresos y eficiencia en dashboards claros. Toma decisiones con datos concretos y genera informes exportables al instante.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Value Section -->
+    <section class="value-section">
+        <div class="container text-center">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h2 class="display-5 fw-bold mb-4">Transforma tu Comunidad</h2>
+                    <p class="lead mb-5">
+                        Nexur no es solo una herramienta, es la evolución de la gestión residencial.
+                        Ahorra tiempo, reduce costos operativos y mejora significativamente la calidad de vida
+                        de tus residentes con tecnología de vanguardia.
+                    </p>
+                    <div class="row text-center mt-5">
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+                                <div class="stat-value">
+                                    <div class="stat-number" data-target="50">0</div>
+                                    <div class="stat-suffix">%</div>
+                                </div>
+                                <p class="stat-label">Menos tiempo en tareas administrativas</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+                                <div class="stat-value">
+                                    <div class="stat-number" data-target="90">0</div>
+                                    <div class="stat-suffix">%</div>
+                                </div>
+                                <p class="stat-label">Reducción en errores manuales</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+                                <div class="stat-value">
+                                    <div class="stat-number" data-target="100">0</div>
+                                    <div class="stat-suffix">%</div>
+                                </div>
+                                <p class="stat-label">Satisfacción de residentes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container text-center">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 cta-content">
+                    <h2 class="cta-title mb-4">¿Listo para modernizar tu comunidad?</h2>
+                    <p class="lead mb-5">
+                        Únete a cientos de administradores que ya confían en Nexur para gestionar
+                        sus torres residenciales de manera eficiente y moderna.
+                        Configura tu comunidad en minutos y mantén todos los procesos bajo control.
+                    </p>
+                    <a href="/login" class="btn-cta">Comenzar Ahora</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h5 class="text-white mb-3">Nexur</h5>
+                    <p class="mb-3">La plataforma líder en gestión inteligente de comunidades residenciales en Colombia.</p>
+                    <p class="mb-0">&copy; 2024 Nexur. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animations on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                }
+            });
+        }, observerOptions);
+
+        // Observe benefit cards
+        document.querySelectorAll('.benefit-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Custom carousel auto-rotation
+        let currentCarouselSlide = 1;
+        showSlide(currentCarouselSlide);
+        
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.carousel-slide');
+            const dots = document.querySelectorAll('.dot');
+            
+            if (n > slides.length) {
+                currentCarouselSlide = 1;
+            }
+            if (n < 1) {
+                currentCarouselSlide = slides.length;
+            }
+            
+            slides.forEach(slide => slide.classList.remove('fade-in'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            if (slides[currentCarouselSlide - 1]) {
+                slides[currentCarouselSlide - 1].classList.add('fade-in');
+            }
+            if (dots[currentCarouselSlide - 1]) {
+                dots[currentCarouselSlide - 1].classList.add('active');
+            }
+        }
+        
+        function currentSlide(n) {
+            currentCarouselSlide = n;
+            showSlide(currentCarouselSlide);
+        }
+        
+        function nextCarouselSlide() {
+            currentCarouselSlide++;
+            showSlide(currentCarouselSlide);
+        }
+        
+        // Auto-advance slides every 2.5 seconds
+        setInterval(nextCarouselSlide, 2500);
+
+        // Core features slider
+        const featureCarouselWrapper = document.querySelector('.feature-carousel-wrapper');
+        const featureCarousel = document.querySelector('.feature-carousel');
+        const featureCards = document.querySelectorAll('.feature-card');
+        const featureDots = document.querySelectorAll('.feature-dot');
+        let currentFeatureIndex = 1;
+
+        function showFeatureSlide(n) {
+            if (!featureCarouselWrapper || !featureCarousel || featureCards.length === 0) return;
+
+            const index = Math.max(0, Math.min(n - 1, featureCards.length - 1));
+            currentFeatureIndex = index + 1;
+            const card = featureCards[index];
+            const leftOffset = card.offsetLeft - (featureCarouselWrapper.clientWidth - card.clientWidth) / 2;
+
+            featureCarouselWrapper.scrollTo({
+                left: leftOffset,
+                behavior: 'smooth'
+            });
+
+            featureDots.forEach(dot => dot.classList.remove('active'));
+            if (featureDots[index]) {
+                featureDots[index].classList.add('active');
+            }
+        }
+
+        function nextFeatureSlide() {
+            currentFeatureIndex++;
+            if (currentFeatureIndex > featureCards.length) {
+                currentFeatureIndex = 1;
+            }
+            showFeatureSlide(currentFeatureIndex);
+        }
+
+        if (featureCarouselWrapper && featureCards.length > 0) {
+            showFeatureSlide(currentFeatureIndex);
+            setInterval(nextFeatureSlide, 3200);
+        }
+
+        // Counter animation
+        function animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-target'));
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    element.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current);
+                }
+            }, 16);
+        }
+
+        // Animate counters when in view
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        });
+
+        document.querySelectorAll('.stat-number').forEach(counter => {
+            counterObserver.observe(counter);
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = target.offsetTop - 80;
+                    window.scrollTo({
+                        top: offset,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Add fade-in-up animation to sections
+        const sections = document.querySelectorAll('section > .container > .row:first-child');
+        sections.forEach((section, index) => {
+            section.style.animationDelay = `${index * 0.2}s`;
+            section.classList.add('fade-in-up');
+        });
+    </script>
+</body>
+</html>

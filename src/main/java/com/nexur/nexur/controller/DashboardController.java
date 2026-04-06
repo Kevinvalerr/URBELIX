@@ -5,6 +5,7 @@ import com.nexur.nexur.model.Pago;
 import com.nexur.nexur.model.Reserva;
 import com.nexur.nexur.model.Usuario;
 import com.nexur.nexur.model.Visitante;
+import com.nexur.nexur.model.enums.EstadoReserva;
 import com.nexur.nexur.service.ApartamentoService;
 import com.nexur.nexur.service.PagoService;
 import com.nexur.nexur.service.ReservaService;
@@ -49,9 +50,11 @@ public class DashboardController {
         model.addAttribute("currentPath", "/dashboard");
 
         String usuarioNombre = "Usuario";
+        String usuarioEmail = null;
         String rolTexto = "Usuario";
         if (authentication != null && authentication.getPrincipal() instanceof Usuario usuario) {
             usuarioNombre = usuario.getNombre() != null ? usuario.getNombre() : usuario.getUsername();
+            usuarioEmail = usuario.getUsername();
             if (usuario.getRol() != null) {
                 rolTexto = switch (usuario.getRol()) {
                     case ADMIN -> "Administrador";
@@ -62,8 +65,9 @@ public class DashboardController {
         } else if (principal != null) {
             usuarioNombre = principal.getName();
         }
-        final String usuarioActual = usuarioNombre;
-        model.addAttribute("currentUser", usuarioActual);
+        final String finalUsuarioActual = usuarioNombre;
+        final String finalUsuarioUsername = usuarioEmail;
+        model.addAttribute("currentUser", finalUsuarioActual);
         model.addAttribute("currentRole", rolTexto);
 
         boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
@@ -75,12 +79,21 @@ public class DashboardController {
             model.addAttribute("residentesCount", residenteService.obtenerTodos().size());
             model.addAttribute("pagosCount", pagoService.contarPagos());
             model.addAttribute("reservasCount", reservaService.contarReservasPendientes());
+            model.addAttribute("visitantesActivosCount", visitanteService.listarVisitantesActivos().size());
             miApartamento = null;
         } else {
             List<Pago> misPagos = pagoService.listarPagos().stream()
-                    .filter(pago -> pago.getResidente() != null && pago.getResidente().equalsIgnoreCase(usuarioActual))
+                    .filter(pago -> pago.getResidente() != null && (
+                            pago.getResidente().equalsIgnoreCase(finalUsuarioActual) ||
+                            (finalUsuarioUsername != null && pago.getResidente().equalsIgnoreCase(finalUsuarioUsername))
+                    ))
                     .collect(Collectors.toList());
-            List<Reserva> misReservas = reservaService.listarReservas();
+            List<Reserva> misReservas = reservaService.listarReservas().stream()
+                    .filter(reserva -> reserva.getResidente() != null && (
+                            reserva.getResidente().getNombre().equalsIgnoreCase(finalUsuarioActual) ||
+                            (finalUsuarioUsername != null && reserva.getResidente().getNombre().equalsIgnoreCase(finalUsuarioUsername))
+                    ))
+                    .collect(Collectors.toList());
                   
 
             model.addAttribute("misPagosCount", misPagos.size());
@@ -112,11 +125,26 @@ public class DashboardController {
             miApartamento = apartamentoAsignado != null ? apartamentoAsignado : "Sin apartamento asignado";
 
             model.addAttribute("miApartamento", miApartamento);
-            model.addAttribute("notificaciones", List.of(
+            model.addAttribute("visitantesActivosCount", visitanteService.listarVisitantesActivos().size());
+            List<String> notificaciones = new ArrayList<>(List.of(
                     "Recuerda pagar el servicio antes del día 10 para evitar moras.",
                     "El parqueadero C está disponible para tu bloque.",
                     "Se ha actualizado el reglamento de visitas."
             ));
+            List<String> notificacionesReservas = reservaService.listarReservas().stream()
+                    .filter(reserva -> reserva.getResidente() != null && (
+                            reserva.getResidente().getNombre().equalsIgnoreCase(finalUsuarioActual) ||
+                            (finalUsuarioUsername != null && reserva.getResidente().getNombre().equalsIgnoreCase(finalUsuarioUsername))
+                    ))
+                    .filter(reserva -> reserva.getEstado() != EstadoReserva.PENDIENTE)
+                    .map(reserva -> "Reserva #" + reserva.getId() + " en " + reserva.getTipoEspacio() + " ha sido " + reserva.getEstado().name().toLowerCase() + ". " +
+                            (reserva.getObservaciones() != null ? reserva.getObservaciones() : ""))
+                    .collect(Collectors.toList());
+            if (!notificacionesReservas.isEmpty()) {
+                notificaciones.add("Actualizaciones de reservas:");
+                notificaciones.addAll(notificacionesReservas);
+            }
+            model.addAttribute("notificaciones", notificaciones);
             model.addAttribute("estadoMora", misPagos.isEmpty() ? "No hay mora registrada" : "Revisa tus pagos pendientes con administración");
             model.addAttribute("multa", "No se han registrado multas en tu cuenta");
             model.addAttribute("parqueaderoHorario", "Lunes a sábado: 06:00 - 22:00");
@@ -127,7 +155,7 @@ public class DashboardController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
         for (Pago pago : pagoService.listarPagos()) {
-            if (isAdmin || (pago.getResidente() != null && pago.getResidente().equalsIgnoreCase(usuarioActual))) {
+            if (isAdmin || (pago.getResidente() != null && pago.getResidente().equalsIgnoreCase(finalUsuarioActual))) {
                 actividades.add(new DashboardActivity(
                         pago.getResidente(),
                         "Registró pago de " + pago.getMonto() + " para apto " + (pago.getApartamento() != null ? pago.getApartamento().getNumero() : "—"),

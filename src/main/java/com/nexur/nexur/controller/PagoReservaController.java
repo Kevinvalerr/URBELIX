@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -53,6 +54,7 @@ public class PagoReservaController {
         model.addAttribute("currentPath", "/pagos/nuevo");
         model.addAttribute("volverUrl", "/dashboard");
         model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
+        model.addAttribute("residentes", residenteService.obtenerTodos());
         model.addAttribute("pago", new Pago());
         return "pagos/nuevo";
     }
@@ -69,6 +71,7 @@ public class PagoReservaController {
             model.addAttribute("currentPath", "/pagos/nuevo");
             model.addAttribute("volverUrl", "/dashboard");
             model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
+            model.addAttribute("residentes", residenteService.obtenerTodos());
             return "pagos/nuevo";
         }
 
@@ -86,7 +89,16 @@ public class PagoReservaController {
     }
 
     @GetMapping("/reservas/nueva")
-    public String mostrarFormularioReserva(Model model) {
+    public String mostrarFormularioReserva(Model model, Authentication authentication) {
+        if (authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
+            return "redirect:/reservas";
+        }
+        if (authentication == null || authentication.getAuthorities().stream()
+                .noneMatch(authority -> authority.getAuthority().equals("ROLE_RESIDENTE"))) {
+            return "redirect:/dashboard";
+        }
+
         model.addAttribute("titulo", "Crear Reserva");
         model.addAttribute("currentPath", "/reservas/nueva");
         model.addAttribute("volverUrl", "/dashboard");
@@ -95,6 +107,7 @@ public class PagoReservaController {
         return "reservas/nueva";
     }
 
+   @PreAuthorize("hasRole('RESIDENTE')")
    @PostMapping("/reservas/guardar")
 public String guardarReserva(@Valid @ModelAttribute("reserva") Reserva reserva,
                              BindingResult bindingResult,
@@ -108,6 +121,8 @@ public String guardarReserva(@Valid @ModelAttribute("reserva") Reserva reserva,
 
     if (bindingResult.hasErrors()) {
         model.addAttribute("titulo", "Crear Reserva");
+        model.addAttribute("currentPath", "/reservas/nueva");
+        model.addAttribute("volverUrl", "/dashboard");
         model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
         return "reservas/nueva";
     }
@@ -122,26 +137,34 @@ Residente residente = residenteService.obtenerTodos().stream()
     });
 reserva.setResidente(residente);
 
-    reservaService.guardar(reserva, reserva.getApartamento().getId());
+    try {
+        reservaService.guardar(reserva, reserva.getApartamento().getId());
+    } catch (RuntimeException e) {
+        redirectAttributes.addFlashAttribute("error", e.getMessage());
+        return "redirect:/reservas/nueva";
+    }
 
-    
     redirectAttributes.addFlashAttribute("success", "Reserva creada exitosamente");
 
     return "redirect:/reservas";
 }
 
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 @PostMapping("/reservas/aprobar/{id}")
-public String aprobar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-    reservaService.aprobarReserva(id);
+public String aprobar(@PathVariable Long id,
+                      @RequestParam(value = "comentario", required = false) String comentario,
+                      RedirectAttributes redirectAttributes) {
+    reservaService.aprobarReserva(id, comentario);
     redirectAttributes.addFlashAttribute("success", "Reserva aprobada");
     return "redirect:/reservas";
 }
 
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 @PostMapping("/reservas/rechazar/{id}")
-public String rechazar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-    reservaService.rechazarReserva(id);
+public String rechazar(@PathVariable Long id,
+                       @RequestParam(value = "comentario", required = false) String comentario,
+                       RedirectAttributes redirectAttributes) {
+    reservaService.rechazarReserva(id, comentario);
     redirectAttributes.addFlashAttribute("error", "Reserva rechazada");
     return "redirect:/reservas";
 }

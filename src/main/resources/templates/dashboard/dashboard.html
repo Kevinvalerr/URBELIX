@@ -67,6 +67,16 @@
                     <h2 class="metric-value" th:text="${reservasCount}">0</h2>
                 </div>
             </div>
+            <div class="card metric-card visitors">
+                <div class="metric-card-header">
+                    <span class="metric-chip">Visitantes</span>
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="metric-card-body">
+                    <p class="metric-label">Activos</p>
+                    <h2 class="metric-value" th:text="${visitantesActivosCount}">0</h2>
+                </div>
+            </div>
         </div>
 
         <div sec:authorize="hasRole('RESIDENTE')" class="metric-grid mb-4">
@@ -98,6 +108,16 @@
                 <div class="metric-card-body">
                     <p class="metric-label">Número</p>
                     <h2 class="metric-value" th:text="${miApartamento}">Sin apartamento</h2>
+                </div>
+            </div>
+            <div class="card metric-card visitors">
+                <div class="metric-card-header">
+                    <span class="metric-chip">Visitantes</span>
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="metric-card-body">
+                    <p class="metric-label">Activos</p>
+                    <h2 class="metric-value" th:text="${visitantesActivosCount}">0</h2>
                 </div>
             </div>
             <div class="card metric-card residents parqueadero">

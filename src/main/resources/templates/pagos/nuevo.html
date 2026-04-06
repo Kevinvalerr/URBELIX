@@ -13,7 +13,11 @@
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="form-group">
                     <label for="residente">Residente</label>
-                    <input id="residente" th:field="*{residente}" type="text" placeholder="Nombre del residente" required />
+                    <select id="residente" th:field="*{residente}" class="form-select" required>
+                        <option value="">Seleccione un residente</option>
+                        <option th:each="residente : ${residentes}" th:value="${residente.nombre}"
+                                th:text="${residente.nombre} + ' - ' + (${residente.apartamento != null ? residente.apartamento.numero : 'N/A'})"></option>
+                    </select>
                     <p class="form-error" th:if="${#fields.hasErrors('residente')}" th:errors="*{residente}"></p>
                 </div>
                 <div class="form-group">
@@ -26,12 +30,12 @@
                 </div>
                 <div class="form-group">
                     <label for="monto">Monto</label>
-                    <input id="monto" th:field="*{monto}" type="text" placeholder="Ej. 350000" required />
+                    <input id="monto" th:field="*{monto}" type="text" class="form-control" placeholder="Ej. 350000" required />
                     <p class="form-error" th:if="${#fields.hasErrors('monto')}" th:errors="*{monto}"></p>
                 </div>
                 <div class="form-group">
                     <label for="metodo">Método de pago</label>
-                    <select id="metodo" th:field="*{metodo}" required>
+                    <select id="metodo" th:field="*{metodo}" class="form-select" required>
                         <option value="">Seleccione método</option>
                         <option value="Efectivo">Efectivo</option>
                         <option value="Tarjeta">Tarjeta</option>
@@ -41,11 +45,11 @@
                 </div>
                 <div class="form-group">
                     <label for="fecha">Fecha</label>
-                    <input id="fecha" th:field="*{fecha}" type="date" required />
+                    <input id="fecha" th:field="*{fecha}" class="form-control" type="date" required />
                     <p class="form-error" th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}"></p>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary btn-main-action">
+                    <button type="submit" class="btn btn-primary btn-main-action btn-sm">
                         <i class="bi bi-cash-stack me-2"></i>Guardar pago
                     </button>
                 </div>
