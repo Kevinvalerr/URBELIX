@@ -1,10 +1,14 @@
 package com.nexur.nexur.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.nexur.nexur.model.enums.EstadoPago;
+import com.nexur.nexur.model.enums.MetodoPago;
+import com.nexur.nexur.model.enums.TipoPago;
 
 @Entity
 @Table(name = "pagos")
@@ -14,17 +18,31 @@ public class Pago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "El nombre del residente es obligatorio")
-    private String residente;
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "residente_id")
+private Residente residente;
 
-    @NotBlank(message = "El monto es obligatorio")
-    private String monto;
+    @NotNull(message = "El monto es obligatorio")
+@Column(nullable = false)
+private java.math.BigDecimal monto;
 
-    @NotBlank(message = "El método de pago es obligatorio")
-    private String metodo;
+   @Enumerated(EnumType.STRING)
+private MetodoPago metodo;
 
     @NotNull(message = "La fecha es obligatoria")
     private LocalDate fecha;
+
+    @Enumerated(EnumType.STRING)
+@Column(nullable = false)
+private EstadoPago estadoPago;
+
+@Enumerated(EnumType.STRING)
+private TipoPago tipoPago;
+
+private LocalDate fechaVencimiento;
+
+@Column(unique = true)
+private String referenciaPago;
 
     private LocalDateTime creadoEn;
 
@@ -34,35 +52,44 @@ public class Pago {
 
     public Pago() {
         this.creadoEn = LocalDateTime.now();
+       this.estadoPago = EstadoPago.PENDIENTE;
     }
 
     public Long getId() {
         return id;
     }
 
-    public String getResidente() {
-        return residente;
-    }
+    public EstadoPago getEstadoPago() {
+    return estadoPago;
+}
 
-    public void setResidente(String residente) {
-        this.residente = residente;
-    }
 
-    public String getMonto() {
-        return monto;
-    }
+public void setEstadoPago(EstadoPago estadoPago) {
+    this.estadoPago = estadoPago;
+}
+public Residente getResidente() {
+    return residente;
+}
 
-    public void setMonto(String monto) {
-        this.monto = monto;
-    }
+public void setResidente(Residente residente) {
+    this.residente = residente;
+}
 
-    public String getMetodo() {
-        return metodo;
-    }
+public java.math.BigDecimal getMonto() {
+    return monto;
+}
 
-    public void setMetodo(String metodo) {
-        this.metodo = metodo;
-    }
+public void setMonto(java.math.BigDecimal monto) {
+    this.monto = monto;
+}
+
+ public MetodoPago getMetodo() {
+    return metodo;
+}
+
+public void setMetodo(MetodoPago metodo) {
+    this.metodo = metodo;
+}
 
     public LocalDate getFecha() {
         return fecha;
@@ -87,4 +114,20 @@ public class Pago {
     public void setApartamento(Apartamento apartamento) {
         this.apartamento = apartamento;
     }
+
+    public TipoPago getTipoPago() {
+    return tipoPago;
+}
+
+public void setTipoPago(TipoPago tipoPago) {
+    this.tipoPago = tipoPago;
+}
+
+public LocalDate getFechaVencimiento() {
+    return fechaVencimiento;
+}
+
+public void setFechaVencimiento(LocalDate fechaVencimiento) {
+    this.fechaVencimiento = fechaVencimiento;
+}
 }

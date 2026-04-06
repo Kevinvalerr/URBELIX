@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.nexur.nexur.service.PagoService;
 
 @Controller
 public class DashboardController {
@@ -43,43 +44,63 @@ public class DashboardController {
         this.visitanteService = visitanteService;
     }
 
-    @GetMapping("/dashboard")
-    public String mostrarDashboard(Model model, Principal principal, Authentication authentication) {
-        model.addAttribute("titulo", "Dashboard");
-        model.addAttribute("currentPath", "/dashboard");
+   @GetMapping("/dashboard")
+public String mostrarDashboard(Model model, Principal principal, Authentication authentication) {
 
-        String usuarioNombre = "Usuario";
-        String rolTexto = "Usuario";
-        if (authentication != null && authentication.getPrincipal() instanceof Usuario usuario) {
-            usuarioNombre = usuario.getNombre() != null ? usuario.getNombre() : usuario.getUsername();
-            if (usuario.getRol() != null) {
-                rolTexto = switch (usuario.getRol()) {
-                    case ADMIN -> "Administrador";
-                    case RESIDENTE -> "Residente";
-                    default -> usuario.getRol().name();
-                };
-            }
-        } else if (principal != null) {
-            usuarioNombre = principal.getName();
+    model.addAttribute("titulo", "Dashboard");
+    model.addAttribute("currentPath", "/dashboard");
+
+    //  DEFINIR UNA SOLA VEZ
+    boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+
+    String email = authentication.getName();
+
+    //  PAGOS VENCIDOS FILTRADOS
+    if (isAdmin) {
+        model.addAttribute("pagosVencidos", pagoService.obtenerPagosVencidos());
+    } else {
+        model.addAttribute("pagosVencidos", pagoService.obtenerPagosVencidosPorUsuario(email));
+    }
+
+    String usuarioNombre = "Usuario";
+    String rolTexto = "Usuario";
+
+    if (authentication != null && authentication.getPrincipal() instanceof Usuario usuario) {
+        usuarioNombre = usuario.getNombre() != null ? usuario.getNombre() : usuario.getEmail();
+
+        if (usuario.getRol() != null) {
+            rolTexto = switch (usuario.getRol()) {
+                case ADMIN -> "Administrador";
+                case RESIDENTE -> "Residente";
+                default -> usuario.getRol().name();
+            };
         }
-        final String usuarioActual = usuarioNombre;
-        model.addAttribute("currentUser", usuarioActual);
-        model.addAttribute("currentRole", rolTexto);
 
-        boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+    } else if (principal != null) {
+        usuarioNombre = principal.getName();
+    }
 
-        String miApartamento;
-        if (isAdmin) {
-            model.addAttribute("apartamentosCount", apartamentoService.listarApartamentos().size());
-            model.addAttribute("residentesCount", residenteService.obtenerTodos().size());
-            model.addAttribute("pagosCount", pagoService.contarPagos());
-            model.addAttribute("reservasCount", reservaService.contarReservasPendientes());
-            miApartamento = null;
-        } else {
-            List<Pago> misPagos = pagoService.listarPagos().stream()
-                    .filter(pago -> pago.getResidente() != null && pago.getResidente().equalsIgnoreCase(usuarioActual))
-                    .collect(Collectors.toList());
+    final String usuarioActual = usuarioNombre;
+
+    model.addAttribute("currentUser", usuarioActual);
+    model.addAttribute("currentRole", rolTexto);
+
+    String miApartamento;
+
+    if (isAdmin) {
+        model.addAttribute("apartamentosCount", apartamentoService.listarApartamentos().size());
+        model.addAttribute("residentesCount", residenteService.obtenerTodos().size());
+        model.addAttribute("pagosCount", (int) pagoService.contarPagos());
+        model.addAttribute("reservasCount", reservaService.contarReservasPendientes());
+        miApartamento = null;
+
+    } else {
+        List<Pago> misPagos = pagoService.listarPagos().stream()
+                .filter(pago -> pago.getResidente() != null &&
+                        pago.getResidente().getNombre().equalsIgnoreCase(usuarioActual))
+                .collect(Collectors.toList());
+
             List<Reserva> misReservas = reservaService.listarReservas();
                   
 
@@ -127,9 +148,10 @@ public class DashboardController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
         for (Pago pago : pagoService.listarPagos()) {
-            if (isAdmin || (pago.getResidente() != null && pago.getResidente().equalsIgnoreCase(usuarioActual))) {
+            if (isAdmin || (pago.getResidente() != null 
+                          && pago.getResidente().getNombre().equalsIgnoreCase(usuarioActual))) {
                 actividades.add(new DashboardActivity(
-                        pago.getResidente(),
+                        pago.getResidente() != null ? pago.getResidente().getNombre() : "—",
                         "Registró pago de " + pago.getMonto() + " para apto " + (pago.getApartamento() != null ? pago.getApartamento().getNumero() : "—"),
                         pago.getCreadoEn() != null ? pago.getCreadoEn().format(formatter) : "Sin fecha",
                         "Pago",

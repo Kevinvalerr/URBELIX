@@ -6,19 +6,27 @@
                 <h1>Registrar Pago</h1>
                 <p class="text-muted">Registra aquí los pagos de los residentes y mantén el historial financiero al día.</p>
             </div>
-        </section>
+        </section><Fieldset></Fieldset>
 
         <div class="form-card">
             <form th:action="@{/pagos/guardar}" th:object="${pago}" method="post" class="form-grid">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="form-group">
                     <label for="residente">Residente</label>
-                    <input id="residente" th:field="*{residente}" type="text" placeholder="Nombre del residente" required />
+  <input type="hidden" name="residenteId" th:value="${pago.residente.id}" />
+
+<input type="text" 
+       th:value="${pago.residente.nombre}" 
+       class="form-control" 
+       readonly />
                     <p class="form-error" th:if="${#fields.hasErrors('residente')}" th:errors="*{residente}"></p>
                 </div>
                 <div class="form-group">
                     <label for="apartamentoId">Apartamento</label>
-                    <select id="apartamentoId" th:field="*{apartamento.id}" class="form-select" required>
+                    <input type="text" 
+       th:value="${pago.apartamento.numero}" 
+       class="form-control" 
+       readonly />
                         <option value="">Seleccione un apartamento</option>
                         <option th:each="apto : ${apartamentos}" th:value="${apto.id}" th:text="${apto.numero} + ' - Torre ' + ${apto.torre} + ' - Piso ' + ${apto.piso}"></option>
                     </select>
@@ -26,17 +34,31 @@
                 </div>
                 <div class="form-group">
                     <label for="monto">Monto</label>
-                    <input id="monto" th:field="*{monto}" type="text" placeholder="Ej. 350000" required />
+                   <input id="monto" th:field="*{monto}" type="number" step="0.01" placeholder="Ej. 350000" required />
                     <p class="form-error" th:if="${#fields.hasErrors('monto')}" th:errors="*{monto}"></p>
                 </div>
                 <div class="form-group">
                     <label for="metodo">Método de pago</label>
-                    <select id="metodo" th:field="*{metodo}" required>
-                        <option value="">Seleccione método</option>
-                        <option value="Efectivo">Efectivo</option>
-                        <option value="Tarjeta">Tarjeta</option>
-                        <option value="Transferencia">Transferencia</option>
+                   <select id="metodo" th:field="*{metodo}" required>
+                      <option value="">Seleccione método</option>
+                       <option value="PSE">PSE</option>
+                      <option value="TARJETA">Tarjeta</option>
+                      <option value="EFECTIVO">Efectivo</option>
+                      <option value="TRANSFERENCIA">Transferencia</option>
                     </select>
+                    <div class="form-group">
+                  <label for="tipoPago">Tipo de pago</label>
+                   <select id="tipoPago" th:field="*{tipoPago}" required>
+                   <option value="">Seleccione tipo</option>
+                    <option value="ADMINISTRACION">Administración</option>
+                   <option value="MULTA">Multa</option>
+                 <option value="OTRO">Otro</option>
+    </select>
+</div>
+<div class="form-group">
+    <label for="fechaVencimiento">Fecha de vencimiento</label>
+    <input id="fechaVencimiento" th:field="*{fechaVencimiento}" type="date" />
+</div>
                     <p class="form-error" th:if="${#fields.hasErrors('metodo')}" th:errors="*{metodo}"></p>
                 </div>
                 <div class="form-group">

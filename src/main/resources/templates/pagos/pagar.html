@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+<div th:fragment="content" th:with="titulo='Pagar Pago'">
+
+    <section class="page-top-section mb-4">
+        <div>
+            <h1>Pagar Pago</h1>
+            <p class="text-muted">Simula el proceso de pago para este movimiento pendiente.</p>
+        </div>
+    </section>
+
+    <div>
+        <h2>Simulación de Pago</h2>
+
+        <p>Monto: <span th:text="${pago.monto}"></span></p>
+        <p>Tipo: <span th:text="${pago.tipoPago}"></span></p>
+
+        <form th:action="@{/pagos/confirmar}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" name="id" th:value="${pago.id}" />
+            <button type="submit">Confirmar Pago</button>
+        </form>
+    </div>
+
+</div>
+</html>

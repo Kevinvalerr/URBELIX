@@ -56,7 +56,7 @@ public class ResidenteController {
 
     @GetMapping("/editar/{id}")
     public String editarResidente(@PathVariable Long id, Model model) {
-        Residente residente = residenteService.buscarPorId(id).orElse(new Residente());
+       Residente residente = residenteService.buscarPorId(id);
         if (residente.getApartamento() == null) {
             residente.setApartamento(new Apartamento());
         }
