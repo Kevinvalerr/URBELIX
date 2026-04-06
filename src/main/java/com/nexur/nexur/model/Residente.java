@@ -1,7 +1,8 @@
 package com.nexur.nexur.model;
 
 import jakarta.persistence.*;
-
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 @Entity
 @Table(name = "residentes")
@@ -13,8 +14,12 @@ public class Residente {
 
     private String nombre;
 
+    @NotBlank(message = "Documento es obligatorio")
+    @Pattern(regexp = "\\d{8,}", message = "Documento debe tener al menos 8 dígitos y solo números")
     private String documento;
 
+    @NotBlank(message = "Teléfono es obligatorio")
+    @Pattern(regexp = "\\d{10,}", message = "Teléfono debe tener al menos 10 dígitos y solo números")
     private String telefono;
 
     @ManyToOne

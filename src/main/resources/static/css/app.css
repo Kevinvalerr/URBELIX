@@ -128,8 +128,9 @@ body, button, input, select, textarea {
 }
 
 .sidebar-user p,
-.sidebar-user strong {
-    color: rgba(255, 255, 255, 0.95);
+.sidebar-user strong,
+.sidebar-user-role {
+    color: #ffffff !important;
 }
 
 .sidebar-user-name {

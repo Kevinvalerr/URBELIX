@@ -19,47 +19,48 @@
         <strong class="sidebar-user-name" th:text="${currentUser}">Usuario</strong>
         <p class="sidebar-user-role">
             Rol:
-            <span class="role-pill"
-                  th:text="${currentRole == 'ADMIN'} ? 'Administrador' : (${currentRole == 'RESIDENTE'} ? 'Residente' : (${currentRole == 'PORTERIA'} ? 'Portería' : currentRole))">
-                Rol
-            </span>
+            <span class="role-pill" th:text="${currentRoleName}">Rol</span>
         </p>
     </div>
 
     <nav class="nav flex-column gap-2">
-        <a href="/dashboard" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/dashboard'} ? ' active' : ''">
+        <a href="/dashboard" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/dashboard')} ? ' active' : ''">
             <i class="bi bi-speedometer2 me-2"></i>
             Dashboard
         </a>
 
         <div sec:authorize="hasRole('ADMIN')">
-            <a href="/residentes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/residentes'} ? ' active' : ''">
+            <a href="/residentes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/residentes')} ? ' active' : ''">
                 <i class="bi bi-people-fill me-2"></i>
                 Residentes
             </a>
-            <a href="/apartamentos" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/apartamentos'} ? ' active' : ''">
+            <a href="/apartamentos" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/apartamentos')} ? ' active' : ''">
                 <i class="bi bi-building me-2"></i>
                 Apartamentos
             </a>
-            <a href="/usuarios-vista" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/usuarios-vista'} ? ' active' : ''">
+            <a href="/usuarios-vista" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/usuarios')} ? ' active' : ''">
                 <i class="bi bi-person-badge me-2"></i>
                 Usuarios
             </a>
-            <a href="/reportes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/reportes'} ? ' active' : ''">
+            <a href="/reportes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/reportes')} ? ' active' : ''">
                 <i class="bi bi-bar-chart-line me-2"></i>
                 Reportes
             </a>
         </div>
 
-        <a href="/visitantes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/visitantes'} ? ' active' : ''" sec:authorize="hasAnyRole('ADMIN','PORTERIA','RESIDENTE')">
+        <a href="/visitantes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/visitantes')} ? ' active' : ''" sec:authorize="hasAnyRole('ADMIN','PORTERIA','RESIDENTE')">
             <i class="bi bi-door-open-fill me-2"></i>
             Visitantes
         </a>
-        <a href="/pagos/nuevo" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/pagos/nuevo'} ? ' active' : ''" sec:authorize="isAuthenticated()">
+        <a href="/pagos/nuevo" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/pagos')} ? ' active' : ''" sec:authorize="isAuthenticated()">
             <i class="bi bi-cash-stack me-2"></i>
             Registrar pago
         </a>
-        <a href="/reservas/nueva" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/reservas/nueva'} ? ' active' : ''" sec:authorize="isAuthenticated()">
+        <a href="/reservas/nueva" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/reservas')} ? ' active' : ''" sec:authorize="hasRole('ADMIN')">
+            <i class="bi bi-calendar-check me-2"></i>
+            Aprobacion de reservas
+        </a>
+        <a href="/reservas/nueva" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/reservas')} ? ' active' : ''" sec:authorize="!hasRole('ADMIN')">
             <i class="bi bi-calendar-check me-2"></i>
             Crear reserva
         </a>

@@ -18,7 +18,8 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Documento</label>
-                        <input type="text" th:field="*{documento}" class="form-control" required />
+                        <input type="text" th:field="*{documento}" class="form-control" required pattern="[0-9]{8,}" title="Solo números, mínimo 8 dígitos" inputmode="numeric" />
+                        <p class="form-error" th:if="${#fields.hasErrors('documento')}" th:errors="*{documento}"></p>
                     </div>
                     <div class="form-group form-full-width">
                         <label class="form-label">Apartamento</label>

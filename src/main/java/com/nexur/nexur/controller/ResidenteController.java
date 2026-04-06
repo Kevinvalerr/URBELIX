@@ -5,8 +5,10 @@ import com.nexur.nexur.model.Apartamento;
 import com.nexur.nexur.model.Residente;
 import com.nexur.nexur.service.ResidenteService;
 import com.nexur.nexur.service.ApartamentoService;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -73,7 +75,18 @@ public class ResidenteController {
     // Guardar residente
 
     @PostMapping("/guardar")
-    public String guardarResidente(@ModelAttribute Residente residente,@RequestParam Long apartamentoId) {
+    public String guardarResidente(@Valid @ModelAttribute Residente residente,
+                                   BindingResult bindingResult,
+                                   @RequestParam Long apartamentoId,
+                                   Model model) {
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
+            model.addAttribute("currentPath", "/residentes");
+            model.addAttribute("volverUrl", "/residentes");
+            model.addAttribute("titulo", residente.getId() == null ? "Registrar Residente" : "Editar Residente");
+            return "residentes/formulario";
+        }
 
         residenteService.guardar(residente, apartamentoId);
 

@@ -52,13 +52,16 @@ public class DashboardController {
         String usuarioNombre = "Usuario";
         String usuarioEmail = null;
         String rolTexto = "Usuario";
+        String rolCodigo = "USUARIO";
         if (authentication != null && authentication.getPrincipal() instanceof Usuario usuario) {
             usuarioNombre = usuario.getNombre() != null ? usuario.getNombre() : usuario.getUsername();
             usuarioEmail = usuario.getUsername();
             if (usuario.getRol() != null) {
+                rolCodigo = usuario.getRol().name();
                 rolTexto = switch (usuario.getRol()) {
                     case ADMIN -> "Administrador";
                     case RESIDENTE -> "Residente";
+                    case PORTERIA -> "Portería";
                     default -> usuario.getRol().name();
                 };
             }
@@ -68,7 +71,8 @@ public class DashboardController {
         final String finalUsuarioActual = usuarioNombre;
         final String finalUsuarioUsername = usuarioEmail;
         model.addAttribute("currentUser", finalUsuarioActual);
-        model.addAttribute("currentRole", rolTexto);
+        model.addAttribute("currentRole", rolCodigo);
+        model.addAttribute("currentRoleName", rolTexto);
 
         boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));

@@ -25,6 +25,7 @@ public class UsuarioController {
     public String listar(Model model) {
         List<Usuario> usuarios = usuarioService.listarUsuarios();
         model.addAttribute("usuarios", usuarios);
+        model.addAttribute("currentPath", "/usuarios");
         return "usuarios/lista";
     }
 
@@ -32,6 +33,7 @@ public class UsuarioController {
     @GetMapping("/nuevo")
     public String nuevo(Model model) {
         model.addAttribute("usuario", new Usuario());
+        model.addAttribute("currentPath", "/usuarios");
         return "usuarios/nuevo";
     }
 
@@ -47,6 +49,7 @@ public class UsuarioController {
     public String editar(@PathVariable Long id, Model model) {
         Usuario usuario = usuarioService.buscarPorId(id);
         model.addAttribute("usuario", usuario);
+        model.addAttribute("currentPath", "/usuarios");
         return "usuarios/editar";
     }
 
