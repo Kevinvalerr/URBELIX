@@ -7,16 +7,17 @@ public class ReporteRegistro {
     private String tipo;
     private String entidad;
     private String usuario;
+    private String residente;
     private String descripcion;
     private LocalDateTime fechaHora;
 
-    public ReporteRegistro(String tipo, String entidad, String usuario, String descripcion, LocalDateTime fechaHora) {
-        this.tipo = tipo;
-        this.entidad = entidad;
-        this.usuario = usuario;
-        this.descripcion = descripcion;
-        this.fechaHora = fechaHora;
-    }
+  public ReporteRegistro(String tipo, String entidad, String residente, String descripcion, LocalDateTime fechaHora) {
+    this.tipo = tipo;
+    this.entidad = entidad;
+    this.residente = residente;
+    this.descripcion = descripcion;
+    this.fechaHora = fechaHora;
+}
 
     public String getTipo() {
         return tipo;
@@ -37,4 +38,8 @@ public class ReporteRegistro {
     public LocalDateTime getFechaHora() {
         return fechaHora;
     }
+
+    public String getResidente() {
+    return residente;
+}
 }

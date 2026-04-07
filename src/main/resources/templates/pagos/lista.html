@@ -28,6 +28,13 @@
             </a>
         </div>
 
+        <form th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:action="@{/pagos/generar}" method="post" style="margin-bottom: 15px;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="btn btn-warning">
+                Generar administración
+            </button>
+        </form>
+
         <!-- Payments Table -->
         <div class="timeline-container" style="padding: 2rem;">
             <div style="overflow-x: auto;">
@@ -39,11 +46,13 @@
                             <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Monto</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Método</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Fecha</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Estado</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="pago : ${pagos}" style="border-bottom: 1px solid rgba(37, 99, 235, 0.06); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(37, 99, 235, 0.02)'" onmouseout="this.style.backgroundColor='transparent'">
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${pago.residente}"></td>
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${pago.residente != null ? pago.residente.nombre : '—'}"></td>
                             <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${pago.apartamento != null ? pago.apartamento.numero : '—'}"></td>
                             <td style="padding: 1rem; color: var(--text-primary); font-weight: 600; color: #16A34A;" th:text="'$' + ${pago.monto}"></td>
                             <td style="padding: 1rem;">
@@ -52,9 +61,13 @@
                                 <span th:if="${pago.metodo != 'EFECTIVO' and pago.metodo != 'TRANSFERENCIA'}" style="background: rgba(148, 163, 184, 0.1); color: #64748B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;" th:text="${pago.metodo}"></span>
                             </td>
                             <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${pago.fecha}"></td>
+                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${pago.estadoPago}"></td>
+                            <td style="padding: 1rem;">
+                                <a th:if="${pago.estadoPago.name() == 'PENDIENTE'}" th:href="@{/pagos/pagar/{id}(id=${pago.id})}" class="btn btn-success btn-sm">Pagar</a>
+                            </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(pagos)}" style="border-bottom: none;">
-                            <td colspan="5" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
+                            <td colspan="7" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
                                 <i class="bi bi-cash-stack" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
                                 <br>
                                 No hay pagos registrados

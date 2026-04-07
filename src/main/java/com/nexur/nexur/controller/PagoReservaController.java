@@ -16,12 +16,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-
+import java.util.List;
 
 
 @Controller
@@ -39,45 +40,58 @@ public class PagoReservaController {
         this.residenteService = residenteService;
     }
 
-    @GetMapping("/pagos")
-    public String mostrarListaPagos(Model model) {
-        model.addAttribute("titulo", "Pagos");
-        model.addAttribute("currentPath", "/pagos");
-        model.addAttribute("volverUrl", "/dashboard");
-        model.addAttribute("pagos", pagoService.listarPagos());
-        return "pagos/lista";
-    }
+ 
 
     @GetMapping("/pagos/nuevo")
-    public String mostrarFormularioPago(Model model) {
+public String nuevoPago(Model model, Authentication authentication) {
+
+    String email = authentication.getName();
+
+    // 🔹 obtener residente del usuario logeado
+    Residente residente = residenteService.buscarPorUsuarioEmail(email);
+
+    Pago pago = new Pago();
+    pago.setResidente(residente);
+    pago.setApartamento(residente.getApartamento());
+
+    model.addAttribute("pago", pago);
+
+    return "pagos/nuevo";
+}
+@PostMapping("/pagos/guardar")
+public String guardarPago(@Valid @ModelAttribute("pago") Pago pago,
+                         BindingResult bindingResult,
+                         Model model,
+                         @RequestParam(value = "residenteId", required = false) Long residenteId) {
+
+    if (pago.getApartamento() == null || pago.getApartamento().getId() == null) {
+        bindingResult.rejectValue("apartamento", "NotNull", "Seleccione un apartamento");
+    }
+
+    if (bindingResult.hasErrors()) {
         model.addAttribute("titulo", "Registrar Pago");
         model.addAttribute("currentPath", "/pagos/nuevo");
         model.addAttribute("volverUrl", "/dashboard");
         model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
         model.addAttribute("residentes", residenteService.obtenerTodos());
-        model.addAttribute("pago", new Pago());
         return "pagos/nuevo";
     }
 
-    @PostMapping("/pagos/guardar")
-    public String guardarPago(@Valid @ModelAttribute("pago") Pago pago,
-                              BindingResult bindingResult,
-                              Model model) {
-        if (pago.getApartamento() == null || pago.getApartamento().getId() == null) {
-            bindingResult.rejectValue("apartamento", "NotNull", "Seleccione un apartamento");
-        }
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("titulo", "Registrar Pago");
-            model.addAttribute("currentPath", "/pagos/nuevo");
-            model.addAttribute("volverUrl", "/dashboard");
-            model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
-            model.addAttribute("residentes", residenteService.obtenerTodos());
-            return "pagos/nuevo";
-        }
-
-        pagoService.guardar(pago, pago.getApartamento().getId());
-        return "redirect:/pagos";
+    if (residenteId != null) {
+        Residente residente = residenteService.buscarPorId(residenteId);
+        pago.setResidente(residente);
     }
+
+    pagoService.guardar(pago, pago.getApartamento().getId());
+    return "redirect:/pagos";
+}
+        return "pagos/nuevo";
+    }
+
+    pagoService.guardar(pago, pago.getApartamento().getId());
+    return "redirect:/pagos";
+}
+>>>>>>> origin/feature/pagos
 
     @GetMapping("/reservas")
     public String mostrarListaReservas(Model model) {
@@ -167,5 +181,45 @@ public String rechazar(@PathVariable Long id,
     reservaService.rechazarReserva(id, comentario);
     redirectAttributes.addFlashAttribute("error", "Reserva rechazada");
     return "redirect:/reservas";
+}
+
+@GetMapping("/pagos/pagar/{id}")
+public String mostrarPago(@PathVariable Long id, Model model) {
+    Pago pago = pagoService.buscarPorId(id);
+    model.addAttribute("pago", pago);
+    return "pagos/pagar";
+}
+
+@PostMapping("/pagos/confirmar")
+public String confirmarPago(@RequestParam Long id) {
+    pagoService.marcarComoPagado(id);
+    return "redirect:/pagos";
+}
+
+@PostMapping("/pagos/generar")
+public String generarPagos() {
+    pagoService.generarPagosAdministracion();
+    return "redirect:/pagos";
+}
+@GetMapping("/pagos")
+public String listarPagos(Model model, Authentication authentication) {
+
+    String email = authentication.getName();
+
+    boolean isAdmin = authentication.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+    List<Pago> pagos;
+
+    if (isAdmin) {
+        pagos = pagoService.listarPagos();
+    } else {
+        pagos = pagoService.listarPagosPorUsuario(email);
+    }
+
+    model.addAttribute("pagos", pagos);
+    model.addAttribute("currentPath", "/pagos");
+
+    return "pagos/lista";
 }
 }

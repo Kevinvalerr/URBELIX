@@ -4,9 +4,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import com.nexur.nexur.model.Usuario;
+
 @Entity
 @Table(name = "residentes")
 public class Residente {
+
+    @ManyToOne
+@JoinColumn(name = "usuario_id")
+private Usuario usuario;
+ 
+   
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -76,5 +86,19 @@ public class Residente {
     public void setApartamento(Apartamento apartamento) {
         this.apartamento = apartamento;
     }
+
+    public void setId(Long id) {
+    this.id = id;
+}
+
+
+  public Usuario getUsuario() {
+    return usuario;
+}
+
+public void setUsuario(Usuario usuario) {
+    this.usuario = usuario;
+}
+
 
 }

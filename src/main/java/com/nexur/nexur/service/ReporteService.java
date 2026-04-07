@@ -66,7 +66,7 @@ public class ReporteService {
                 .map(pago -> new ReporteRegistro(
                         "Pago",
                         "Pago #" + pago.getId(),
-                        pago.getResidente(),
+                       pago.getResidente() != null ? pago.getResidente().getNombre() : "—",
                         "Pago de " + pago.getMonto() + " por apto " + (pago.getApartamento() != null ? pago.getApartamento().getNumero() : "N/A"),
                         pago.getCreadoEn()
                 ))

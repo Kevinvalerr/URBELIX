@@ -137,6 +137,20 @@
             </div>
         </div>
 
+        <!-- Pagos Vencidos (Admin) -->
+        <div sec:authorize="hasRole('ADMIN')" class="card mt-4">
+            <h5>Pagos vencidos</h5>
+            <div th:if="${#lists.isEmpty(pagosVencidos)}">
+                <p>No hay pagos vencidos</p>
+            </div>
+            <ul th:if="${!#lists.isEmpty(pagosVencidos)}">
+                <li th:each="p : ${pagosVencidos}">
+                    <span th:text="${p.residente.nombre}"></span> -
+                    <span th:text="${p.monto}"></span>
+                </li>
+            </ul>
+        </div>
+
         <!-- Resident Summary -->
         <div sec:authorize="hasRole('RESIDENTE')" class="resident-summary-section">
             <div class="resident-summary-top">
@@ -176,6 +190,8 @@
                         <div class="payment-status" th:if="${estadoPago == 'PENDIENTE'}" style="color: #D97706; font-size: 0.85rem; font-weight: 600;">
                             <i class="bi bi-exclamation-triangle"></i> Pendiente
                         </div>
+                        <p><strong>Mora:</strong> <span th:text="${estadoMora}">No hay mora registrada</span></p>
+                        <p><strong>Multa:</strong> <span th:text="${multa}">No se han registrado multas</span></p>
                     </div>
                 </div>
                 <div class="summary-card status-primary">
@@ -200,6 +216,9 @@
                         <div class="notification-preview" th:if="${ultimaNotificacion}">
                             <small style="color: var(--text-secondary);" th:text="${ultimaNotificacion}">Recordatorio de pago</small>
                         </div>
+                        <ul>
+                            <li th:each="nota : ${notificaciones}" th:text="${nota}">Notificación</li>
+                        </ul>
                     </div>
                 </div>
             </div>

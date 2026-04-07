@@ -45,11 +45,19 @@ public class ResidenteService {
              return residenteRepository.save(residente);
      }
 
-     public Optional<Residente> buscarPorId(Long id) {
-        return residenteRepository.findById(id);
-     }
+    
 
      public void eliminar(Long id) {
         residenteRepository.deleteById(id);
      }
+
+     public Residente buscarPorId(Long id) {
+    return residenteRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Residente no encontrado"));
+}
+
+      public Residente buscarPorUsuarioEmail(String email) {
+    return residenteRepository.findByUsuarioEmail(email)
+            .orElseThrow(() -> new RuntimeException("Residente no encontrado"));
+}
 }
