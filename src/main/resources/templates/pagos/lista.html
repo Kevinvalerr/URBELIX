@@ -1,75 +1,170 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
-    <div th:fragment="content" th:with="titulo='Pagos | NEXUR'">
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" 
+      th:replace="layout/base :: page">
+    
+    <div th:fragment="content" th:with="titulo='Gestión de Pagos | NEXUR'">
         <!-- Page Header -->
         <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
             <div class="welcome-content" style="gap: 2rem;">
-                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(34, 197, 94, 0.15));">
+                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.15));">
                     <i class="bi bi-cash-stack"></i>
                 </div>
                 <div class="welcome-text">
                     <h1 class="welcome-title">Gestión de Pagos</h1>
-                    <p class="welcome-subtitle">Administra todos los pagos del condominio</p>
+                    <p class="welcome-subtitle" th:text="${isAdmin ? 'Administra todos los pagos del condominio' : 'Visualiza y gestiona tus pagos pendientes'}"></p>
                 </div>
             </div>
             <div class="welcome-stats">
                 <div class="stat-item">
-                    <div class="stat-number" th:text="${pagos.size()}">0</div>
+                    <div class="stat-number" th:text="${totalPagos}">0</div>
                     <div class="stat-label">Total Pagos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" th:text="${totalPendiente}">0</div>
+                    <div class="stat-label">Pendientes</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" th:text="${totalPagado}">0</div>
+                    <div class="stat-label">Pagados</div>
                 </div>
             </div>
         </div>
 
-        <!-- Register Payment Button -->
-        <div style="margin-bottom: 2rem;">
-            <a href="/pagos/nuevo" class="btn btn-primary" style="background: linear-gradient(135deg, #2563EB, #06B6D4); border: none; padding: 0.75rem 2rem; border-radius: 12px; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: all 0.3s ease;">
-                <i class="bi bi-plus-circle"></i>
-                Registrar Nuevo Pago
-            </a>
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+            <div sec:authorize="hasRole('ADMIN')" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="/pagos/nuevo" 
+                   class="btn" 
+                   style="background: linear-gradient(135deg, #3B82F6, #1E40AF); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    Registrar Pago
+                </a>
+
+                <form th:action="@{/pagos/generar-administracion}" method="post" style="margin: 0;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" 
+                            class="btn" 
+                            style="background: linear-gradient(135deg, #F59E0B, #D97706); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600;"
+                            onclick="return confirm('¿Deseas generar administración para todos los residentes?')">
+                        Generar Administración
+                    </button>
+                </form>
+            </div>
+
+            <div sec:authorize="hasRole('RESIDENTE')" style="display: flex; align-items: center;">
+                <span style="color: #475569; font-weight: 600;">Verifica tus pagos pendientes y confirma desde la fila correspondiente.</span>
+            </div>
         </div>
 
-        <form th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:action="@{/pagos/generar}" method="post" style="margin-bottom: 15px;">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <button type="submit" class="btn btn-warning">
-                Generar administración
-            </button>
-        </form>
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; background-color: #DCFCE7; border-left: 4px solid #16A34A; color: #15803D;">
+            <i class="bi bi-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; background-color: #FEE2E2; border-left: 4px solid #DC2626; color: #991B1B;">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+        </div>
 
         <!-- Payments Table -->
         <div class="timeline-container" style="padding: 2rem;">
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; background: transparent;">
                     <thead>
-                        <tr style="border-bottom: 2px solid rgba(37, 99, 235, 0.1);">
+                        <tr style="border-bottom: 2px solid rgba(59, 130, 246, 0.1);">
                             <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Residente</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Apartamento</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Tipo</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Monto</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Método</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Fecha</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Vencimiento</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Estado</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Acciones</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Acción</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="pago : ${pagos}" style="border-bottom: 1px solid rgba(37, 99, 235, 0.06); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(37, 99, 235, 0.02)'" onmouseout="this.style.backgroundColor='transparent'">
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${pago.residente != null ? pago.residente.nombre : '—'}"></td>
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${pago.apartamento != null ? pago.apartamento.numero : '—'}"></td>
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 600; color: #16A34A;" th:text="'$' + ${pago.monto}"></td>
-                            <td style="padding: 1rem;">
-                                <span th:if="${pago.metodo == 'EFECTIVO'}" style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Efectivo</span>
-                                <span th:if="${pago.metodo == 'TRANSFERENCIA'}" style="background: rgba(37, 99, 235, 0.1); color: #2563EB; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Transferencia</span>
-                                <span th:if="${pago.metodo != 'EFECTIVO' and pago.metodo != 'TRANSFERENCIA'}" style="background: rgba(148, 163, 184, 0.1); color: #64748B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;" th:text="${pago.metodo}"></span>
+                        <tr th:each="pago : ${pagos}" 
+                            style="border-bottom: 1px solid rgba(59, 130, 246, 0.06); transition: background-color 0.3s ease;" 
+                            onmouseover="this.style.backgroundColor='rgba(59, 130, 246, 0.02)'" 
+                            onmouseout="this.style.backgroundColor='transparent'">
+                            
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" 
+                                th:text="${pago.residente != null ? pago.residente.nombre : '—'}"></td>
+                            
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" 
+                                th:text="${pago.apartamento != null ? pago.apartamento.numero : '—'}"></td>
+                            
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;">
+                                <span th:if="${pago.tipoPago.name() == 'ADMINISTRACION'}" 
+                                      style="background: rgba(59, 130, 246, 0.1); color: #1E40AF; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    Administración
+                                </span>
+                                <span th:if="${pago.tipoPago.name() == 'MULTA'}" 
+                                      style="background: rgba(239, 68, 68, 0.1); color: #991B1B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    Multa
+                                </span>
+                                <span th:if="${pago.tipoPago.name() == 'OTRO'}" 
+                                      style="background: rgba(148, 163, 184, 0.1); color: #334155; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    Otro
+                                </span>
                             </td>
-                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${pago.fecha}"></td>
-                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${pago.estadoPago}"></td>
+                            
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 600; color: #16A34A;">
+                                <span th:text="'$' + ${#numbers.formatDecimal(pago.monto, 0, 'DEFAULT', 0, 'DEFAULT')}"></span>
+                            </td>
+                            
+                            <td style="padding: 1rem; color: var(--text-secondary);">
+                                <span th:if="${pago.metodo.name() == 'PSE'}" 
+                                      style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    PSE
+                                </span>
+                                <span th:if="${pago.metodo.name() == 'TARJETA'}" 
+                                      style="background: rgba(59, 130, 246, 0.1); color: #1E40AF; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    Tarjeta
+                                </span>
+                                <span th:if="${pago.metodo.name() == 'EFECTIVO'}" 
+                                      style="background: rgba(245, 158, 11, 0.1); color: #92400E; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    Efectivo
+                                </span>
+                                <span th:if="${pago.metodo.name() == 'TRANSFERENCIA'}" 
+                                      style="background: rgba(139, 92, 246, 0.1); color: #5B21B6; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    Transferencia
+                                </span>
+                            </td>
+                            
+                            <td style="padding: 1rem; color: var(--text-secondary);" 
+                                th:text="${pago.fechaVencimiento}"></td>
+                            
                             <td style="padding: 1rem;">
-                                <a th:if="${pago.estadoPago.name() == 'PENDIENTE'}" th:href="@{/pagos/pagar/{id}(id=${pago.id})}" class="btn btn-success btn-sm">Pagar</a>
+                                <span th:if="${pago.estadoPago.name() == 'PENDIENTE'}" 
+                                      style="background: rgba(245, 158, 11, 0.1); color: #92400E; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    Pendiente
+                                </span>
+                                <span th:if="${pago.estadoPago.name() == 'PAGADO'}" 
+                                      style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    Pagado
+                                </span>
+                                <span th:if="${pago.estadoPago.name() == 'VENCIDO'}" 
+                                      style="background: rgba(239, 68, 68, 0.1); color: #991B1B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    Vencido
+                                </span>
+                            </td>
+                            
+                            <td style="padding: 1rem;">
+                                <a th:if="${pago.estadoPago.name() == 'PENDIENTE'}" 
+                                   th:href="@{/pagos/{id}(id=${pago.id})}" 
+                                   class="btn btn-sm" 
+                                   style="background: linear-gradient(135deg, #10B981, #047857); color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; font-size: 0.85rem; display: inline-block;">
+                                    Pagar
+                                </a>
+                                <span th:if="${pago.estadoPago.name() != 'PENDIENTE'}" 
+                                      style="color: var(--text-muted); font-size: 0.85rem;">—</span>
                             </td>
                         </tr>
+
                         <tr th:if="${#lists.isEmpty(pagos)}" style="border-bottom: none;">
-                            <td colspan="7" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
-                                <i class="bi bi-cash-stack" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-                                <br>
+                            <td colspan="8" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
+                                <i class="bi bi-inbox" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem; display: block;"></i>
                                 No hay pagos registrados
                             </td>
                         </tr>

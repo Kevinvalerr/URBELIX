@@ -186,16 +186,8 @@ public String mostrarDashboard(Model model, Principal principal, Authentication 
             );
         }
     }
-                        pago.getResidente() != null ? pago.getResidente().getNombre() : "—",
-                        "Registró pago de " + pago.getMonto() + " para apto " + (pago.getApartamento() != null ? pago.getApartamento().getNumero() : "—"),
-                        pago.getCreadoEn() != null ? pago.getCreadoEn().format(formatter) : "Sin fecha",
-                        "Pago",
-                        pago.getCreadoEn())
-                );
-            }
-        }
 
-        for (Reserva reserva : reservaService.listarReservas()) {
+    for (Reserva reserva : reservaService.listarReservas()) {
             if (true) {
                 actividades.add(new DashboardActivity(
                         reserva.getResidente() != null ? reserva.getResidente().getNombre() : "N/A",

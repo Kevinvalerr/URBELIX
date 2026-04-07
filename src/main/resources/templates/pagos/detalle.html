@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Detalle del Pago | NEXUR'">
+        
+        <!-- Page Header -->
+        <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
+            <div class="welcome-content">
+                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.15));">
+                    <i class="bi bi-check-square"></i>
+                </div>
+                <div class="welcome-text">
+                    <h1 class="welcome-title">Confirmar Pago</h1>
+                    <p class="welcome-subtitle">Revisa los detalles y confirma el pago</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Details Card -->
+        <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            
+            <!-- Info Section -->
+            <div style="margin-bottom: 2rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1.5rem;">Información del Pago</h2>
+                
+                <!-- Grid de Info -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    
+                    <!-- Residente -->
+                    <div>
+                        <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Residente</label>
+                        <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.5rem;" th:text="${pago.residente.nombre}"></p>
+                    </div>
+
+                    <!-- Apartamento -->
+                    <div>
+                        <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Apartamento</label>
+                        <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.5rem;">
+                            <span th:text="${pago.apartamento.numero}"></span> - <span th:text="${pago.apartamento.torre}"></span>
+                        </p>
+                    </div>
+
+                    <!-- Tipo de Pago -->
+                    <div>
+                        <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Tipo de Pago</label>
+                        <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.5rem;">
+                            <span th:if="${pago.tipoPago == 'ADMINISTRACION'}" 
+                                  style="background: rgba(59, 130, 246, 0.1); color: #1E40AF; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">
+                                Administración
+                            </span>
+                            <span th:if="${pago.tipoPago == 'MULTA'}" 
+                                  style="background: rgba(239, 68, 68, 0.1); color: #991B1B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">
+                                Multa
+                            </span>
+                            <span th:if="${pago.tipoPago == 'OTRO'}" 
+                                  style="background: rgba(148, 163, 184, 0.1); color: #334155; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">
+                                Otro
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- Método de Pago -->
+                    <div>
+                        <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Método de Pago</label>
+                        <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.5rem;">
+                            <span th:if="${pago.metodo == 'PSE'}" 
+                                  style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">
+                                PSE
+                            </span>
+                            <span th:if="${pago.metodo == 'TARJETA'}" 
+                                  style="background: rgba(59, 130, 246, 0.1); color: #1E40AF; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">
+                                Tarjeta
+                            </span>
+                            <span th:if="${pago.metodo == 'EFECTIVO'}" 
+                                  style="background: rgba(245, 158, 11, 0.1); color: #92400E; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">
+                                Efectivo
+                            </span>
+                            <span th:if="${pago.metodo == 'TRANSFERENCIA'}" 
+                                  style="background: rgba(139, 92, 246, 0.1); color: #5B21B6; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">
+                                Transferencia
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- Fecha de Pago -->
+                    <div>
+                        <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Fecha de Pago</label>
+                        <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.5rem;" th:text="${pago.fecha}"></p>
+                    </div>
+
+                    <!-- Fecha de Vencimiento -->
+                    <div>
+                        <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Fecha de Vencimiento</label>
+                        <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.5rem;" th:text="${pago.fechaVencimiento}"></p>
+                    </div>
+
+                    <!-- Estado -->
+                    <div>
+                        <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Estado</label>
+                        <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.5rem;">
+                            <span th:if="${pago.estadoPago == 'PENDIENTE'}" 
+                                  style="background: rgba(245, 158, 11, 0.1); color: #92400E; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">
+                                Pendiente
+                            </span>
+                            <span th:if="${pago.estadoPago == 'PAGADO'}" 
+                                  style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">
+                                Pagado
+                            </span>
+                            <span th:if="${pago.estadoPago == 'VENCIDO'}" 
+                                  style="background: rgba(239, 68, 68, 0.1); color: #991B1B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">
+                                Vencido
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amount Section (Highlighted) -->
+            <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.05)); padding: 1.5rem; border-radius: 8px; border-left: 4px solid #10B981; margin-bottom: 2rem;">
+                <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Monto a Pagar</label>
+                <p style="color: #10B981; font-weight: 700; font-size: 2rem; margin-top: 0.5rem;">
+                    <span th:text="'$' + ${#numbers.formatDecimal(pago.monto, 0, 'DEFAULT', 0, 'DEFAULT')}"></span>
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 1rem;">
+                <!-- Confirm Payment Button -->
+                <form th:action="@{/pagos/{id}/confirmar(id=${pago.id})}" method="post" style="display: inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" 
+                            class="btn" 
+                            style="background: linear-gradient(135deg, #10B981, #047857); color: white; padding: 0.75rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1rem;">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Confirmar Pago
+                    </button>
+                </form>
+
+                <!-- Back Button -->
+                <a th:href="@{/pagos}" 
+                   style="background: var(--bg-secondary); color: var(--text-primary); padding: 0.75rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Cancelar
+                </a>
+            </div>
+        </div>
+    </div>
+</html>

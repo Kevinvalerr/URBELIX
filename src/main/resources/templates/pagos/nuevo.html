@@ -1,65 +1,114 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
-    <div th:fragment="content" th:with="titulo='Registrar Pago'">
-        <section class="page-top-section mb-4">
-            <div>
-                <h1>Registrar Pago</h1>
-                <p class="text-muted">Registra aquí los pagos de los residentes y mantén el historial financiero al día.</p>
+    <div th:fragment="content" th:with="titulo='Registrar Nuevo Pago | NEXUR'">
+        
+        <!-- Page Header -->
+        <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
+            <div class="welcome-content">
+                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.15));">
+                    <i class="bi bi-plus-circle"></i>
+                </div>
+                <div class="welcome-text">
+                    <h1 class="welcome-title">Registrar Nuevo Pago</h1>
+                    <p class="welcome-subtitle">Crea un pago para un residente</p>
+                </div>
             </div>
-        </section>
+        </div>
 
-        <div class="form-card">
-            <form th:action="@{/pagos/guardar}" th:object="${pago}" method="post" class="form-grid">
+        <!-- Form -->
+        <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <form th:action="@{/pagos/guardar}" th:object="${pago}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <div class="form-group">
-                    <label for="residente">Residente</label>
-                    <input type="hidden" name="residenteId" th:value="${pago.residente.id}" />
-                    <input type="text" th:value="${pago.residente.nombre}" class="form-control" readonly />
-                    <p class="form-error" th:if="${#fields.hasErrors('residente')}" th:errors="*{residente}"></p>
+
+                <!-- Errors Alert -->
+                <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; background-color: #FEE2E2; border-left: 4px solid #DC2626; color: #991B1B;">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <span>Por favor, revisa los errores en el formulario</span>
                 </div>
-                <div class="form-group">
-                    <label for="apartamentoId">Apartamento</label>
-                    <input type="text" th:value="${pago.apartamento.numero}" class="form-control" readonly />
-                    <p class="form-error" th:if="${#fields.hasErrors('apartamento')}" th:errors="*{apartamento}"></p>
-                </div>
-                <div class="form-group">
-                    <label for="monto">Monto</label>
-                    <input id="monto" th:field="*{monto}" type="number" step="0.01" placeholder="Ej. 350000" required />
-                    <p class="form-error" th:if="${#fields.hasErrors('monto')}" th:errors="*{monto}"></p>
-                </div>
-                <div class="form-group">
-                    <label for="metodo">Método de pago</label>
-                    <select id="metodo" th:field="*{metodo}" class="form-select" required>
-                        <option value="">Seleccione método</option>
-                        <option value="PSE">PSE</option>
-                        <option value="TARJETA">Tarjeta</option>
-                        <option value="EFECTIVO">Efectivo</option>
-                        <option value="TRANSFERENCIA">Transferencia</option>
+
+                <!-- Residente Selection -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="residente" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Residente *</label>
+                    <select name="residenteId" id="residente" required 
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;">
+                        <option value="">-- Selecciona un residente --</option>
+                        <option th:each="residente : ${residentes}" 
+                                th:value="${residente.id}" 
+                                th:text="${residente.nombre}"></option>
                     </select>
-                    <p class="form-error" th:if="${#fields.hasErrors('metodo')}" th:errors="*{metodo}"></p>
+                    <div th:if="${#fields.hasErrors('residente')}" th:errors="*{residente}" style="color: #DC2626; font-size: 0.85rem; margin-top: 0.25rem;"></div>
                 </div>
-                <div class="form-group">
-                    <label for="tipoPago">Tipo de pago</label>
-                    <select id="tipoPago" th:field="*{tipoPago}" class="form-select" required>
-                        <option value="">Seleccione tipo</option>
-                        <option value="ADMINISTRACION">Administración</option>
-                        <option value="MULTA">Multa</option>
-                        <option value="OTRO">Otro</option>
+
+                <!-- Apartamento Selection -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="apartamento" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Apartamento *</label>
+                    <select name="apartamentoId" id="apartamento" required 
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;">
+                        <option value="">-- Selecciona un apartamento --</option>
+                        <option th:each="apartamento : ${apartamentos}" 
+                                th:value="${apartamento.id}" 
+                                th:text="${apartamento.numero + ' - ' + apartamento.torre}"></option>
                     </select>
+                    <div th:if="${#fields.hasErrors('apartamento')}" th:errors="*{apartamento}" style="color: #DC2626; font-size: 0.85rem; margin-top: 0.25rem;"></div>
                 </div>
-                <div class="form-group">
-                    <label for="fechaVencimiento">Fecha de vencimiento</label>
-                    <input id="fechaVencimiento" th:field="*{fechaVencimiento}" type="date" class="form-control" />
+
+                <!-- Tipo de Pago -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="tipoPago" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Tipo de Pago *</label>
+                    <select name="tipoPago" id="tipoPago" th:field="*{tipoPago}" required 
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;">
+                        <option value="">-- Selecciona tipo --</option>
+                        <option th:each="tipo : ${tiposPago}" th:value="${tipo}" th:text="${tipo.descripcion}"></option>
+                    </select>
+                    <div th:if="${#fields.hasErrors('tipoPago')}" th:errors="*{tipoPago}" style="color: #DC2626; font-size: 0.85rem; margin-top: 0.25rem;"></div>
                 </div>
-                <div class="form-group">
-                    <label for="fecha">Fecha</label>
-                    <input id="fecha" th:field="*{fecha}" class="form-control" type="date" required />
-                    <p class="form-error" th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}"></p>
+
+                <!-- Monto -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="monto" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Monto ($) *</label>
+                    <input type="number" id="monto" th:field="*{monto}" required min="0" step="0.01"
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;"
+                           placeholder="100000"/>
+                    <div th:if="${#fields.hasErrors('monto')}" th:errors="*{monto}" style="color: #DC2626; font-size: 0.85rem; margin-top: 0.25rem;"></div>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary btn-main-action btn-sm">
-                        <i class="bi bi-cash-stack me-2"></i>Guardar pago
+
+                <!-- Método de Pago -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="metodo" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Método de Pago *</label>
+                    <select name="metodo" id="metodo" th:field="*{metodo}" required 
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;">
+                        <option value="">-- Selecciona método --</option>
+                        <option th:each="metodo : ${metodosPago}" th:value="${metodo}" th:text="${metodo.descripcion}"></option>
+                    </select>
+                    <div th:if="${#fields.hasErrors('metodo')}" th:errors="*{metodo}" style="color: #DC2626; font-size: 0.85rem; margin-top: 0.25rem;"></div>
+                </div>
+
+                <!-- Fecha -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="fecha" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Fecha *</label>
+                    <input type="date" id="fecha" th:field="*{fecha}" required 
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;"/>
+                    <div th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}" style="color: #DC2626; font-size: 0.85rem; margin-top: 0.25rem;"></div>
+                </div>
+
+                <!-- Fecha Vencimiento -->
+                <div style="margin-bottom: 2rem;">
+                    <label for="fechaVencimiento" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Fecha de Vencimiento *</label>
+                    <input type="date" id="fechaVencimiento" th:field="*{fechaVencimiento}" required 
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;"/>
+                    <div th:if="${#fields.hasErrors('fechaVencimiento')}" th:errors="*{fechaVencimiento}" style="color: #DC2626; font-size: 0.85rem; margin-top: 0.25rem;"></div>
+                </div>
+
+                <!-- Buttons -->
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button type="submit" 
+                            style="background: linear-gradient(135deg, #3B82F6, #1E40AF); color: white; padding: 0.75rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1rem;">
+                        Registrar Pago
                     </button>
+                    <a th:href="@{/pagos}" 
+                       style="background: #F3F4F6; color: #111827; padding: 0.75rem 2rem; border-radius: 8px; border: 1px solid #D1D5DB; font-weight: 600; cursor: pointer; font-size: 1rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                        Cancelar
+                    </a>
                 </div>
             </form>
         </div>

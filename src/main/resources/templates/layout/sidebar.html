@@ -52,10 +52,6 @@
             <i class="bi bi-door-open-fill me-2"></i>
             Visitantes
         </a>
-        <a href="/pagos/nuevo" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/pagos')} ? ' active' : ''" sec:authorize="isAuthenticated()">
-            <i class="bi bi-cash-stack me-2"></i>
-            Registrar pago
-        </a>
         <a href="/reservas/nueva" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/reservas')} ? ' active' : ''" sec:authorize="hasRole('ADMIN')">
             <i class="bi bi-calendar-check me-2"></i>
             Aprobacion de reservas

@@ -155,12 +155,12 @@
         <div sec:authorize="hasRole('RESIDENTE')" class="resident-summary-section">
             <div class="resident-summary-top">
                 <div>
-                    <h2 class="section-title">Mi Panel Personal</h2>
-                    <p class="section-subtitle">Todo lo que necesitas ver de un vistazo como residente.</p>
+                    <h2 class="section-title">Resumen personal</h2>
+                    <p class="section-subtitle">Tu información más importante para pagos y reservas.</p>
                 </div>
                 <div class="resident-actions">
-                    <a href="/pagos/nuevo" class="action-pill action-info">Pagar ahora</a>
-                    <a href="/reservas/nueva" class="action-pill action-primary">Reservar espacio</a>
+                    <a href="/pagos" class="action-pill action-info">Ver mis pagos</a>
+                    <a href="/reservas" class="action-pill action-primary">Ver mis reservas</a>
                 </div>
             </div>
             <div class="summary-cards">
@@ -169,12 +169,9 @@
                         <i class="bi bi-house-door"></i>
                     </div>
                     <div class="summary-content">
-                        <h4>Mi Apartamento</h4>
+                        <h4>Mi apartamento</h4>
                         <p class="summary-value" th:text="${miApartamento != null ? miApartamento : 'Sin asignar'}">Apt 101</p>
-                        <div class="status-indicator">
-                            <span class="status-dot active"></span>
-                            Activo
-                        </div>
+                        <p class="summary-text">Ubicación y estado actual de tu vivienda.</p>
                     </div>
                 </div>
                 <div class="summary-card status-info">
@@ -182,16 +179,10 @@
                         <i class="bi bi-cash-stack"></i>
                     </div>
                     <div class="summary-content">
-                        <h4>Mis Pagos</h4>
-                        <p class="summary-value" th:text="${misPagosCount != null ? misPagosCount : 0} + ' registrados'">3 registrados</p>
-                        <div class="payment-status" th:if="${estadoPago == 'AL_DIA'}" style="color: #16A34A; font-size: 0.85rem; font-weight: 600;">
-                            <i class="bi bi-check-circle"></i> Al día
-                        </div>
-                        <div class="payment-status" th:if="${estadoPago == 'PENDIENTE'}" style="color: #D97706; font-size: 0.85rem; font-weight: 600;">
-                            <i class="bi bi-exclamation-triangle"></i> Pendiente
-                        </div>
-                        <p><strong>Mora:</strong> <span th:text="${estadoMora}">No hay mora registrada</span></p>
-                        <p><strong>Multa:</strong> <span th:text="${multa}">No se han registrado multas</span></p>
+                        <h4>Mis pagos</h4>
+                        <p class="summary-value" th:text="${misPagosCount != null ? misPagosCount : 0} + ' pagos'">3 pagos</p>
+                        <p class="summary-text">Pendientes: <strong th:text="${pagosPendientes != null ? pagosPendientes : 0}">0</strong></p>
+                        <p class="summary-text">Pagos al día: <strong th:text="${pagosAlDia != null ? pagosAlDia : 0}">0</strong></p>
                     </div>
                 </div>
                 <div class="summary-card status-primary">
@@ -199,11 +190,10 @@
                         <i class="bi bi-calendar-check"></i>
                     </div>
                     <div class="summary-content">
-                        <h4>Mis Reservas</h4>
+                        <h4>Mis reservas</h4>
                         <p class="summary-value" th:text="${misReservasCount != null ? misReservasCount : 0} + ' activas'">2 activas</p>
-                        <div class="next-reservation" th:if="${proximaReserva}">
-                            <small style="color: var(--text-secondary);">Próxima: <span th:text="${proximaReserva}">Piscina - Hoy 15:00</span></small>
-                        </div>
+                        <p class="summary-text" th:if="${proximaReserva}">Próxima reserva: <strong th:text="${proximaReserva}">Piscina - Hoy 15:00</strong></p>
+                        <p class="summary-text" th:unless="${proximaReserva}">No tienes reservas próximas.</p>
                     </div>
                 </div>
                 <div class="summary-card status-warning">
@@ -212,13 +202,9 @@
                     </div>
                     <div class="summary-content">
                         <h4>Notificaciones</h4>
-                        <p class="summary-value" th:text="${notificacionesCount != null ? notificacionesCount : 0} + ' nuevas'">1 nueva</p>
-                        <div class="notification-preview" th:if="${ultimaNotificacion}">
-                            <small style="color: var(--text-secondary);" th:text="${ultimaNotificacion}">Recordatorio de pago</small>
-                        </div>
-                        <ul>
-                            <li th:each="nota : ${notificaciones}" th:text="${nota}">Notificación</li>
-                        </ul>
+                        <p class="summary-value" th:text="${notificacionesCount != null ? notificacionesCount : 0} + ' nuevas'">1 nuevas</p>
+                        <p class="summary-text" th:if="${ultimaNotificacion}">Última: <strong th:text="${ultimaNotificacion}">Recordatorio de pago</strong></p>
+                        <p class="summary-text" th:unless="${ultimaNotificacion}">Sin notificaciones recientes.</p>
                     </div>
                 </div>
             </div>
