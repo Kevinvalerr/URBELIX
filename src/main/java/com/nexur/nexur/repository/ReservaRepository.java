@@ -16,7 +16,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     long countByEstado(String estado);
     
     Long countByEstado(EstadoReserva estado);
-   List<Reserva> findByFechaInicioBetween(LocalDateTime inicio, LocalDateTime fin);
+    boolean existsByApartamentoId(Long apartamentoId);
+    long countByApartamentoId(Long apartamentoId);
+    List<Reserva> findByFechaInicioBetween(LocalDateTime inicio, LocalDateTime fin);
     List<Reserva> findByTipoEspacio(TipoEspacio tipoEspacio);
     List<Reserva> findByTipoEspacioAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
        TipoEspacio tipoEspacio,

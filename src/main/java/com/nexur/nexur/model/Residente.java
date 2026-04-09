@@ -4,16 +4,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
 import com.nexur.nexur.model.Usuario;
 
 @Entity
 @Table(name = "residentes")
 public class Residente {
 
-    @ManyToOne
-@JoinColumn(name = "usuario_id")
+ @OneToOne
+@JoinColumn(name = "usuario_id", unique = true)
 private Usuario usuario;
  
    

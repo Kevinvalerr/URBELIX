@@ -12,6 +12,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collection;
 import java.util.List;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.CascadeType;
 
 
 @Entity
@@ -21,6 +23,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Usuario implements UserDetails {
+
+@OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
+private Residente residente;
+      
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

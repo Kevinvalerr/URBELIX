@@ -22,6 +22,8 @@ public class ReservaService {
         this.apartamentoRepository = apartamentoRepository;
     }
 
+     
+
     public List<Reserva> listarReservas() {
         return reservaRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
     }
@@ -34,9 +36,6 @@ public class ReservaService {
         Apartamento apartamento = apartamentoRepository.findById(apartamentoId)
                 .orElseThrow(() -> new RuntimeException("Apartamento no encontrado"));
         reserva.setApartamento(apartamento);
-        if (reserva.getEstado() == null) {
-            reserva.setEstado(EstadoReserva.PENDIENTE);
-        }
 
         List<Reserva> conflictos = reservaRepository
             .findByTipoEspacioAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
@@ -45,8 +44,8 @@ public class ReservaService {
                     reserva.getFechaInicio()
             );
 
-           if (conflictos.stream().anyMatch(r -> r.getEstado() == EstadoReserva.APROBADA)) {
-          throw new RuntimeException("Ya existe una reserva aprobada en ese horario para este espacio");
+           if (!conflictos.isEmpty()) {
+          throw new RuntimeException("Ya existe una reserva en ese horario para este espacio");
          }
 
          if (reserva.getObservaciones() == null || reserva.getObservaciones().isBlank()) {
@@ -75,21 +74,17 @@ public class ReservaService {
     };
 }
 
-   public void aprobarReserva(Long id) {
-    aprobarReserva(id, null);
-}
-
 public void aprobarReserva(Long id, String comentario) {
     Reserva reserva = reservaRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
     reserva.setEstado(EstadoReserva.APROBADA);
-    agregarObservacionAdmin(reserva, comentario, "APROBADA");
-    reservaRepository.save(reserva);
-}
 
-public void rechazarReserva(Long id) {
-    rechazarReserva(id, null);
+    if (comentario != null && !comentario.isBlank()) {
+        reserva.setObservaciones(comentario);
+    }
+
+    reservaRepository.save(reserva);
 }
 
 public void rechazarReserva(Long id, String comentario) {
@@ -97,21 +92,11 @@ public void rechazarReserva(Long id, String comentario) {
             .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
     reserva.setEstado(EstadoReserva.RECHAZADA);
-    agregarObservacionAdmin(reserva, comentario, "RECHAZADA");
+
+    if (comentario != null && !comentario.isBlank()) {
+        reserva.setObservaciones(comentario);
+    }
+
     reservaRepository.save(reserva);
 }
-
-private void agregarObservacionAdmin(Reserva reserva, String comentario, String estado) {
-    if (comentario == null || comentario.isBlank()) {
-        return;
-    }
-    String textoComentario = "Observación administrativa (" + estado + "): " + comentario.trim();
-    String observacionesExistentes = reserva.getObservaciones();
-    if (observacionesExistentes == null || observacionesExistentes.isBlank()) {
-        reserva.setObservaciones(textoComentario);
-    } else {
-        reserva.setObservaciones(observacionesExistentes + "\n" + textoComentario);
-    }
-}
-
 }

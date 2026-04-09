@@ -16,6 +16,8 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
     List<Pago> findByMetodo(String metodo);
 
     List<Pago> findByResidenteUsuarioEmail(String email);
+    boolean existsByApartamentoId(Long apartamentoId);
+    long countByApartamentoId(Long apartamentoId);
     
     List<Pago> findByEstadoPago(EstadoPago estadoPago);
 

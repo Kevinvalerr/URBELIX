@@ -90,16 +90,16 @@ public String guardarReserva(@Valid @ModelAttribute("reserva") Reserva reserva,
         model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
         return "reservas/nueva";
     }
-String email = authentication.getName();
-Residente residente = residenteService.obtenerTodos().stream()
-    .filter(r -> r.getNombre().equalsIgnoreCase(email))
-    .findFirst()
-    .orElseGet(() -> {
-        Residente nuevo = new Residente();
-        nuevo.setNombre(email);
-        return residenteService.guardar(nuevo, reserva.getApartamento().getId());
-    });
-reserva.setResidente(residente);
+
+    String email = authentication.getName();
+    Residente residente;
+    try {
+        residente = residenteService.buscarPorUsuarioEmail(email);
+    } catch (RuntimeException e) {
+        redirectAttributes.addFlashAttribute("error", "No se encontró su perfil de residente. Contacte a un administrador para completar sus datos antes de reservar.");
+        return "redirect:/dashboard";
+    }
+    reserva.setResidente(residente);
 
     try {
         reservaService.guardar(reserva, reserva.getApartamento().getId());

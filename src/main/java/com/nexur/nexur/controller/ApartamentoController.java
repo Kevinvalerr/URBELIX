@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import org.springframework.ui.Model;
 import java.util.List;
@@ -100,10 +101,12 @@ public class ApartamentoController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/apartamentos/eliminar/{id}")
-     public String eliminarApartamento(@PathVariable Long id){
-        
-        apartamentoService.eliminarApartamento(id);
-
+     public String eliminarApartamento(@PathVariable Long id, RedirectAttributes redirectAttributes){
+        try {
+            apartamentoService.eliminarApartamento(id);
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+        }
         return "redirect:/apartamentos";
      }   
 
