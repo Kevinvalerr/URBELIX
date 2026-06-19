@@ -8,11 +8,11 @@
 		<version>4.0.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.nexur</groupId>
-	<artifactId>nexur</artifactId>
+	<groupId>com.urbelix</groupId>
+	<artifactId>urbelix</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Nexur</name>
-	<description>Sitema web de getion recidencial</description>
+	<name>Urbelix</name>
+	<description>Sistema web de gestion residencial</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -61,6 +61,16 @@
         <artifactId>poi-ooxml</artifactId>
         <version>5.2.5</version>
         </dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>kernel</artifactId>
+			<version>8.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>layout</artifactId>
+			<version>8.0.3</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -140,3 +150,4 @@
 	</build>
 
 </project>
+

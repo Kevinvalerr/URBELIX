@@ -1,6 +1,18 @@
 ﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
-    <div th:fragment="content" th:with="titulo='Usuarios | NEXUR'">
+   
+       
+    <div th:fragment="content" th:with="titulo='Usuarios | Urbelix'">
+
+       <div th:if="${success}" class="alert alert-success">
+        <span th:text="${success}"></span>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger">
+        <span th:text="${error}"></span>
+    </div>
+
+        
         <!-- Page Header -->
         <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
             <div class="welcome-content" style="gap: 2rem;">
@@ -77,3 +89,5 @@
         </div>
     </div>
 </html>
+
+

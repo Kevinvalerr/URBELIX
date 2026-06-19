@@ -1,91 +1,203 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
-    <div th:fragment="content" th:with="titulo='Reportes | NEXUR'">
-        <!-- Page Header -->
-        <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
-            <div class="welcome-content" style="gap: 2rem;">
-                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(251, 191, 36, 0.15));">
-                    <i class="bi bi-bar-chart-line"></i>
-                </div>
-                <div class="welcome-text">
-                    <h1 class="welcome-title">Reportes del Sistema</h1>
-                    <p class="welcome-subtitle">Genera reportes detallados de pagos, reservas y visitas</p>
-                </div>
-            </div>
-            <div class="welcome-stats">
-                <div class="stat-item">
-                    <div class="stat-number" th:text="${registros.size()}">0</div>
-                    <div class="stat-label">Registros</div>
-                </div>
-            </div>
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+
+<div th:fragment="content" th:with="titulo='Reportes'">
+
+    <section class="page-top-section mb-4">
+        <div>
+            <h1>Generador de Reportes</h1>
+            <p class="text-muted">
+                Genera reportes automáticos con análisis textual de las estadísticas del sistema.
+            </p>
         </div>
 
-        <!-- Filter Form -->
-        <div class="timeline-container" style="padding: 2rem; margin-bottom: 2rem;">
-            <h3 style="color: var(--text-primary); font-weight: 700; margin-bottom: 1.5rem; font-size: 1.3rem;">Filtros de Reporte</h3>
-            <form th:action="@{/reportes}" method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; align-items: end;">
-                <div>
-                    <label for="tipo" style="display: block; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; font-size: 0.9rem;">Tipo de Reporte</label>
-                    <select id="tipo" name="tipo" style="width: 100%; padding: 0.75rem; border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 8px; background: white; font-size: 0.95rem; transition: border-color 0.3s ease;" onfocus="this.style.borderColor='rgba(37, 99, 235, 0.5)'" onblur="this.style.borderColor='rgba(37, 99, 235, 0.2)'">
-                        <option value="TODOS" th:selected="${tipo == null or tipo == 'TODOS'}">Todos</option>
-                        <option value="PAGOS" th:selected="${tipo == 'PAGOS'}">Pagos</option>
-                        <option value="RESERVAS" th:selected="${tipo == 'RESERVAS'}">Reservas</option>
-                        <option value="VISITANTES" th:selected="${tipo == 'VISITANTES'}">Visitas</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="fechaInicio" style="display: block; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; font-size: 0.9rem;">Fecha Inicio</label>
-                    <input id="fechaInicio" name="fechaInicio" type="date" style="width: 100%; padding: 0.75rem; border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 8px; background: white; font-size: 0.95rem; transition: border-color 0.3s ease;" onfocus="this.style.borderColor='rgba(37, 99, 235, 0.5)'" onblur="this.style.borderColor='rgba(37, 99, 235, 0.2)'" th:value="${fechaInicio}" />
-                </div>
-                <div>
-                    <label for="fechaFin" style="display: block; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; font-size: 0.9rem;">Fecha Fin</label>
-                    <input id="fechaFin" name="fechaFin" type="date" style="width: 100%; padding: 0.75rem; border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 8px; background: white; font-size: 0.95rem; transition: border-color 0.3s ease;" onfocus="this.style.borderColor='rgba(37, 99, 235, 0.5)'" onblur="this.style.borderColor='rgba(37, 99, 235, 0.2)'" th:value="${fechaFin}" />
-                </div>
-                <div>
-                    <button type="submit" style="background: linear-gradient(135deg, #2563EB, #06B6D4); border: none; padding: 0.75rem 2rem; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(37, 99, 235, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                        <i class="bi bi-search" style="margin-right: 0.5rem;"></i>Filtrar Reportes
-                    </button>
-                </div>
-            </form>
+        <div class="page-actions">
+            <button type="button" class="btn btn-primary btn-main-action" id="generarReportBtn">
+                <i class="bi bi-file-pdf me-2"></i>
+                Generar Reporte PDF
+            </button>
         </div>
+    </section>
 
-        <!-- Results Table -->
-        <div class="timeline-container" style="padding: 2rem;">
-            <h3 style="color: var(--text-primary); font-weight: 700; margin-bottom: 1.5rem; font-size: 1.3rem;">Resultados del Reporte</h3>
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; background: transparent;">
-                    <thead>
-                        <tr style="border-bottom: 2px solid rgba(37, 99, 235, 0.1);">
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Tipo</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Entidad</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Usuario</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Descripción</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Fecha y Hora</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="registro : ${registros}" style="border-bottom: 1px solid rgba(37, 99, 235, 0.06); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(37, 99, 235, 0.02)'" onmouseout="this.style.backgroundColor='transparent'">
-                            <td style="padding: 1rem;">
-                                <span th:if="${registro.tipo == 'PAGO'}" style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Pago</span>
-                                <span th:if="${registro.tipo == 'RESERVA'}" style="background: rgba(6, 182, 212, 0.1); color: #06B6D4; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Reserva</span>
-                                <span th:if="${registro.tipo == 'VISITA'}" style="background: rgba(14, 165, 233, 0.1); color: #0EA5E9; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Visita</span>
-                                <span th:if="${registro.tipo != 'PAGO' and registro.tipo != 'RESERVA' and registro.tipo != 'VISITA'}" style="background: rgba(148, 163, 184, 0.1); color: #64748B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;" th:text="${registro.tipo}"></span>
-                            </td>
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${registro.entidad}"></td>
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${registro.usuario}"></td>
-                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${registro.descripcion}"></td>
-                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${#temporals.format(registro.fechaHora, 'dd/MM/yyyy HH:mm')}"></td>
-                        </tr>
-                        <tr th:if="${registros.isEmpty()}" style="border-bottom: none;">
-                            <td colspan="5" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
-                                <i class="bi bi-search" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-                                <br>
-                                No se encontraron registros para estos filtros
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    <!-- ALERTA DE CARGA -->
+    <div id="loadingAlert" class="alert alert-info d-none" role="alert">
+        <div class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <span id="loadingText">Generando reporte desde el servicio de análisis...</span>
+    </div>
+
+    <!-- ALERTA DE ERROR -->
+    <div id="errorAlert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+        <span id="errorText"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- ALERTA DE ÉXITO -->
+    <div id="successAlert" class="alert alert-success alert-dismissible fade show d-none" role="alert">
+        <span id="successText"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- TARJETA CON EL REPORTE GENERADO -->
+    <div id="reportCard" class="card activity-card d-none">
+        <h5>Reporte Generado</h5>
+        <div class="mt-3">
+            <p id="reportText" class="mb-0" style="line-height: 1.8; font-size: 1.1rem;"></p>
+        </div>
+        <div class="mt-3">
+            <button class="btn btn-secondary btn-sm" id="downloadBtn">
+                <i class="bi bi-download me-1"></i>
+                Descargar reporte
+            </button>
+            <button class="btn btn-primary btn-sm" id="printBtn">
+                <i class="bi bi-printer me-1"></i>
+                Imprimir
+            </button>
         </div>
     </div>
+
+    <!-- INFORMACIÓN DEL SISTEMA -->
+    <div class="card activity-card mt-4">
+        <h5>Información del Sistema</h5>
+        <div class="table-dashboard mt-3">
+            <table class="table table-sm mb-0">
+                <tbody>
+                    <tr>
+                        <td class="text-muted">Residentes registrados:</td>
+                        <td><strong id="residentesCount" th:text="${residentes}">0</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Apartamentos registrados:</td>
+                        <td><strong id="apartamentosCount" th:text="${apartamentos}">0</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Pagos realizados:</td>
+                        <td><strong id="pagosRealizadosCount" th:text="${pagosRealizados}">0</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Pagos pendientes:</td>
+                        <td><strong id="pagosPendientesCount" th:text="${pagosPendientes}">0</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Reservas activas:</td>
+                        <td><strong id="reservasActivasCount" th:text="${reservasActivas}">0</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- INFORMACIÓN TÉCNICA -->
+    <div class="card activity-card mt-4">
+        <h5>Información Técnica</h5>
+        <p class="text-muted mb-2">
+            Este módulo utiliza un microservicio Python (FastAPI) que analiza las estadísticas
+            del sistema y genera reportes automáticos en lenguaje natural.
+        </p>
+        <p class="text-muted">
+            <strong>Arquitectura:</strong> Spring Boot ↔ FastAPI REST
+        </p>
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Reporte lista: DOMContentLoaded');
+            const generarBtn = document.getElementById('generarReportBtn');
+            const loadingAlert = document.getElementById('loadingAlert');
+            const errorAlert = document.getElementById('errorAlert');
+            const successAlert = document.getElementById('successAlert');
+            const reportCard = document.getElementById('reportCard');
+
+            if (!generarBtn) {
+                console.error('No se encontró el botón Generar Reporte PDF');
+                return;
+            }
+
+            generarBtn.addEventListener('click', function() {
+                console.log('Botón Generar Reporte PDF clickeado');
+                generarReportePDF();
+            });
+
+            function generarReportePDF() {
+                console.log('[generarReportePDF] Iniciando generación...');
+                
+                loadingAlert.classList.remove('d-none');
+                errorAlert.classList.add('d-none');
+                successAlert.classList.add('d-none');
+                reportCard.classList.add('d-none');
+
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+
+                console.log('[generarReportePDF] CSRF', {
+                    header: csrfHeader,
+                    present: !!csrfToken
+                });
+
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (csrfToken) {
+                    headers[csrfHeader] = csrfToken;
+                }
+
+                fetch('/reportes/generar-pdf', {
+                    method: 'POST',
+                    headers: headers
+                })
+                .then(response => {
+                    console.log('[generarReportePDF] Respuesta recibida', response.status, response.statusText);
+                    
+                    if (!response.ok) {
+                        throw new Error('Error HTTP ' + response.status + ': ' + response.statusText);
+                    }
+                    
+                    return response.blob();
+                })
+                .then(pdfBlob => {
+                    console.log('[generarReportePDF] PDF recibido, tamaño:', pdfBlob.size, 'bytes');
+                    
+                    loadingAlert.classList.add('d-none');
+                    
+                    const url = window.URL.createObjectURL(pdfBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'reporte_' + new Date().toISOString().slice(0, 10) + '.pdf';
+                    document.body.appendChild(link);
+                    link.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(link);
+                    
+                    successAlert.classList.remove('d-none');
+                    document.getElementById('successText').textContent = '¡PDF generado y descargado exitosamente!';
+                    
+                    console.log('[generarReportePDF] PDF descargado correctamente');
+                })
+                .catch(error => {
+                    console.error('[generarReportePDF] Error:', error);
+                    loadingAlert.classList.add('d-none');
+                    errorAlert.classList.remove('d-none');
+                    document.getElementById('errorText').textContent = 'Error: ' + error.message;
+                });
+            }
+
+            // Botón de impresión
+            document.getElementById('printBtn').addEventListener('click', function() {
+                const printWindow = window.open('', '_blank');
+                const reportText = document.getElementById('reportText').textContent;
+                printWindow.document.write('<html><head><title>Reporte Urbelix</title></head><body>');
+                printWindow.document.write('<h2>Reporte del Sistema Urbelix</h2>');
+                printWindow.document.write('<p>' + reportText + '</p>');
+                printWindow.document.write('<p style="font-size: 0.8em; color: #999; margin-top: 2em;">Generado el: ' + new Date().toLocaleString() + '</p>');
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.print();
+            });
+        });
+    </script>
+</div>
+
 </html>
+
+

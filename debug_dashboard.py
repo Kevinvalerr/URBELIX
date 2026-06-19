@@ -15,7 +15,7 @@ token = match.group(1)
 print('CSRF', token)
 
 login_data = urllib.parse.urlencode({
-    'username': 'admin@nexur.com',
+    'username': 'admin@URBELIX.com',
     'password': 'admin123',
     '_csrf': token
 }).encode('utf-8')
@@ -28,3 +28,4 @@ resp = opener.open('http://localhost:8081/dashboard')
 print('DASHBOARD STATUS', resp.status)
 content = resp.read().decode('utf-8', errors='replace')
 print(content[:2000])
+

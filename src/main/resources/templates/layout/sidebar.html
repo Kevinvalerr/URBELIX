@@ -1,10 +1,10 @@
-<div xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="sidebar" class="sidebar-panel">
+﻿<div xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="sidebar" class="sidebar-panel">
     <div class="sidebar-brand mb-4">
         <div class="sidebar-brand-icon">
             <i class="bi bi-building"></i>
         </div>
         <div class="sidebar-brand-text">
-            <span class="sidebar-brand-name">NEXUR</span>
+            <span class="sidebar-brand-name">Urbelix</span>
             <span class="sidebar-brand-subtitle">
                 <span sec:authorize="hasRole('ADMIN')">Panel administrativo</span>
                 <span sec:authorize="hasRole('RESIDENTE')">Panel de residente</span>
@@ -71,3 +71,5 @@
 
     </nav>
 </div>
+
+

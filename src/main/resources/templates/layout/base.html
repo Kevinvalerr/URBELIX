@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="page">
 
 
@@ -7,7 +7,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${titulo} ?: 'NEXUR'">NEXUR</title>
+    <meta name="_csrf" th:content="${_csrf.token}" th:if="${_csrf != null}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" th:if="${_csrf != null}" />
+    <meta name="_csrf_parameter" th:content="${_csrf.parameterName}" th:if="${_csrf != null}" />
+    <title th:text="${titulo} ?: 'Urbelix'">Urbelix</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,12 +19,13 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/form-validation.js}"></script>
 </head>
 
 <body class="layout-body">
 
 <nav class="navbar navbar-dark px-4 navbar-main">
-    <span class="navbar-brand fw-bold">NEXUR</span>
+    <span class="navbar-brand fw-bold">Urbelix</span>
     <div class="d-flex align-items-center gap-3">
         <span class="text-light small" sec:authorize="hasRole('ADMIN')">Admin</span>
         <span class="text-light small" sec:authorize="hasRole('RESIDENTE')">Residente</span>
@@ -43,7 +47,8 @@
     </main>
 </div>
 
-<footer class="text-center mt-5 p-3 footer-bar">NEXUR - Panel de gestión residencial</footer>
+<footer class="text-center mt-5 p-3 footer-bar">Urbelix - Panel de gestión residencial</footer>
 
 </body>
 </html>
+
