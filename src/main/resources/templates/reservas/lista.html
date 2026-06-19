@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
 
 <div th:if="${success}" class="alert alert-success" style="position: fixed; top: 20px; right: 20px; z-index: 1000; max-width: 400px; border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
@@ -6,7 +6,7 @@
     <span th:text="${success}"></span>
 </div>
 
-    <div th:fragment="content" th:with="titulo='Reservas | NEXUR'">
+    <div th:fragment="content" th:with="titulo='Reservas | Urbelix'">
         <!-- Page Header -->
         <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
             <div class="welcome-content" style="gap: 2rem;">
@@ -101,3 +101,5 @@
         </div>
     </div>
 </html>
+
+

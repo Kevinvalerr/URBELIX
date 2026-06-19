@@ -1,10 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" 
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" 
       th:replace="layout/base :: page">
     
-    <div th:fragment="content" th:with="titulo='Gestión de Pagos | NEXUR'">
-           <div th:fragment="content" th:with="titulo='Gestión de Pagos | NEXUR'">
+    <div th:fragment="content" th:with="titulo='Gestión de Pagos | Urbelix'">
         <!-- Page Header -->
          <a href="/excel/pagos" class="btn btn-success">
     Exportar Pagos Excel
@@ -20,7 +19,7 @@
                     <p class="welcome-subtitle" th:text="${isAdmin ? 'Administra todos los pagos del condominio' : 'Visualiza y gestiona tus pagos pendientes'}"></p>
                 </div>
             </div>
-            <div class="welcome-stats">
+            <div class="welcome-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; align-items: stretch;">
                 <div class="stat-item">
                     <div class="stat-number" th:text="${totalPagos}">0</div>
                     <div class="stat-label">Total Pagos</div>
@@ -33,12 +32,24 @@
                     <div class="stat-number" th:text="${totalPagado}">0</div>
                     <div class="stat-label">Pagados</div>
                 </div>
+                <div class="stat-item">
+                    <div class="stat-number" th:text="${totalVencido}">0</div>
+                    <div class="stat-label">Vencidos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" th:text="' $' + ${#numbers.formatDecimal(montoPendiente, 0, 'DEFAULT', 0, 'DEFAULT')}">0</div>
+                    <div class="stat-label">Monto Pendiente</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" th:text="' $' + ${#numbers.formatDecimal(montoTotal, 0, 'DEFAULT', 0, 'DEFAULT')}">0</div>
+                    <div class="stat-label">Monto Total</div>
+                </div>
             </div>
         </div>
 
         <!-- Action Buttons -->
         <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
-            <div sec:authorize="hasRole('ADMIN')" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <div sec:authorize="hasRole('ADMIN')" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
                 <a href="/pagos/nuevo" 
                    class="btn" 
                    style="background: linear-gradient(135deg, #3B82F6, #1E40AF); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
@@ -58,6 +69,19 @@
 
             <div sec:authorize="hasRole('RESIDENTE')" style="display: flex; align-items: center;">
                 <span style="color: #475569; font-weight: 600;">Verifica tus pagos pendientes y confirma desde la fila correspondiente.</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; align-items: center;">
+            <div style="flex: 1; min-width: 220px;">
+                <label style="font-weight: 600; color: #475569; display: block; margin-bottom: 0.5rem;">Buscar pagador o apartamento</label>
+                <input id="searchInput" type="search" placeholder="Residente, apartamento, método..." style="width: 100%; padding: 0.85rem 1rem; border-radius: 0.75rem; border: 1px solid #CBD5E1;" oninput="filterPagos()" />
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button type="button" class="btn" style="background: #E5E7EB; color: #111827; padding: 0.75rem 1rem; border-radius: 0.75rem; border: none; cursor: pointer;" onclick="setStatusFilter('ALL')">Todos</button>
+                <button type="button" class="btn" style="background: #F97316; color: white; padding: 0.75rem 1rem; border-radius: 0.75rem; border: none; cursor: pointer;" onclick="setStatusFilter('PENDIENTE')">Pendientes</button>
+                <button type="button" class="btn" style="background: #34D399; color: white; padding: 0.75rem 1rem; border-radius: 0.75rem; border: none; cursor: pointer;" onclick="setStatusFilter('PAGADO')">Pagados</button>
+                <button type="button" class="btn" style="background: #F87171; color: white; padding: 0.75rem 1rem; border-radius: 0.75rem; border: none; cursor: pointer;" onclick="setStatusFilter('VENCIDO')">Vencidos</button>
             </div>
         </div>
 
@@ -88,7 +112,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="pago : ${pagos}" 
+                        <tr th:each="pago : ${pagos}" class="pago-row"
+                            th:attr="data-status=${pago.estadoPago.name()}, data-residente=${pago.residente != null ? pago.residente.nombre : 'N/A'}, data-apartamento=${pago.apartamento != null ? pago.apartamento.numero : 'N/A'}"
                             style="border-bottom: 1px solid rgba(59, 130, 246, 0.06); transition: background-color 0.3s ease;" 
                             onmouseover="this.style.backgroundColor='rgba(59, 130, 246, 0.02)'" 
                             onmouseout="this.style.backgroundColor='transparent'">
@@ -178,4 +203,30 @@
             </div>
         </div>
     </div>
+
+    <script>
+        let currentStatusFilter = 'ALL';
+
+        function setStatusFilter(status) {
+            currentStatusFilter = status;
+            filterPagos();
+        }
+
+        function filterPagos() {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
+            document.querySelectorAll('.pago-row').forEach(row => {
+                const status = row.getAttribute('data-status') || '';
+                const residente = row.getAttribute('data-residente') || '';
+                const apartamento = row.getAttribute('data-apartamento') || '';
+                const text = (residente + ' ' + apartamento + ' ' + status).toLowerCase();
+
+                const statusMatch = currentStatusFilter === 'ALL' || status === currentStatusFilter;
+                const searchMatch = searchValue === '' || text.includes(searchValue);
+
+                row.style.display = statusMatch && searchMatch ? '' : 'none';
+            });
+        }
+    </script>
 </html>
+
+
