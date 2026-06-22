@@ -56,6 +56,19 @@
 
     </div>
 
+    <!-- IMPORT SUMMARY -->
+    <div th:if="${importSummary}" class="alert alert-info alert-dismissible fade show" role="alert">
+        <strong>Resumen:</strong> <span th:text="${importSummary}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div th:if="${importErrors}">
+            <hr />
+            <strong>Omisiones:</strong>
+            <ul>
+                <li th:each="err : ${importErrors}" th:text="${err}"></li>
+            </ul>
+        </div>
+    </div>
+
     <!-- TABLA -->
     <div class="card activity-card">
 

@@ -20,7 +20,12 @@
             </div>
         </div>
 
-        <!-- Create Resident Button -->
+        <div style="display:flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
+            <a th:href="@{/residentes/nuevo}" class="btn btn-primary" style="padding: 0.85rem 1.2rem; font-weight: 600;">Nuevo Residente</a>
+            <a th:href="@{/admin/residentes-import}" class="btn btn-secondary" style="padding: 0.85rem 1.2rem; font-weight: 600;">Importar Residentes Excel</a>
+        </div>
+
+        <!-- Residents Table -->
       
         <!-- Residents Table -->
         <div class="timeline-container" style="padding: 2rem;">
