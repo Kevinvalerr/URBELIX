@@ -20,6 +20,10 @@
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button type="submit" class="btn btn-success">Confirmar Pago (manual)</button>
             </form>
+            <form th:action="@{/pagos/{id}/rechazar(id=${pago.id})}" method="post" th:if="${pago.estadoPago.name() == 'PENDIENTE'}" class="mt-2">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn-outline-danger">Simular rechazo</button>
+            </form>
 
             <a th:if="${pago.metodo.name() == 'PSE'}"
                th:href="@{'/pagos/' + ${pago.id} + '/simular-pse'}"

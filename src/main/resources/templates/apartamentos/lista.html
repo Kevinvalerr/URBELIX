@@ -24,6 +24,7 @@
                 Importar Excel
             </button>
 
+
         </div>
     </section>
 
@@ -81,7 +82,7 @@
                 <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Número</th>
+                    <th>APTO</th>
                     <th>Torre</th>
                     <th>Piso</th>
                     <th>Estado</th>
@@ -160,6 +161,15 @@
                            th:value="${_csrf.token}" />
 
                     <div class="modal-body">
+
+                        <div class="alert alert-info">
+                            <strong>Formato requerido:</strong> usa las columnas Numero, Torre, Piso y Estado.
+                            Debes indicar el número de APTO. El ID interno se genera automáticamente en el sistema.
+                        </div>
+
+                        <a th:href="@{/apartamentos/plantilla}" class="btn btn-outline-success mb-3">
+                            Descargar plantilla Excel
+                        </a>
 
                         <input type="file"
                                name="archivo"

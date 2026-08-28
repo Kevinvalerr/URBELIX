@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
-    <div th:fragment="content" th:with="titulo='Detalle del Pago | Urbelix'">
+    <div th:fragment="content" th:with="titulo='Detalle del Pago | URBELIX'">
         
         <!-- Page Header -->
         <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
@@ -29,6 +29,11 @@
                     <div>
                         <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Residente</label>
                         <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.5rem;" th:text="${pago.residente.nombre}"></p>
+                    </div>
+
+                    <div th:if="${pago.referenciaPago != null}">
+                        <label style="font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Referencia</label>
+                        <p style="color: var(--text-primary); font-weight: 500; margin-top: 0.5rem;" th:text="${pago.referenciaPago}"></p>
                     </div>
 
                     <!-- Apartamento -->
@@ -133,6 +138,11 @@
                         Pagar en Línea (PSE)
                     </a>
                 </div>
+                <a th:if="${pago.estadoPago.name() != 'PENDIENTE'}"
+                   th:href="@{/pagos/{id}/recibo(id=${pago.id})}"
+                   class="btn btn-outline-primary">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Descargar recibo
+                </a>
                 <div th:if="${pago.estadoPago.name() != 'PENDIENTE'}" style="padding: 1rem 1.25rem; background: #F8FAFC; color: #475569; border-radius: 0.75rem; border: 1px solid #E2E8F0;">
                     <strong>Estado:</strong>
                     <span th:text="${pago.estadoPago.name()}"></span>

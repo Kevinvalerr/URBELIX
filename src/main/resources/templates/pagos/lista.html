@@ -3,9 +3,9 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" 
       th:replace="layout/base :: page">
     
-    <div th:fragment="content" th:with="titulo='Gestión de Pagos | Urbelix'">
+    <div th:fragment="content" th:with="titulo='Gestión de Pagos | URBELIX'">
         <!-- Page Header -->
-         <a href="/excel/pagos" class="btn btn-success">
+         <a th:href="@{/excel/pagos}" class="btn btn-success">
     Exportar Pagos Excel
 </a>
         <!-- Page Header -->

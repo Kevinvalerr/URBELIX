@@ -10,7 +10,7 @@
     <meta name="_csrf" th:content="${_csrf.token}" th:if="${_csrf != null}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" th:if="${_csrf != null}" />
     <meta name="_csrf_parameter" th:content="${_csrf.parameterName}" th:if="${_csrf != null}" />
-    <title th:text="${titulo} ?: 'Urbelix'">Urbelix</title>
+    <title th:text="${titulo} ?: 'URBELIX'">URBELIX</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +25,7 @@
 <body class="layout-body">
 
 <nav class="navbar navbar-dark px-4 navbar-main">
-    <span class="navbar-brand fw-bold">Urbelix</span>
+    <span class="navbar-brand fw-bold">URBELIX</span>
     <div class="d-flex align-items-center gap-3">
         <span class="text-light small" sec:authorize="hasRole('ADMIN')">Admin</span>
         <span class="text-light small" sec:authorize="hasRole('RESIDENTE')">Residente</span>
@@ -47,7 +47,7 @@
     </main>
 </div>
 
-<footer class="text-center mt-5 p-3 footer-bar">Urbelix - Panel de gestión residencial</footer>
+<footer class="text-center mt-5 p-3 footer-bar">URBELIX - Panel de gestión residencial</footer>
 
 </body>
 </html>

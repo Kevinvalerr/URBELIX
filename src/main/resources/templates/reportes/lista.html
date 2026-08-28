@@ -150,7 +150,7 @@
                     console.log('[generarReportePDF] Respuesta recibida', response.status, response.statusText);
                     
                     if (!response.ok) {
-                        throw new Error('Error HTTP ' + response.status + ': ' + response.statusText);
+                        throw new Error('No fue posible generar el reporte en este momento. El servicio de reportes no está disponible.');
                     }
                     
                     return response.blob();
@@ -178,7 +178,7 @@
                     console.error('[generarReportePDF] Error:', error);
                     loadingAlert.classList.add('d-none');
                     errorAlert.classList.remove('d-none');
-                    document.getElementById('errorText').textContent = 'Error: ' + error.message;
+                    document.getElementById('errorText').textContent = error.message;
                 });
             }
 
@@ -186,8 +186,8 @@
             document.getElementById('printBtn').addEventListener('click', function() {
                 const printWindow = window.open('', '_blank');
                 const reportText = document.getElementById('reportText').textContent;
-                printWindow.document.write('<html><head><title>Reporte Urbelix</title></head><body>');
-                printWindow.document.write('<h2>Reporte del Sistema Urbelix</h2>');
+                printWindow.document.write('<html><head><title>Reporte URBELIX</title></head><body>');
+                printWindow.document.write('<h2>Reporte del Sistema URBELIX</h2>');
                 printWindow.document.write('<p>' + reportText + '</p>');
                 printWindow.document.write('<p style="font-size: 0.8em; color: #999; margin-top: 2em;">Generado el: ' + new Date().toLocaleString() + '</p>');
                 printWindow.document.write('</body></html>');

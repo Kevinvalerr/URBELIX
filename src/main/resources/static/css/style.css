@@ -228,6 +228,26 @@ body {
     font-size: 0.95rem;
 }
 
+.password-card { max-width: 500px; }
+.eyebrow { display: inline-block; margin-bottom: .65rem; color: #2563eb; font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.password-field { margin-bottom: 1.1rem; }
+.password-input-wrap { position: relative; }
+.password-input-wrap .form-control { padding-left: 3rem; padding-right: 3.2rem; }
+.password-field-icon { position: absolute; top: 50%; left: 1.05rem; z-index: 2; color: #64748b; transform: translateY(-50%); }
+.password-toggle { position: absolute; top: 50%; right: .65rem; display: inline-flex; align-items: center; justify-content: center; width: 2.2rem; height: 2.2rem; border: 0; border-radius: .7rem; background: transparent; color: #64748b; cursor: pointer; transform: translateY(-50%); }
+.password-toggle:hover, .password-toggle:focus-visible { background: #eaf2ff; color: #1d4ed8; outline: none; }
+.password-requirements { margin: .2rem 0 1.3rem; padding: 1rem 1.1rem; border: 1px solid #dbeafe; border-radius: 1rem; background: #f8fbff; }
+.requirements-title { margin: 0 0 .7rem; color: #1e3a5f; font-size: .85rem; font-weight: 700; }
+.requirement { display: flex; align-items: center; gap: .55rem; margin: .42rem 0; color: #64748b; font-size: .84rem; transition: color .2s ease; }
+.requirement i { color: #94a3b8; font-size: .9rem; }
+.requirement.is-valid { color: #15803d; }
+.requirement.is-valid i { color: #16a34a; }
+.password-match { min-height: 1.2rem; margin: .45rem 0 0; font-size: .82rem; }
+.password-match.is-valid { color: #15803d; }
+.password-match.is-invalid { color: #dc2626; }
+.password-submit { margin-top: .35rem; }
+.security-note { margin: 1.3rem 0 0; color: #64748b; font-size: .8rem; text-align: center; }
+
 @media (max-width: 576px) {
     .auth-card {
         padding: 1.75rem;

@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
-    <div th:fragment="content" th:with="titulo='Residentes | Urbelix'">
+    <div th:fragment="content" th:with="titulo='Residentes | URBELIX'">
         <!-- Page Header -->
         <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
             <div class="welcome-content" style="gap: 2rem;">
@@ -22,7 +22,8 @@
 
         <div style="display:flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
             <a th:href="@{/residentes/nuevo}" class="btn btn-primary" style="padding: 0.85rem 1.2rem; font-weight: 600;">Nuevo Residente</a>
-            <a th:href="@{/admin/residentes-import}" class="btn btn-secondary" style="padding: 0.85rem 1.2rem; font-weight: 600;">Importar Residentes Excel</a>
+            <a th:href="@{/residentes/importar}" class="btn btn-outline-primary" style="padding: 0.85rem 1.2rem; font-weight: 600;">Importar Residentes</a>
+            <a th:href="@{/excel/residentes}" class="btn btn-success" style="padding: 0.85rem 1.2rem; font-weight: 600;">Exportar Residentes Excel</a>
         </div>
 
         <!-- Residents Table -->

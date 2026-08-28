@@ -11,7 +11,7 @@
 	<groupId>com.urbelix</groupId>
 	<artifactId>urbelix</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Urbelix</name>
+		<name>Urbelix</name>
 	<description>Sistema web de gestion residencial</description>
 	<url/>
 	<licenses>
@@ -33,6 +33,14 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-mysql</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

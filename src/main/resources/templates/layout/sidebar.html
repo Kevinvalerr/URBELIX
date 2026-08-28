@@ -4,7 +4,7 @@
             <i class="bi bi-building"></i>
         </div>
         <div class="sidebar-brand-text">
-            <span class="sidebar-brand-name">Urbelix</span>
+            <span class="sidebar-brand-name">URBELIX</span>
             <span class="sidebar-brand-subtitle">
                 <span sec:authorize="hasRole('ADMIN')">Panel administrativo</span>
                 <span sec:authorize="hasRole('RESIDENTE')">Panel de residente</span>
@@ -66,9 +66,14 @@
             <i class="bi bi-cash-stack me-2"></i>
             Ver pagos
         </a>
-
-
-
+        <a href="/incidencias" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/incidencias')} ? ' active' : ''" sec:authorize="hasAnyRole('ADMIN','RESIDENTE','PORTERIA')">
+            <i class="bi bi-exclamation-diamond me-2"></i>
+            Incidencias y reclamos
+        </a>
+        <a href="/incidencias" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/incidencias')} ? ' active' : ''" sec:authorize="hasAnyRole('ADMIN','RESIDENTE','PORTERIA')">
+            <i class="bi bi-exclamation-diamond me-2"></i>
+            Incidencias y reclamos
+        </a>
     </nav>
 </div>
 

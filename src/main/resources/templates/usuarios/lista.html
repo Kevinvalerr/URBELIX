@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
    
        
-    <div th:fragment="content" th:with="titulo='Usuarios | Urbelix'">
+    <div th:fragment="content" th:with="titulo='Usuarios | URBELIX'">
 
        <div th:if="${success}" class="alert alert-success">
         <span th:text="${success}"></span>
@@ -32,15 +32,8 @@
             </div>
         </div>
 
-        <!-- Create User Button -->
-        <div style="margin-bottom: 2rem;">
-            <a th:href="@{/usuarios/nuevo}" class="btn btn-primary" style="background: linear-gradient(135deg, #2563EB, #06B6D4); border: none; padding: 0.75rem 2rem; border-radius: 12px; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: all 0.3s ease;">
-                <i class="bi bi-person-plus"></i>
-                Nuevo Usuario
-            </a>
-        </div>
-       <a href="/excel/residentes" class="btn btn-success">
-    Exportar a Excel
+         <a th:href="@{/excel/residentes}" class="btn btn-success">
+     Exportar residentes Excel
 </a>
         <!-- Users Table -->
         <div class="timeline-container" style="padding: 2rem;">
