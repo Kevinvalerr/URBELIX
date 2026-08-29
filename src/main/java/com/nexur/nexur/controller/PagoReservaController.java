@@ -44,15 +44,29 @@ public class PagoReservaController {
 
 
     @GetMapping("/reservas")
-    public String mostrarListaReservas(Model model) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESIDENTE')")
+    public String mostrarListaReservas(Model model, Authentication authentication) {
         model.addAttribute("titulo", "Reservas");
         model.addAttribute("currentPath", "/reservas");
         model.addAttribute("volverUrl", "/dashboard");
-        model.addAttribute("reservas", reservaService.listarReservas());
+
+        boolean esResidente = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_RESIDENTE"));
+        if (esResidente) {
+            try {
+                Residente residente = residenteService.buscarPorUsuarioEmail(authentication.getName());
+                model.addAttribute("reservas", reservaService.listarReservasPorResidente(residente.getId()));
+            } catch (RuntimeException e) {
+                model.addAttribute("reservas", List.of());
+            }
+        } else {
+            model.addAttribute("reservas", reservaService.listarReservas());
+        }
         return "reservas/lista";
     }
 
     @GetMapping("/reservas/nueva")
+    @PreAuthorize("hasRole('RESIDENTE')")
     public String mostrarFormularioReserva(Model model, Authentication authentication) {
         if (authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
@@ -66,7 +80,16 @@ public class PagoReservaController {
         model.addAttribute("titulo", "Crear Reserva");
         model.addAttribute("currentPath", "/reservas/nueva");
         model.addAttribute("volverUrl", "/dashboard");
-        model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
+        Residente residente;
+        try {
+            residente = residenteService.buscarPorUsuarioEmail(authentication.getName());
+        } catch (RuntimeException e) {
+            return "redirect:/dashboard";
+        }
+        if (residente.getApartamento() == null || residente.getApartamento().getId() == null) {
+            return "redirect:/dashboard";
+        }
+        model.addAttribute("apartamentos", List.of(residente.getApartamento()));
         model.addAttribute("reserva", new Reserva());
         return "reservas/nueva";
     }
@@ -79,18 +102,6 @@ public String guardarReserva(@Valid @ModelAttribute("reserva") Reserva reserva,
                              RedirectAttributes redirectAttributes,
                              Authentication authentication) {
 
-    if (reserva.getApartamento() == null || reserva.getApartamento().getId() == null) {
-        bindingResult.rejectValue("apartamento", "NotNull", "Seleccione un apartamento");
-    }
-
-    if (bindingResult.hasErrors()) {
-        model.addAttribute("titulo", "Crear Reserva");
-        model.addAttribute("currentPath", "/reservas/nueva");
-        model.addAttribute("volverUrl", "/dashboard");
-        model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
-        return "reservas/nueva";
-    }
-
     String email = authentication.getName();
     Residente residente;
     try {
@@ -99,10 +110,26 @@ public String guardarReserva(@Valid @ModelAttribute("reserva") Reserva reserva,
         redirectAttributes.addFlashAttribute("error", "No se encontró su perfil de residente. Contacte a un administrador para completar sus datos antes de reservar.");
         return "redirect:/dashboard";
     }
+
+    Long apartamentoEnviado = reserva.getApartamento() == null ? null : reserva.getApartamento().getId();
+    Long apartamentoAsignado = residente.getApartamento() == null ? null : residente.getApartamento().getId();
+    if (apartamentoEnviado == null || apartamentoAsignado == null || !apartamentoAsignado.equals(apartamentoEnviado)) {
+        bindingResult.rejectValue("apartamento", "Invalid", "Solo puede reservar con su apartamento asignado");
+    }
+
+    if (bindingResult.hasErrors()) {
+        model.addAttribute("titulo", "Crear Reserva");
+        model.addAttribute("currentPath", "/reservas/nueva");
+        model.addAttribute("volverUrl", "/dashboard");
+        model.addAttribute("apartamentos", residente.getApartamento() == null
+                ? List.of() : List.of(residente.getApartamento()));
+        return "reservas/nueva";
+    }
+
     reserva.setResidente(residente);
 
     try {
-        reservaService.guardar(reserva, reserva.getApartamento().getId());
+        reservaService.guardar(reserva, apartamentoAsignado);
     } catch (RuntimeException e) {
         redirectAttributes.addFlashAttribute("error", e.getMessage());
         return "redirect:/reservas/nueva";
@@ -113,23 +140,31 @@ public String guardarReserva(@Valid @ModelAttribute("reserva") Reserva reserva,
     return "redirect:/reservas";
 }
 
-@PreAuthorize("hasRole('ADMIN')")
-@PostMapping("/reservas/aprobar/{id}")
-public String aprobar(@PathVariable Long id,
-                      @RequestParam(value = "comentario", required = false) String comentario,
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/reservas/aprobar/{id}")
+    public String aprobar(@PathVariable Long id,
+                          @RequestParam(value = "comentario", required = false) String comentario,
                       RedirectAttributes redirectAttributes) {
-    reservaService.aprobarReserva(id, comentario);
-    redirectAttributes.addFlashAttribute("success", "Reserva aprobada");
+    try {
+        reservaService.aprobarReserva(id, comentario);
+        redirectAttributes.addFlashAttribute("success", "Reserva aprobada");
+    } catch (IllegalArgumentException exception) {
+        redirectAttributes.addFlashAttribute("error", exception.getMessage());
+    }
     return "redirect:/reservas";
 }
 
 @PreAuthorize("hasRole('ADMIN')")
 @PostMapping("/reservas/rechazar/{id}")
-public String rechazar(@PathVariable Long id,
+    public String rechazar(@PathVariable Long id,
                        @RequestParam(value = "comentario", required = false) String comentario,
                        RedirectAttributes redirectAttributes) {
-    reservaService.rechazarReserva(id, comentario);
-    redirectAttributes.addFlashAttribute("error", "Reserva rechazada");
+    try {
+        reservaService.rechazarReserva(id, comentario);
+        redirectAttributes.addFlashAttribute("success", "Reserva rechazada");
+    } catch (IllegalArgumentException exception) {
+        redirectAttributes.addFlashAttribute("error", exception.getMessage());
+    }
     return "redirect:/reservas";
 }
 

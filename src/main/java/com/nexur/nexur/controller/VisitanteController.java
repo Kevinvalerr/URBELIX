@@ -1,90 +1,172 @@
 package com.nexur.nexur.controller;
 
+import com.nexur.nexur.model.Residente;
 import com.nexur.nexur.model.Visitante;
+import com.nexur.nexur.service.ResidenteService;
 import com.nexur.nexur.service.VisitanteService;
-import com.nexur.nexur.service.ApartamentoService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
-
+import java.util.List;
 
 @Controller
-@RequestMapping("/visitantes") //Ruta del modulo
+@RequestMapping("/visitantes")
 public class VisitanteController {
 
-    @Autowired
-    private VisitanteService visitanteService;
+    private final VisitanteService visitanteService;
+    private final ResidenteService residenteService;
 
-/*
-Se usa para mostrar la lista de apartamentos
-*en el formulario de registro de visitantes.
-*/
-    @Autowired
-    private ApartamentoService apartamentoService;
+    public VisitanteController(VisitanteService visitanteService,
+                               ResidenteService residenteService) {
+        this.visitanteService = visitanteService;
+        this.residenteService = residenteService;
+    }
 
-    /*
-   Listar todos los visitantes registrados.
-    */
-    
-   @GetMapping
-   public String listarVisitantes(Model model){
+    @GetMapping
+    @PreAuthorize("hasAnyRole('PORTERIA', 'RESIDENTE')")
+    public String listarVisitantes(Model model, Authentication authentication) {
+        boolean esResidente = tieneRol(authentication, "RESIDENTE");
+        List<Visitante> visitantes;
+        if (esResidente) {
+            try {
+                Residente residente = residenteService.buscarPorUsuarioEmail(authentication.getName());
+                Long apartamentoId = residente.getApartamento() == null
+                        ? null : residente.getApartamento().getId();
+                visitantes = apartamentoId == null
+                        ? List.of() : visitanteService.buscarPorApartamento(apartamentoId);
+            } catch (RuntimeException exception) {
+                visitantes = List.of();
+            }
+        } else {
+            visitantes = visitanteService.listarVisitantes();
+        }
+        model.addAttribute("visitantes", visitantes);
+        model.addAttribute("esResidente", esResidente);
+        model.addAttribute("currentPath", "/visitantes");
+        model.addAttribute("volverUrl", "/dashboard");
+        model.addAttribute("titulo", esResidente
+                ? "Mis solicitudes de visitantes | Urbelix"
+                : "Control de visitantes | Urbelix");
+        return "visitantes/listaVisitantes";
+    }
 
-    // Se obtienen todos los visitantes del sistema
-    model.addAttribute("visitantes", visitanteService.listarVisitantes());
-    model.addAttribute("currentPath", "/visitantes");
-    model.addAttribute("volverUrl", "/dashboard");
-    
-    return "visitantes/listaVisitantes";
+    @GetMapping("/nuevo")
+    @PreAuthorize("hasRole('RESIDENTE')")
+    public String mostrarFormulario(Model model, Authentication authentication) {
+        try {
+            Residente residente = residenteService.buscarPorUsuarioEmail(authentication.getName());
+            if (residente.getApartamento() == null || residente.getApartamento().getId() == null) {
+                return "redirect:/dashboard";
+            }
+            model.addAttribute("apartamento", residente.getApartamento());
+        } catch (RuntimeException exception) {
+            return "redirect:/dashboard";
+        }
+        model.addAttribute("visitante", new Visitante());
+        model.addAttribute("currentPath", "/visitantes");
+        model.addAttribute("volverUrl", "/visitantes");
+        model.addAttribute("titulo", "Solicitar acceso de visitante | Urbelix");
+        return "visitantes/formularioVisitante";
+    }
 
-   }
+    @PostMapping("/guardar")
+    @PreAuthorize("hasRole('RESIDENTE')")
+    public String solicitarVisitante(@Valid @ModelAttribute("visitante") Visitante visitante,
+                                     BindingResult bindingResult,
+                                     Authentication authentication,
+                                     Model model,
+                                     RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            prepararFormulario(model, authentication);
+            return "visitantes/formularioVisitante";
+        }
+        try {
+            visitanteService.solicitar(visitante, authentication.getName());
+            redirectAttributes.addFlashAttribute("success",
+                    "Solicitud enviada. Portería debe aprobarla antes del ingreso.");
+            return "redirect:/visitantes";
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("error", exception.getMessage());
+            prepararFormulario(model, authentication);
+            return "visitantes/formularioVisitante";
+        }
+    }
 
-  @GetMapping("/nuevo")
-  public String mostrarFormulario(Model model) {
-      // Objeto vistante vacío para el formulario
-     model.addAttribute("visitante", new Visitante());
-     // Lista de apartamentos para el select
-     model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
-     model.addAttribute("currentPath", "/visitantes");
-     model.addAttribute("volverUrl", "/visitantes");
+    @PostMapping("/{id}/aprobar")
+    @PreAuthorize("hasRole('PORTERIA')")
+    public String aprobarSolicitud(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            visitanteService.aprobarSolicitud(id);
+            redirectAttributes.addFlashAttribute("success", "Solicitud aprobada");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("error", exception.getMessage());
+        }
+        return "redirect:/visitantes";
+    }
 
-      return "visitantes/formularioVisitante";
-  }
-  
-  @PostMapping("/guardar")
-  public String registrarVisitante(@Valid @ModelAttribute("visitante") Visitante visitante,
-                                   BindingResult bindingResult,
-                                   Model model) {
-       /*
-       El Service registrará automaticamente
-       la fecha de entrada usando LocalDateTime.now()
-       */
-      if (visitante.getApartamento() == null || visitante.getApartamento().getId() == null) {
-          bindingResult.rejectValue("apartamento", "NotNull", "Seleccione un apartamento");
-      }
-      if (bindingResult.hasErrors()) {
-          model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
-          model.addAttribute("currentPath", "/visitantes");
-          model.addAttribute("volverUrl", "/visitantes");
-          return "visitantes/formularioVisitante";
-      }
+    @PostMapping("/{id}/rechazar")
+    @PreAuthorize("hasRole('PORTERIA')")
+    public String rechazarSolicitud(@PathVariable Long id,
+                                    @RequestParam(required = false) String motivo,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            visitanteService.rechazarSolicitud(id, motivo);
+            redirectAttributes.addFlashAttribute("success", "Solicitud rechazada");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("error", exception.getMessage());
+        }
+        return "redirect:/visitantes";
+    }
 
-     visitanteService.registrarEntrada(visitante);
-      
-      return "redirect:/visitantes";
-  }
-  
-  @GetMapping("/salida/{id}")
-  public String registrarSalida(@PathVariable Long id) {
-     // El service registra automáticamente la hora de la salida 
-    visitanteService.registrarSalida(id);
+    @PostMapping("/{id}/entrada")
+    @PreAuthorize("hasRole('PORTERIA')")
+    public String registrarEntrada(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            visitanteService.registrarEntrada(id);
+            redirectAttributes.addFlashAttribute("success", "Entrada registrada correctamente");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("error", exception.getMessage());
+        }
+        return "redirect:/visitantes";
+    }
 
-      return "redirect:/visitantes";
-  }
-  
+    @PostMapping("/salida/{id}")
+    @PreAuthorize("hasRole('PORTERIA')")
+    public String registrarSalida(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            visitanteService.registrarSalida(id);
+            redirectAttributes.addFlashAttribute("success", "Salida registrada correctamente");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("error", exception.getMessage());
+        }
+        return "redirect:/visitantes";
+    }
 
+    private void prepararFormulario(Model model, Authentication authentication) {
+        try {
+            Residente residente = residenteService.buscarPorUsuarioEmail(authentication.getName());
+            model.addAttribute("apartamento", residente.getApartamento());
+        } catch (RuntimeException exception) {
+            model.addAttribute("apartamento", null);
+        }
+        model.addAttribute("currentPath", "/visitantes");
+        model.addAttribute("volverUrl", "/visitantes");
+        model.addAttribute("titulo", "Solicitar acceso de visitante | Urbelix");
+    }
+
+    private boolean tieneRol(Authentication authentication, String rol) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + rol));
+    }
 }

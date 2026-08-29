@@ -1,232 +1,225 @@
-﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" 
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" 
-      th:replace="layout/base :: page">
-    
-    <div th:fragment="content" th:with="titulo='Gestión de Pagos | Urbelix'">
-        <!-- Page Header -->
-         <a href="/excel/pagos" class="btn btn-success">
-    Exportar Pagos Excel
-</a>
-        <!-- Page Header -->
-        <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
-            <div class="welcome-content" style="gap: 2rem;">
-                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.15));">
-                    <i class="bi bi-cash-stack"></i>
-                </div>
-                <div class="welcome-text">
-                    <h1 class="welcome-title">Gestión de Pagos</h1>
-                    <p class="welcome-subtitle" th:text="${isAdmin ? 'Administra todos los pagos del condominio' : 'Visualiza y gestiona tus pagos pendientes'}"></p>
-                </div>
-            </div>
-            <div class="welcome-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; align-items: stretch;">
-                <div class="stat-item">
-                    <div class="stat-number" th:text="${totalPagos}">0</div>
-                    <div class="stat-label">Total Pagos</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" th:text="${totalPendiente}">0</div>
-                    <div class="stat-label">Pendientes</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" th:text="${totalPagado}">0</div>
-                    <div class="stat-label">Pagados</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" th:text="${totalVencido}">0</div>
-                    <div class="stat-label">Vencidos</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" th:text="' $' + ${#numbers.formatDecimal(montoPendiente, 0, 'DEFAULT', 0, 'DEFAULT')}">0</div>
-                    <div class="stat-label">Monto Pendiente</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" th:text="' $' + ${#numbers.formatDecimal(montoTotal, 0, 'DEFAULT', 0, 'DEFAULT')}">0</div>
-                    <div class="stat-label">Monto Total</div>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: page}">
+<div th:fragment="content" th:with="titulo='Pagos | Urbelix'" class="payments-page">
+    <section class="payments-hero">
+        <div class="payments-hero__copy">
+            <span class="payments-eyebrow">Finanzas residenciales</span>
+            <h1>Pagos</h1>
+            <p th:text="${isAdmin ? 'Administra la cartera del conjunto, confirma pagos y consulta comprobantes.' : 'Consulta tus obligaciones, paga en el sandbox y descarga tus comprobantes.'}">Consulta y gestiona tus pagos.</p>
         </div>
-
-        <!-- Action Buttons -->
-        <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
-            <div sec:authorize="hasRole('ADMIN')" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                <a href="/pagos/nuevo" 
-                   class="btn" 
-                   style="background: linear-gradient(135deg, #3B82F6, #1E40AF); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
-                    Registrar Pago
+        <div class="payments-hero__mark" aria-hidden="true">
+            <i class="bi bi-wallet2"></i>
+        </div>
+        <div class="payments-hero__actions">
+            <div sec:authorize="hasRole('ADMIN')" class="payments-action-group">
+                <a th:href="@{/pagos/nuevo}" class="payment-button payment-button--primary">
+                    <i class="bi bi-plus-lg"></i><span>Registrar pago</span>
                 </a>
-
-                <form th:action="@{/pagos/generar-administracion}" method="post" style="margin: 0;">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <button type="submit" 
-                            class="btn" 
-                            style="background: linear-gradient(135deg, #F59E0B, #D97706); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600;"
-                            onclick="return confirm('¿Deseas generar administración para todos los residentes?')">
-                        Generar Administración
+                <form th:action="@{/pagos/generar-administracion}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                    <button type="submit" class="payment-button payment-button--warm"
+                            onclick="return confirm('¿Deseas generar la cuota de administración del mes para los residentes?')">
+                        <i class="bi bi-arrow-repeat"></i><span>Generar administración</span>
                     </button>
                 </form>
+                <a th:href="@{/pagos/excel}" class="payment-button payment-button--soft">
+                    <i class="bi bi-file-earmark-spreadsheet"></i><span>Exportar Excel</span>
+                </a>
             </div>
-
-            <div sec:authorize="hasRole('RESIDENTE')" style="display: flex; align-items: center;">
-                <span style="color: #475569; font-weight: 600;">Verifica tus pagos pendientes y confirma desde la fila correspondiente.</span>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; align-items: center;">
-            <div style="flex: 1; min-width: 220px;">
-                <label style="font-weight: 600; color: #475569; display: block; margin-bottom: 0.5rem;">Buscar pagador o apartamento</label>
-                <input id="searchInput" type="search" placeholder="Residente, apartamento, método..." style="width: 100%; padding: 0.85rem 1rem; border-radius: 0.75rem; border: 1px solid #CBD5E1;" oninput="filterPagos()" />
-            </div>
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                <button type="button" class="btn" style="background: #E5E7EB; color: #111827; padding: 0.75rem 1rem; border-radius: 0.75rem; border: none; cursor: pointer;" onclick="setStatusFilter('ALL')">Todos</button>
-                <button type="button" class="btn" style="background: #F97316; color: white; padding: 0.75rem 1rem; border-radius: 0.75rem; border: none; cursor: pointer;" onclick="setStatusFilter('PENDIENTE')">Pendientes</button>
-                <button type="button" class="btn" style="background: #34D399; color: white; padding: 0.75rem 1rem; border-radius: 0.75rem; border: none; cursor: pointer;" onclick="setStatusFilter('PAGADO')">Pagados</button>
-                <button type="button" class="btn" style="background: #F87171; color: white; padding: 0.75rem 1rem; border-radius: 0.75rem; border: none; cursor: pointer;" onclick="setStatusFilter('VENCIDO')">Vencidos</button>
+            <div sec:authorize="hasRole('RESIDENTE')" class="payments-action-group">
+                <a th:href="@{/pagos/estado-cuenta}" class="payment-button payment-button--soft">
+                    <i class="bi bi-file-earmark-pdf"></i><span>Estado de cuenta</span>
+                </a>
             </div>
         </div>
+    </section>
 
-        <!-- Flash Messages -->
-        <div th:if="${success}" class="alert alert-success" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; background-color: #DCFCE7; border-left: 4px solid #16A34A; color: #15803D;">
-            <i class="bi bi-check-circle me-2"></i>
-            <span th:text="${success}"></span>
-        </div>
-        <div th:if="${error}" class="alert alert-danger" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; background-color: #FEE2E2; border-left: 4px solid #DC2626; color: #991B1B;">
-            <i class="bi bi-exclamation-circle me-2"></i>
-            <span th:text="${error}"></span>
-        </div>
-
-        <!-- Payments Table -->
-        <div class="timeline-container" style="padding: 2rem;">
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; background: transparent;">
-                    <thead>
-                        <tr style="border-bottom: 2px solid rgba(59, 130, 246, 0.1);">
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Residente</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Apartamento</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Tipo</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Monto</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Método</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Vencimiento</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Estado</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="pago : ${pagos}" class="pago-row"
-                            th:attr="data-status=${pago.estadoPago.name()}, data-residente=${pago.residente != null ? pago.residente.nombre : 'N/A'}, data-apartamento=${pago.apartamento != null ? pago.apartamento.numero : 'N/A'}"
-                            style="border-bottom: 1px solid rgba(59, 130, 246, 0.06); transition: background-color 0.3s ease;" 
-                            onmouseover="this.style.backgroundColor='rgba(59, 130, 246, 0.02)'" 
-                            onmouseout="this.style.backgroundColor='transparent'">
-                            
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" 
-                                th:text="${pago.residente != null ? pago.residente.nombre : '—'}"></td>
-                            
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" 
-                                th:text="${pago.apartamento != null ? pago.apartamento.numero : '—'}"></td>
-                            
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;">
-                                <span th:if="${pago.tipoPago.name() == 'ADMINISTRACION'}" 
-                                      style="background: rgba(59, 130, 246, 0.1); color: #1E40AF; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                                    Administración
-                                </span>
-                                <span th:if="${pago.tipoPago.name() == 'MULTA'}" 
-                                      style="background: rgba(239, 68, 68, 0.1); color: #991B1B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                                    Multa
-                                </span>
-                                <span th:if="${pago.tipoPago.name() == 'OTRO'}" 
-                                      style="background: rgba(148, 163, 184, 0.1); color: #334155; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                                    Otro
-                                </span>
-                            </td>
-                            
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 600; color: #16A34A;">
-                                <span th:text="'$' + ${#numbers.formatDecimal(pago.monto, 0, 'DEFAULT', 0, 'DEFAULT')}"></span>
-                            </td>
-                            
-                            <td style="padding: 1rem; color: var(--text-secondary);">
-                                <span th:if="${pago.metodo.name() == 'PSE'}" 
-                                      style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                                    PSE
-                                </span>
-                                <span th:if="${pago.metodo.name() == 'TARJETA'}" 
-                                      style="background: rgba(59, 130, 246, 0.1); color: #1E40AF; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                                    Tarjeta
-                                </span>
-                                <span th:if="${pago.metodo.name() == 'EFECTIVO'}" 
-                                      style="background: rgba(245, 158, 11, 0.1); color: #92400E; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                                    Efectivo
-                                </span>
-                                <span th:if="${pago.metodo.name() == 'TRANSFERENCIA'}" 
-                                      style="background: rgba(139, 92, 246, 0.1); color: #5B21B6; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                                    Transferencia
-                                </span>
-                            </td>
-                            
-                            <td style="padding: 1rem; color: var(--text-secondary);" 
-                                th:text="${pago.fechaVencimiento}"></td>
-                            
-                            <td style="padding: 1rem;">
-                                <span th:if="${pago.estadoPago.name() == 'PENDIENTE'}" 
-                                      style="background: rgba(245, 158, 11, 0.1); color: #92400E; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                                    Pendiente
-                                </span>
-                                <span th:if="${pago.estadoPago.name() == 'PAGADO'}" 
-                                      style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                                    Pagado
-                                </span>
-                                <span th:if="${pago.estadoPago.name() == 'VENCIDO'}" 
-                                      style="background: rgba(239, 68, 68, 0.1); color: #991B1B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                                    Vencido
-                                </span>
-                            </td>
-                            
-                            <td style="padding: 1rem;">
-                                <a th:if="${pago.estadoPago.name() == 'PENDIENTE'}" 
-                                   th:href="@{/pagos/{id}(id=${pago.id})}" 
-                                   class="btn btn-sm" 
-                                   style="background: linear-gradient(135deg, #10B981, #047857); color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; font-size: 0.85rem; display: inline-block;">
-                                    Pagar
-                                </a>
-                                <span th:if="${pago.estadoPago.name() != 'PENDIENTE'}" 
-                                      style="color: var(--text-muted); font-size: 0.85rem;">—</span>
-                            </td>
-                        </tr>
-
-                        <tr th:if="${#lists.isEmpty(pagos)}" style="border-bottom: none;">
-                            <td colspan="8" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
-                                <i class="bi bi-inbox" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem; display: block;"></i>
-                                No hay pagos registrados
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <div th:if="${success}" class="payment-alert payment-alert--success" role="status">
+        <i class="bi bi-check-circle-fill"></i><span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="payment-alert payment-alert--danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i><span th:text="${error}"></span>
     </div>
 
-    <script>
-        let currentStatusFilter = 'ALL';
+    <section class="payment-stat-grid" aria-label="Resumen de pagos">
+        <article class="payment-stat-card payment-stat-card--blue">
+            <span class="payment-stat-card__icon"><i class="bi bi-receipt"></i></span>
+            <div><span class="payment-stat-card__label">Registros</span><strong th:text="${totalPagos}">0</strong></div>
+        </article>
+        <article class="payment-stat-card payment-stat-card--amber">
+            <span class="payment-stat-card__icon"><i class="bi bi-hourglass-split"></i></span>
+            <div><span class="payment-stat-card__label">Pendientes</span><strong th:text="${totalPendiente}">0</strong></div>
+        </article>
+        <article class="payment-stat-card payment-stat-card--green">
+            <span class="payment-stat-card__icon"><i class="bi bi-check2-circle"></i></span>
+            <div><span class="payment-stat-card__label">Pagados</span><strong th:text="${totalPagado}">0</strong></div>
+        </article>
+        <article class="payment-stat-card payment-stat-card--red">
+            <span class="payment-stat-card__icon"><i class="bi bi-calendar-x"></i></span>
+            <div><span class="payment-stat-card__label">Vencidos</span><strong th:text="${totalVencido}">0</strong></div>
+        </article>
+        <article class="payment-stat-card payment-stat-card--ink payment-stat-card--wide">
+            <span class="payment-stat-card__icon"><i class="bi bi-cash-stack"></i></span>
+            <div><span class="payment-stat-card__label">Saldo por gestionar</span><strong th:text="${montoPendiente != null ? '$ ' + #numbers.formatDecimal(montoPendiente, 1, 'POINT', 0, 'COMMA') : '$ 0'}">$ 0</strong></div>
+        </article>
+    </section>
 
-        function setStatusFilter(status) {
-            currentStatusFilter = status;
-            filterPagos();
-        }
+    <section class="payment-list-card">
+        <div class="payment-list-card__header">
+            <div>
+                <span class="payments-eyebrow">Cartera</span>
+                <h2 th:text="${isAdmin ? 'Todos los pagos' : 'Mis pagos'}">Mis pagos</h2>
+                <p th:text="${isAdmin ? 'Combina estado, método, concepto, fechas o búsqueda libre.' : 'Tus pagos permanecen separados de la información de otros residentes.'}">Historial de pagos.</p>
+            </div>
+            <div class="payment-search">
+                <i class="bi bi-search"></i>
+                <input id="searchInput" type="search" placeholder="Buscar en la cartera..." oninput="filterPagos()" aria-label="Buscar pagos">
+            </div>
+        </div>
 
-        function filterPagos() {
-            const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
-            document.querySelectorAll('.pago-row').forEach(row => {
-                const status = row.getAttribute('data-status') || '';
-                const residente = row.getAttribute('data-residente') || '';
-                const apartamento = row.getAttribute('data-apartamento') || '';
-                const text = (residente + ' ' + apartamento + ' ' + status).toLowerCase();
+        <div class="payment-filter-bar" role="group" aria-label="Filtrar por estado">
+            <button type="button" class="payment-filter is-active" data-filter="ALL" onclick="setStatusFilter('ALL', this)">Todos <span th:text="${totalPagos}">0</span></button>
+            <button type="button" class="payment-filter payment-filter--amber" data-filter="PENDIENTE" onclick="setStatusFilter('PENDIENTE', this)">Pendientes <span th:text="${totalPendiente}">0</span></button>
+            <button type="button" class="payment-filter payment-filter--green" data-filter="PAGADO" onclick="setStatusFilter('PAGADO', this)">Pagados <span th:text="${totalPagado}">0</span></button>
+            <button type="button" class="payment-filter payment-filter--red" data-filter="VENCIDO" onclick="setStatusFilter('VENCIDO', this)">Vencidos <span th:text="${totalVencido}">0</span></button>
+        </div>
 
-                const statusMatch = currentStatusFilter === 'ALL' || status === currentStatusFilter;
-                const searchMatch = searchValue === '' || text.includes(searchValue);
+        <div class="payment-advanced-filters" aria-label="Filtros adicionales de pagos">
+            <div class="payment-filter-field payment-filter-field--searchable">
+                <label for="methodFilter">Método</label>
+                <select id="methodFilter" onchange="filterPagos()">
+                    <option value="">Todos los métodos</option>
+                    <option value="PSE">PSE</option>
+                    <option value="TARJETA">Tarjeta</option>
+                    <option value="TRANSFERENCIA">Transferencia</option>
+                    <option value="EFECTIVO">Efectivo</option>
+                </select>
+            </div>
+            <div class="payment-filter-field payment-filter-field--searchable">
+                <label for="conceptFilter">Concepto</label>
+                <select id="conceptFilter" onchange="filterPagos()">
+                    <option value="">Todos los conceptos</option>
+                    <option value="ADMINISTRACION">Administración</option>
+                    <option value="MULTA">Multa</option>
+                    <option value="OTRO">Otro</option>
+                </select>
+            </div>
+            <div class="payment-filter-field">
+                <label for="issuedFromFilter">Emitido desde</label>
+                <input id="issuedFromFilter" type="date" onchange="filterPagos()" aria-label="Fecha de emisión desde">
+            </div>
+            <div class="payment-filter-field">
+                <label for="issuedToFilter">Emitido hasta</label>
+                <input id="issuedToFilter" type="date" onchange="filterPagos()" aria-label="Fecha de emisión hasta">
+            </div>
+            <div class="payment-filter-field payment-filter-field--action">
+                <button type="button" class="payment-filter-reset" onclick="clearFilters()">
+                    <i class="bi bi-arrow-counterclockwise"></i><span>Limpiar filtros</span>
+                </button>
+            </div>
+        </div>
+        <div class="payment-filter-summary" aria-live="polite">
+            <span id="filterResultCount">Mostrando todos los registros</span>
+            <span><i class="bi bi-sliders"></i> Puedes combinar varios filtros</span>
+        </div>
 
-                row.style.display = statusMatch && searchMatch ? '' : 'none';
-            });
-        }
-    </script>
+        <div class="payment-table-wrap">
+            <table class="payment-table">
+                <thead>
+                <tr>
+                    <th sec:authorize="hasRole('ADMIN')">Residente</th>
+                    <th sec:authorize="hasRole('ADMIN')">Apartamento</th>
+                    <th>Concepto</th>
+                    <th>Monto</th>
+                    <th>Método</th>
+                    <th>Vencimiento</th>
+                    <th>Pago efectivo</th>
+                    <th>Estado</th>
+                    <th class="payment-table__actions">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="pago : ${pagos}" class="payment-row"
+                    th:attr="data-status=${pago.estadoPago != null ? pago.estadoPago.name() : 'SIN_ESTADO'}, data-method=${pago.metodo != null ? pago.metodo.name() : ''}, data-concept=${pago.tipoPago != null ? pago.tipoPago.name() : ''}, data-issued=${pago.fecha != null ? #temporals.format(pago.fecha, 'yyyy-MM-dd') : ''}">
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <div class="payment-person">
+                            <span class="payment-person__avatar"><i class="bi bi-person"></i></span>
+                            <span>
+                                <strong th:text="${pago.residente != null ? pago.residente.nombre : 'Sin residente'}">Residente</strong>
+                                <small th:text="${pago.referenciaPago != null ? pago.referenciaPago : 'Sin referencia'}">Referencia</small>
+                            </span>
+                        </div>
+                    </td>
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <span class="payment-apartment" th:if="${pago.apartamento != null}">
+                            <i class="bi bi-building"></i><span th:text="${pago.apartamento.numero + (pago.apartamento.torre != null ? ' · Torre ' + pago.apartamento.torre : '')}">101 · Torre A</span>
+                        </span>
+                        <span class="payment-muted" th:unless="${pago.apartamento != null}">No asignado</span>
+                    </td>
+                    <td>
+                        <span class="payment-concept" th:text="${pago.tipoPago != null ? pago.tipoPago.descripcion : 'Sin concepto'}">Administración</span>
+                        <small class="payment-date" th:text="${pago.fecha != null ? 'Emitido ' + #temporals.format(pago.fecha, 'dd/MM/yyyy') : 'Sin fecha de emisión'}">Emitido 01/01/2026</small>
+                    </td>
+                    <td><strong class="payment-amount" th:text="${pago.monto != null ? '$ ' + #numbers.formatDecimal(pago.monto, 1, 'POINT', 0, 'COMMA') : '$ 0'}">$ 300.000</strong></td>
+                    <td>
+                        <span class="payment-method" th:classappend="${pago.metodo != null ? ' payment-method--' + pago.metodo.name().toLowerCase() : ''}">
+                            <i th:class="${pago.metodo != null and pago.metodo.name() == 'PSE' ? 'bi bi-bank' : pago.metodo != null and pago.metodo.name() == 'TARJETA' ? 'bi bi-credit-card' : pago.metodo != null and pago.metodo.name() == 'EFECTIVO' ? 'bi bi-cash' : 'bi bi-arrow-left-right'}"></i>
+                            <span th:text="${pago.metodo != null ? pago.metodo.descripcion : 'Sin método'}">Transferencia</span>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="payment-date" th:classappend="${pago.estadoPago != null and pago.estadoPago.name() == 'VENCIDO' ? ' payment-date--late' : ''}">
+                            <i class="bi bi-calendar3"></i>
+                            <span th:text="${pago.fechaVencimiento != null ? #temporals.format(pago.fechaVencimiento, 'dd/MM/yyyy') : 'Sin fecha'}">30/01/2026</span>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="payment-date payment-date--paid" th:if="${pago.fechaPago != null}"><i class="bi bi-check2"></i><span th:text="${#temporals.format(pago.fechaPago, 'dd/MM/yyyy')}">20/01/2026</span></span>
+                        <span class="payment-muted" th:unless="${pago.fechaPago != null}">Pendiente</span>
+                    </td>
+                    <td>
+                        <span class="payment-status"
+                              th:classappend="${pago.estadoPago != null and pago.estadoPago.name() == 'PAGADO' ? ' payment-status--paid' : pago.estadoPago != null and pago.estadoPago.name() == 'VENCIDO' ? ' payment-status--late' : ' payment-status--pending'}">
+                            <span class="payment-status__dot"></span>
+                            <span th:text="${pago.estadoPago != null ? (pago.estadoPago.name() == 'PAGADO' ? 'Pagado' : pago.estadoPago.name() == 'VENCIDO' ? 'Vencido' : 'Pendiente') : 'Sin estado'}">Pendiente</span>
+                        </span>
+                    </td>
+                    <td class="payment-table__actions">
+                        <div class="payment-row-actions">
+                            <a th:href="@{/pagos/{id}(id=${pago.id})}" class="payment-icon-link payment-icon-link--main" th:title="${!isAdmin and pago.estadoPago != null and (pago.estadoPago.name() == 'PENDIENTE' or pago.estadoPago.name() == 'VENCIDO') and (pago.metodo != null and (pago.metodo.name() == 'PSE' or pago.metodo.name() == 'TARJETA')) ? 'Pagar pago' : 'Ver detalle'}">
+                                <i th:class="${!isAdmin and pago.estadoPago != null and (pago.estadoPago.name() == 'PENDIENTE' or pago.estadoPago.name() == 'VENCIDO') and (pago.metodo != null and (pago.metodo.name() == 'PSE' or pago.metodo.name() == 'TARJETA')) ? 'bi bi-arrow-up-right' : 'bi bi-eye'}"></i>
+                                <span th:text="${!isAdmin and pago.estadoPago != null and (pago.estadoPago.name() == 'PENDIENTE' or pago.estadoPago.name() == 'VENCIDO') and (pago.metodo != null and (pago.metodo.name() == 'PSE' or pago.metodo.name() == 'TARJETA')) ? 'Pagar' : 'Detalle'}">Detalle</span>
+                            </a>
+                            <a th:href="@{/pagos/{id}/factura(id=${pago.id})}" class="payment-icon-link" title="Descargar comprobante">
+                                <i class="bi bi-file-earmark-pdf"></i><span class="visually-hidden">Comprobante</span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(pagos)}">
+                    <td th:attr="colspan=${isAdmin ? 9 : 7}" class="payment-empty">
+                        <span class="payment-empty__icon"><i class="bi bi-receipt-cutoff"></i></span>
+                        <strong>No hay pagos registrados</strong>
+                        <span th:text="${isAdmin ? 'Registra una obligación o genera la administración mensual para comenzar.' : 'Cuando administración genere una obligación, aparecerá aquí.'}">No hay registros.</span>
+                    </td>
+                </tr>
+                <tr id="paymentNoResults" hidden>
+                    <td th:attr="colspan=${isAdmin ? 9 : 7}" class="payment-empty payment-empty--filtered">
+                        <span class="payment-empty__icon"><i class="bi bi-funnel"></i></span>
+                        <strong>No hay coincidencias</strong>
+                        <span>Prueba con otros criterios o limpia los filtros para ver nuevamente la cartera.</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="payment-list-card__footer">
+            <span><i class="bi bi-shield-check"></i> La información se muestra según tu rol y permisos.</span>
+            <span th:text="${montoTotal != null ? 'Valor registrado: $ ' + #numbers.formatDecimal(montoTotal, 1, 'POINT', 0, 'COMMA') : 'Valor registrado: $ 0'}">Valor registrado: $ 0</span>
+        </div>
+    </section>
+
+</div>
 </html>
-
-

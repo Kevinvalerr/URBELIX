@@ -3,7 +3,6 @@ package com.nexur.nexur.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,6 +24,13 @@ public class Visitante {
 
     private LocalDateTime fechaSalida;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20, columnDefinition = "varchar(20) default 'PENDIENTE'")
+    private EstadoVisitante estado = EstadoVisitante.PENDIENTE;
+
+    @Column(length = 500)
+    private String motivoRechazo;
+
     @ManyToOne
     @JoinColumn(name = "apartamento_id")
     private Apartamento apartamento;
@@ -33,6 +39,10 @@ public class Visitante {
 
     public Long getId() {
        return id;
+    }
+
+    public void setId(Long id) {
+       this.id = id;
     }
 
     public String getNombre() {
@@ -71,6 +81,22 @@ public class Visitante {
     public void setFechaSalida(LocalDateTime fechaSalida) {
         this.fechaSalida = fechaSalida;
 
+    }
+
+    public EstadoVisitante getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoVisitante estado) {
+        this.estado = estado;
+    }
+
+    public String getMotivoRechazo() {
+        return motivoRechazo;
+    }
+
+    public void setMotivoRechazo(String motivoRechazo) {
+        this.motivoRechazo = motivoRechazo;
     }
 
     public Apartamento getApartamento() {

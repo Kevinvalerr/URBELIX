@@ -1,35 +1,54 @@
 package com.nexur.nexur.config;
 
-import com.nexur.nexur.service.UsuarioDetailsService;
+import com.nexur.nexur.repository.UsuarioRepository;
+import com.nexur.nexur.service.AuditoriaService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration(proxyBeanMethods = false)
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final UsuarioDetailsService usuarioDetailsService;
+    private final UsuarioRepository usuarioRepository;
+    private final AuditoriaService auditoriaService;
 
-    public SecurityConfig(UsuarioDetailsService usuarioDetailsService) {
-        this.usuarioDetailsService = usuarioDetailsService;
+    public SecurityConfig(UsuarioRepository usuarioRepository, AuditoriaService auditoriaService) {
+        this.usuarioRepository = usuarioRepository;
+        this.auditoriaService = auditoriaService;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, DaoAuthenticationProvider authProvider) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           AuthenticationSuccessHandler successHandler) throws Exception {
         http
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/webhooks/pagos", "/webhooks/wompi"))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                .requestMatchers("/", "/home", "/login", "/register", "/forgot-password").permitAll()
+                .requestMatchers("/", "/home", "/login", "/register", "/forgot-password", "/reset-password").permitAll()
+                .requestMatchers("/webhooks/pagos").permitAll()
+                .requestMatchers("/webhooks/wompi").permitAll()
                 .requestMatchers("/usuarios-vista", "/usuarios/**", "/guardar-usuario", "/eliminar-usuario", "/editar-usuario", "/actualizar-usuario").hasRole("ADMIN")
                 .requestMatchers("/reportes/**").hasRole("ADMIN")
+                .requestMatchers("/porteria/**").hasRole("PORTERIA")
+                .requestMatchers("/usuarios/excel/residentes", "/pagos/excel").hasRole("ADMIN")
+                .requestMatchers("/pagos/**").hasAnyRole("ADMIN", "RESIDENTE")
+                .requestMatchers("/reservas/**").hasAnyRole("ADMIN", "RESIDENTE")
+                .requestMatchers("/avisos/**").hasAnyRole("ADMIN", "RESIDENTE", "PORTERIA")
+                .requestMatchers("/notificaciones/**").authenticated()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/visitantes/**").hasAnyRole("ADMIN", "PORTERIA", "RESIDENTE")
+                .requestMatchers("/parqueaderos/nuevo", "/parqueaderos/editar/**",
+                        "/parqueaderos/guardar", "/parqueaderos/eliminar/**").hasRole("ADMIN")
+                .requestMatchers("/parqueaderos/mis-vehiculos/**").hasRole("RESIDENTE")
+                .requestMatchers("/parqueaderos/**").hasAnyRole("ADMIN", "RESIDENTE")
+                .requestMatchers("/incidencias/nueva").hasRole("RESIDENTE")
+                .requestMatchers("/incidencias/**").hasAnyRole("ADMIN", "RESIDENTE")
+                .requestMatchers("/visitantes/**").hasAnyRole("PORTERIA", "RESIDENTE")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -37,7 +56,7 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
-                .defaultSuccessUrl("/dashboard", true)
+                .successHandler(successHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
@@ -48,21 +67,33 @@ public class SecurityConfig {
                 .deleteCookies("JSESSIONID")
                 .permitAll()
             )
-            .authenticationProvider(authProvider);
+            .exceptionHandling(exception -> exception
+                .accessDeniedPage("/acceso-denegado")
+            );
+
+        http.addFilterBefore(new FirstLoginPasswordFilter(usuarioRepository),
+                org.springframework.security.web.access.intercept.AuthorizationFilter.class);
+        http.addFilterAfter(new AuditoriaRequestFilter(auditoriaService),
+                org.springframework.security.web.access.intercept.AuthorizationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(usuarioDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public AuthenticationSuccessHandler authenticationSuccessHandler(UsuarioRepository usuarioRepository) {
+        return (request, response, authentication) -> {
+            var usuario = usuarioRepository.findByEmail(authentication.getName()).orElse(null);
+            if (usuario != null && usuario.isDebeCambiarPassword()) {
+                response.sendRedirect("/perfil?cambiarPassword=true");
+                return;
+            }
+            response.sendRedirect("/dashboard");
+        };
     }
 
 

@@ -47,6 +47,12 @@ private Residente residente;
     @Enumerated(EnumType.STRING)
     private Rol rol;
 
+    @Column(nullable = false)
+    private boolean activo = true;
+
+    @Column(nullable = false)
+    private boolean debeCambiarPassword = false;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (rol == null) {
@@ -72,7 +78,7 @@ private Residente residente;
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return activo;
     }
 
     @Override

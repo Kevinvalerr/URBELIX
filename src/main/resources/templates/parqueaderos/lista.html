@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{layout/base :: page}">
+<div th:fragment="content" th:with="titulo='Parqueaderos | Urbelix'">
+    <section class="page-top-section mb-4">
+        <div>
+            <h1>Parqueaderos</h1>
+            <p class="text-muted" th:text="${esAdmin ? 'Administra los espacios y sus asignaciones.' : 'Consulta los espacios asignados a tu apartamento.'}">Consulta de parqueaderos.</p>
+        </div>
+        <div class="page-actions" sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/parqueaderos/nuevo}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Nuevo parqueadero
+            </a>
+        </div>
+    </section>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div class="timeline-container table-surface">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th>Espacio</th>
+                    <th>Zona</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th sec:authorize="hasRole('ADMIN')">Apartamento</th>
+                    <th sec:authorize="hasRole('ADMIN')">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="parqueadero : ${parqueaderos}">
+                    <td th:text="${parqueadero.numero}">P-01</td>
+                    <td th:text="${parqueadero.zona ?: 'Sin zona'}">Sótano 1</td>
+                    <td th:text="${parqueadero.tipo}">CARRO</td>
+                    <td>
+                        <span class="badge text-bg-success" th:if="${parqueadero.estado.name() == 'DISPONIBLE'}">Disponible</span>
+                        <span class="badge text-bg-primary" th:if="${parqueadero.estado.name() == 'ASIGNADO'}">Asignado</span>
+                        <span class="badge text-bg-primary" th:if="${parqueadero.estado.name() == 'OCUPADO'}">Ocupado</span>
+                        <span class="badge text-bg-warning" th:if="${parqueadero.estado.name() == 'RESERVADO'}">Reservado</span>
+                        <span class="badge text-bg-warning" th:if="${parqueadero.estado.name() == 'MANTENIMIENTO'}">Mantenimiento</span>
+                    </td>
+                    <td sec:authorize="hasRole('ADMIN')" th:text="${parqueadero.apartamento != null ? parqueadero.apartamento.numero : 'Sin asignar'}">Sin asignar</td>
+                    <td sec:authorize="hasRole('ADMIN')" class="data-table-actions-cell">
+                        <a th:href="@{/parqueaderos/editar/{id}(id=${parqueadero.id})}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Editar</a>
+                        <form th:action="@{/parqueaderos/eliminar/{id}(id=${parqueadero.id})}" method="post" onsubmit="return confirm('¿Eliminar este parqueadero?')">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(parqueaderos)}">
+                    <td colspan="6" class="text-center text-muted py-5">No hay parqueaderos disponibles.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</html>

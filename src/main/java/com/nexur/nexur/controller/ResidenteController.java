@@ -97,7 +97,8 @@ public class ResidenteController {
             if (residente.getUsuario() == null || residente.getUsuario().getPassword() == null || residente.getUsuario().getPassword().isBlank()) {
                 bindingResult.rejectValue("usuario.password", "NotBlank", "La contraseña es obligatoria para el residente");
             }
-            if (confirmPassword == null || !confirmPassword.equals(residente.getUsuario().getPassword())) {
+            if (residente.getUsuario() == null || confirmPassword == null
+                    || !confirmPassword.equals(residente.getUsuario().getPassword())) {
                 bindingResult.rejectValue("usuario.password", "Match", "Las contraseñas no coinciden");
             }
             if (residente.getUsuario() != null && StringUtils.hasText(residente.getUsuario().getEmail()) && usuarioService.existePorEmail(residente.getUsuario().getEmail())) {
@@ -114,13 +115,26 @@ public class ResidenteController {
             return "residentes/formulario";
         }
 
-        residenteService.guardar(residente, apartamentoId);
+        try {
+            residenteService.guardar(residente, apartamentoId);
+        } catch (RuntimeException exception) {
+            if (residente.getUsuario() != null) {
+                residente.getUsuario().setPassword(null);
+            }
+            model.addAttribute("apartamentos", apartamentoService.listarApartamentos());
+            model.addAttribute("currentPath", "/residentes");
+            model.addAttribute("volverUrl", "/residentes");
+            model.addAttribute("titulo", residente.getId() == null ? "Registrar Residente" : "Editar Residente");
+            model.addAttribute("isNew", residente.getId() == null);
+            model.addAttribute("formError", exception.getMessage());
+            return "residentes/formulario";
+        }
 
         return "redirect:/residentes";
     }
 
     //Eliminar residente
-    @GetMapping("/eliminar/{id}")
+    @PostMapping("/eliminar/{id}")
     public String eliminarResidente(@PathVariable Long id) {
 
         residenteService.eliminar(id);

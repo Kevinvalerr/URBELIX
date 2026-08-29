@@ -8,6 +8,7 @@ import com.nexur.nexur.repository.ResidenteRepository;
 import com.nexur.nexur.repository.ApartamentoRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -37,7 +38,23 @@ public class ResidenteService {
         return residenteRepository.findAll();
     }
 
+    @Transactional
     public Residente guardar(Residente residente, Long apartamentoId) {
+        if (residente == null) {
+            throw new IllegalArgumentException("El residente es obligatorio");
+        }
+        String documento = residente.getDocumento() == null ? null : residente.getDocumento().trim();
+        if (!StringUtils.hasText(documento)) {
+            throw new IllegalArgumentException("El documento es obligatorio");
+        }
+        boolean documentoDuplicado = residente.getId() == null
+                ? residenteRepository.existsByDocumento(documento)
+                : residenteRepository.existsByDocumentoAndIdNot(documento, residente.getId());
+        if (documentoDuplicado) {
+            throw new IllegalArgumentException("El documento ya está registrado");
+        }
+        residente.setDocumento(documento);
+
         Apartamento apartamento = apartamentoRepository
                 .findById(apartamentoId)
                 .orElseThrow(() -> new RuntimeException("Apartamento no encontrado"));
@@ -51,6 +68,7 @@ public class ResidenteService {
                 if (usuario.getRol() == null) {
                     usuario.setRol(Rol.RESIDENTE);
                 }
+                usuario.setNombre(residente.getNombre());
                 usuario = usuarioService.guardarUsuario(usuario);
             } else {
                 usuario = usuarioService.guardarUsuarioActualizado(usuario);

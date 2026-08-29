@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,25 +39,33 @@ public class ReporteService {
         if (fechaFin == null) {
             fechaFin = LocalDate.now();
         }
+        if (fechaInicio.isAfter(fechaFin)) {
+            throw new IllegalArgumentException("La fecha inicial no puede ser posterior a la fecha final");
+        }
+
         LocalDateTime inicio = fechaInicio.atStartOfDay();
         LocalDateTime fin = fechaFin.atTime(LocalTime.MAX);
 
         List<ReporteRegistro> registros = new ArrayList<>();
-          
+        String tipoNormalizado = tipo == null ? "TODOS" : tipo.trim().toUpperCase();
 
-        if (tipo == null || tipo.isBlank() || "TODOS".equalsIgnoreCase(tipo)) {
-            registros.addAll(mapPagos(pagoRepository.findByFechaBetween(fechaInicio, fechaFin)));
-            registros.addAll(mapReservas(reservaRepository.findByFechaInicioBetween(inicio, fin)));
-            registros.addAll(mapVisitantes(visitanteRepository.findByFechaEntradaBetween(inicio, fin)));
-        } else if ("PAGOS".equalsIgnoreCase(tipo)) {
-            registros.addAll(mapPagos(pagoRepository.findByFechaBetween(fechaInicio, fechaFin)));
-        } else if ("RESERVAS".equalsIgnoreCase(tipo)) {
-            registros.addAll(mapReservas(reservaRepository.findByFechaInicioBetween(inicio, fin)));
-        } else if ("VISITANTES".equalsIgnoreCase(tipo)) {
-            registros.addAll(mapVisitantes(visitanteRepository.findByFechaEntradaBetween(inicio, fin)));
+        switch (tipoNormalizado) {
+            case "TODOS" -> {
+                registros.addAll(mapPagos(pagoRepository.findByFechaBetween(fechaInicio, fechaFin)));
+                registros.addAll(mapReservas(reservaRepository.findByFechaInicioBetween(inicio, fin)));
+                registros.addAll(mapVisitantes(visitanteRepository.findByFechaEntradaBetween(inicio, fin)));
+            }
+            case "PAGOS" -> registros.addAll(mapPagos(
+                    pagoRepository.findByFechaBetween(fechaInicio, fechaFin)));
+            case "RESERVAS" -> registros.addAll(mapReservas(
+                    reservaRepository.findByFechaInicioBetween(inicio, fin)));
+            case "VISITANTES" -> registros.addAll(mapVisitantes(
+                    visitanteRepository.findByFechaEntradaBetween(inicio, fin)));
+            default -> throw new IllegalArgumentException("Tipo de reporte no válido: " + tipo);
         }
 
-        registros.sort((a, b) -> b.getFechaHora().compareTo(a.getFechaHora()));
+        registros.sort(Comparator.comparing(ReporteRegistro::getFechaHora,
+                Comparator.nullsLast(Comparator.reverseOrder())));
         return registros;
     }
 
@@ -68,7 +76,7 @@ public class ReporteService {
                         "Pago #" + pago.getId(),
                        pago.getResidente() != null ? pago.getResidente().getNombre() : "—",
                         "Pago de " + pago.getMonto() + " por apto " + (pago.getApartamento() != null ? pago.getApartamento().getNumero() : "N/A"),
-                        pago.getCreadoEn()
+                        pago.getFecha() == null ? pago.getCreadoEn() : pago.getFecha().atStartOfDay()
                 ))
                 .collect(Collectors.toList());
     }

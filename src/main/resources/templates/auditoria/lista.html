@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: page}">
+<div th:fragment="content" th:with="titulo='Auditoria | Urbelix'">
+    <section class="page-top-section">
+        <div>
+            <h1>Bitacora de seguridad</h1>
+            <p class="text-muted">Ultimas mutaciones autorizadas del sistema. No se almacenan contrasenas ni datos sensibles de formularios.</p>
+        </div>
+    </section>
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Actor</th>
+                        <th>Metodo</th>
+                        <th>Ruta</th>
+                        <th>Resultado</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="auditoria : ${auditorias}">
+                        <td th:text="${#temporals.format(auditoria.creadoEn, 'dd/MM/yyyy HH:mm:ss')}">27/08/2026 15:00:00</td>
+                        <td th:text="${auditoria.actorEmail}">admin@nexur.com</td>
+                        <td><span class="badge text-bg-secondary" th:text="${auditoria.accion}">POST</span></td>
+                        <td class="text-break" th:text="${auditoria.entidad}">/usuarios/estado/1</td>
+                        <td th:text="${auditoria.detalle ?: '-'}">status=302</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(auditorias)}">
+                        <td colspan="5" class="text-center text-muted py-4">Todavia no hay acciones registradas.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.time.LocalDateTime;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReservaService {
@@ -28,24 +30,51 @@ public class ReservaService {
         return reservaRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
     }
 
+    public List<Reserva> listarReservasPorResidente(Long residenteId) {
+        return reservaRepository.findByResidenteIdOrderByIdDesc(residenteId);
+    }
+
     public List<Reserva> obtenerUltimasReservas() {
         return reservaRepository.findTop4ByOrderByIdDesc();
     }
 
+    @Transactional
     public Reserva guardar(Reserva reserva, Long apartamentoId) {
+        if (reserva == null) {
+            throw new IllegalArgumentException("La reserva es obligatoria");
+        }
+        if (reserva.getTipoEspacio() == null) {
+            throw new IllegalArgumentException("Debe seleccionar el área a reservar");
+        }
+        if (apartamentoId == null) {
+            throw new IllegalArgumentException("Debe seleccionar un apartamento");
+        }
+        if (reserva.getFechaInicio() == null || reserva.getFechaFin() == null
+                || !reserva.getFechaFin().isAfter(reserva.getFechaInicio())) {
+            throw new IllegalArgumentException("La fecha final debe ser posterior a la fecha inicial");
+        }
+        if (reserva.getFechaInicio().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("La reserva debe comenzar en el futuro");
+        }
         Apartamento apartamento = apartamentoRepository.findById(apartamentoId)
-                .orElseThrow(() -> new RuntimeException("Apartamento no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Apartamento no encontrado"));
+        if (reserva.getResidente() != null
+                && (reserva.getResidente().getApartamento() == null
+                || !apartamentoId.equals(reserva.getResidente().getApartamento().getId()))) {
+            throw new IllegalArgumentException("El apartamento no pertenece al residente que solicita la reserva");
+        }
         reserva.setApartamento(apartamento);
 
         List<Reserva> conflictos = reservaRepository
-            .findByTipoEspacioAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+            .findByTipoEspacioAndEstadoInAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
                     reserva.getTipoEspacio(),
+                List.of(EstadoReserva.PENDIENTE, EstadoReserva.APROBADA),
                     reserva.getFechaFin(),
                     reserva.getFechaInicio()
             );
 
            if (!conflictos.isEmpty()) {
-          throw new RuntimeException("Ya existe una reserva en ese horario para este espacio");
+          throw new IllegalArgumentException("Ya existe una reserva en ese horario para este espacio");
          }
 
          if (reserva.getObservaciones() == null || reserva.getObservaciones().isBlank()) {
@@ -76,7 +105,11 @@ public class ReservaService {
 
 public void aprobarReserva(Long id, String comentario) {
     Reserva reserva = reservaRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+            .orElseThrow(() -> new IllegalArgumentException("Reserva no encontrada"));
+
+    if (reserva.getEstado() != EstadoReserva.PENDIENTE) {
+        throw new IllegalArgumentException("Solo se pueden aprobar reservas pendientes");
+    }
 
     reserva.setEstado(EstadoReserva.APROBADA);
 
@@ -89,7 +122,11 @@ public void aprobarReserva(Long id, String comentario) {
 
 public void rechazarReserva(Long id, String comentario) {
     Reserva reserva = reservaRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+            .orElseThrow(() -> new IllegalArgumentException("Reserva no encontrada"));
+
+    if (reserva.getEstado() != EstadoReserva.PENDIENTE) {
+        throw new IllegalArgumentException("Solo se pueden rechazar reservas pendientes");
+    }
 
     reserva.setEstado(EstadoReserva.RECHAZADA);
 

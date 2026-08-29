@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{layout/base :: page}">
     <div th:fragment="content" th:with="titulo='Residentes | Urbelix'">
         <!-- Page Header -->
-        <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
-            <div class="welcome-content" style="gap: 2rem;">
-                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(168, 85, 247, 0.15));">
+        <div class="dashboard-welcome-header">
+            <div class="welcome-content">
+                <div class="welcome-avatar welcome-avatar--residents">
                     <i class="bi bi-people"></i>
                 </div>
                 <div class="welcome-text">
@@ -20,48 +20,50 @@
             </div>
         </div>
 
-        <div style="display:flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
-            <a th:href="@{/residentes/nuevo}" class="btn btn-primary" style="padding: 0.85rem 1.2rem; font-weight: 600;">Nuevo Residente</a>
-            <a th:href="@{/admin/residentes-import}" class="btn btn-secondary" style="padding: 0.85rem 1.2rem; font-weight: 600;">Importar Residentes Excel</a>
+        <div class="page-actions mb-4">
+            <a th:href="@{/residentes/nuevo}" class="btn btn-primary btn-main-action"><i class="bi bi-person-plus me-2"></i>Nuevo residente</a>
+            <a th:href="@{/residentes/importar}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Importar desde Excel</a>
         </div>
+        <div class="page-filter mb-4"><input class="form-control" data-filter-search="residentes" oninput="filterRows('residentes')" placeholder="Buscar por nombre, documento, teléfono o apartamento"></div>
 
         <!-- Residents Table -->
       
         <!-- Residents Table -->
-        <div class="timeline-container" style="padding: 2rem;">
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; background: transparent;">
+        <div class="data-table-shell">
+            <div class="table-responsive">
+                <table class="table data-table align-middle mb-0">
                     <thead>
-                        <tr style="border-bottom: 2px solid rgba(37, 99, 235, 0.1);">
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">ID</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Nombre</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Documento</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Teléfono</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Apartamento</th>
-                            <th style="padding: 1rem; text-align: center; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Acciones</th>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Documento</th>
+                            <th>Teléfono</th>
+                            <th>Apartamento</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="residente : ${residentes}" style="border-bottom: 1px solid rgba(37, 99, 235, 0.06); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(37, 99, 235, 0.02)'" onmouseout="this.style.backgroundColor='transparent'">
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${residente.id}"></td>
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${residente.nombre}"></td>
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${residente.documento}"></td>
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${residente.telefono}"></td>
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${residente.apartamento.numero}"></td>
-                            <td style="padding: 1rem; text-align: center;">
-                                <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                                    <a th:href="@{/residentes/editar/{id}(id=${residente.id})}" style="background: rgba(251, 191, 36, 0.1); color: #D97706; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(251, 191, 36, 0.2)'" onmouseout="this.style.background='rgba(251, 191, 36, 0.1)'">
+                        <tr th:each="residente : ${residentes}" data-filter-row="residentes">
+                            <td th:text="${residente.id}"></td>
+                            <td th:text="${residente.nombre}"></td>
+                            <td th:text="${residente.documento}"></td>
+                            <td th:text="${residente.telefono}"></td>
+                            <td th:text="${residente.apartamento != null ? residente.apartamento.numero : 'Sin asignar'}"></td>
+                            <td class="text-center">
+                                <div class="data-table-actions d-inline-flex gap-2">
+                                    <a th:href="@{/residentes/editar/{id}(id=${residente.id})}" class="btn btn-sm btn-outline-warning">
                                         <i class="bi bi-pencil"></i> Editar
                                     </a>
-                                    <a th:href="@{/residentes/eliminar/{id}(id=${residente.id})}" style="background: rgba(239, 68, 68, 0.1); color: #DC2626; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'" onclick="return confirm('¿Estás seguro de que quieres eliminar este residente?')">
-                                        <i class="bi bi-trash"></i> Eliminar
-                                    </a>
+                                    <form th:action="@{/residentes/eliminar/{id}(id=${residente.id})}" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este residente?')">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
-                        <tr th:if="${#lists.isEmpty(residentes)}" style="border-bottom: none;">
-                            <td colspan="6" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
-                                <i class="bi bi-people" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                        <tr th:if="${#lists.isEmpty(residentes)}">
+                            <td colspan="6" class="table-empty">
+                                <i class="bi bi-people fs-1 d-block mb-2 text-muted"></i>
                                 <br>
                                 No hay residentes registrados
                             </td>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{layout/base :: page}">
+<div th:fragment="content" th:with="titulo='Avisos | Urbelix'">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <section class="page-top-section mb-4">
+        <div>
+            <h1>Avisos generales</h1>
+            <p class="text-muted" th:text="${esAdmin ? 'Publica y administra las comunicaciones de la copropiedad.' : 'Consulta las comunicaciones vigentes de la copropiedad.'}">Comunicaciones de la comunidad.</p>
+        </div>
+    </section>
+
+    <div sec:authorize="hasRole('ADMIN')" class="card form-card mb-4">
+        <div class="card-body">
+            <h2 class="h5 mb-3">Publicar aviso</h2>
+            <form th:action="@{/avisos}" th:object="${aviso}" method="post" class="form-grid">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                <div class="form-group"><label for="titulo">Título</label><input id="titulo" th:field="*{titulo}" class="form-control" maxlength="120" required><small class="text-danger" th:errors="*{titulo}"></small></div>
+                <div class="form-group"><label for="venceEn">Vigente hasta (opcional)</label><input id="venceEn" th:field="*{venceEn}" type="datetime-local" class="form-control"></div>
+                <div class="form-group form-group-full"><label for="contenido">Mensaje</label><textarea id="contenido" th:field="*{contenido}" class="form-control" rows="4" maxlength="2000" required></textarea><small class="text-danger" th:errors="*{contenido}"></small></div>
+                <div class="form-actions form-group-full"><button class="btn btn-primary" type="submit"><i class="bi bi-megaphone me-2"></i>Publicar aviso</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <article class="col-12" th:each="aviso : ${avisos}">
+            <div class="card h-100" th:classappend="${!aviso.activo ? ' border-secondary opacity-75' : ''}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between gap-3 align-items-start">
+                        <div><h2 class="h5 mb-1" th:text="${aviso.titulo}">Título del aviso</h2><p class="text-muted small mb-3" th:text="${#temporals.format(aviso.publicadoEn, 'dd/MM/yyyy HH:mm')}">Fecha</p></div>
+                        <span class="badge text-bg-secondary" th:if="${!aviso.activo}">Desactivado</span>
+                        <span class="badge text-bg-info" th:if="${aviso.venceEn != null}" th:text="${'Vence: ' + #temporals.format(aviso.venceEn, 'dd/MM/yyyy HH:mm')}">Vence</span>
+                    </div>
+                    <p class="mb-0" style="white-space: pre-line" th:text="${aviso.contenido}">Contenido del aviso.</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0" sec:authorize="hasRole('ADMIN')">
+                    <form th:action="@{/avisos/{id}/estado(id=${aviso.id})}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                        <input type="hidden" name="activo" th:value="${!aviso.activo}">
+                        <button class="btn btn-sm" th:classappend="${aviso.activo ? 'btn-outline-danger' : 'btn-outline-success'}" type="submit" th:text="${aviso.activo ? 'Desactivar' : 'Reactivar'}">Desactivar</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+        <div class="col-12" th:if="${#lists.isEmpty(avisos)}"><div class="text-center text-muted py-5">No hay avisos vigentes.</div></div>
+    </div>
+</div>
+</html>

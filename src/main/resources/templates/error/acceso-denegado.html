@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: page}">
+<div th:fragment="content" class="py-4">
+    <section class="dashboard-welcome-header" style="max-width: 760px; margin: 3rem auto; padding: 3rem 2rem; text-align: center;">
+        <div class="welcome-avatar" style="margin: 0 auto 1.5rem; background: rgba(239, 68, 68, 0.12); color: #DC2626;">
+            <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <h1 class="welcome-title">Acceso restringido</h1>
+        <p class="welcome-subtitle" style="max-width: 520px; margin: 0.75rem auto 1.75rem;">
+            Tu rol actual no tiene permisos para consultar este apartado. Si necesitas acceder, solicita la habilitacion a un administrador.
+        </p>
+        <a th:href="@{/dashboard}" class="btn btn-primary">
+            <i class="bi bi-arrow-left me-2"></i>Volver al dashboard
+        </a>
+    </section>
+</div>
+</html>

@@ -8,7 +8,7 @@
             <span class="sidebar-brand-subtitle">
                 <span sec:authorize="hasRole('ADMIN')">Panel administrativo</span>
                 <span sec:authorize="hasRole('RESIDENTE')">Panel de residente</span>
-                <span sec:authorize="hasRole('PORTERIA')">Panel de portería</span>
+                <span sec:authorize="hasRole('PORTERIA')">Centro de control de portería</span>
                 <span sec:authorize="isAnonymous()">Panel</span>
             </span>
         </div>
@@ -24,47 +24,94 @@
     </div>
 
     <nav class="nav flex-column gap-2">
-        <a href="/dashboard" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/dashboard')} ? ' active' : ''">
+        <a th:href="@{/dashboard}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/dashboard')} ? ' active' : ''">
             <i class="bi bi-speedometer2 me-2"></i>
             Dashboard
         </a>
+        <a th:href="@{/perfil}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/perfil')} ? ' active' : ''">
+            <i class="bi bi-person-circle me-2"></i>
+            Mi perfil
+        </a>
 
         <div sec:authorize="hasRole('ADMIN')">
-            <a href="/residentes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/residentes')} ? ' active' : ''">
+            <a th:href="@{/residentes}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/residentes')} ? ' active' : ''">
                 <i class="bi bi-people-fill me-2"></i>
                 Residentes
             </a>
-            <a href="/apartamentos" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/apartamentos')} ? ' active' : ''">
+            <a th:href="@{/apartamentos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/apartamentos')} ? ' active' : ''">
                 <i class="bi bi-building me-2"></i>
                 Apartamentos
             </a>
-            <a href="/usuarios-vista" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/usuarios')} ? ' active' : ''">
+            <a th:href="@{/usuarios}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/usuarios')} ? ' active' : ''">
                 <i class="bi bi-person-badge me-2"></i>
                 Usuarios
             </a>
-            <a href="/reportes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/reportes')} ? ' active' : ''">
+            <a th:href="@{/reportes}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/reportes')} ? ' active' : ''">
                 <i class="bi bi-bar-chart-line me-2"></i>
                 Reportes
             </a>
+            <a th:href="@{/auditoria}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/auditoria')} ? ' active' : ''">
+                <i class="bi bi-shield-lock me-2"></i>
+                Auditoria
+            </a>
+                <a th:href="@{/parqueaderos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/parqueaderos')} ? ' active' : ''">
+                    <i class="bi bi-p-square me-2"></i>
+                    Administrar parqueaderos
+                </a>
         </div>
 
-        <a href="/visitantes" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/visitantes')} ? ' active' : ''" sec:authorize="hasAnyRole('ADMIN','PORTERIA','RESIDENTE')">
+            <a th:href="@{/parqueaderos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/parqueaderos')} ? ' active' : ''" sec:authorize="hasRole('RESIDENTE')">
+                <i class="bi bi-p-square me-2"></i>
+                Mi parqueadero
+            </a>
+            <a th:href="@{/parqueaderos/mis-vehiculos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/parqueaderos/mis-vehiculos')} ? ' active' : ''" sec:authorize="hasRole('RESIDENTE')">
+                <i class="bi bi-car-front me-2"></i>
+                Mis vehículos
+            </a>
+
+        <a th:href="@{/visitantes}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/visitantes')} ? ' active' : ''" sec:authorize="hasRole('RESIDENTE')">
             <i class="bi bi-door-open-fill me-2"></i>
-            Visitantes
+            Mis solicitudes de visitantes
         </a>
-        <a href="/reservas/nueva" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/reservas')} ? ' active' : ''" sec:authorize="hasRole('ADMIN')">
+        <a th:href="@{/visitantes}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/visitantes')} ? ' active' : ''" sec:authorize="hasRole('PORTERIA')">
+            <i class="bi bi-person-check me-2"></i>
+            Solicitudes de acceso
+        </a>
+        <a th:href="@{/porteria}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/porteria'} ? ' active' : ''" sec:authorize="hasRole('PORTERIA')">
+            <i class="bi bi-shield-check me-2"></i>
+            Centro de control
+        </a>
+        <a th:href="@{/porteria/parqueaderos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/porteria/parqueaderos')} ? ' active' : ''" sec:authorize="hasRole('PORTERIA')">
+            <i class="bi bi-p-square me-2"></i>
+            Control de parqueaderos
+        </a>
+        <a th:href="@{/porteria/parqueaderos/vehiculos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/porteria/parqueaderos/vehiculos')} ? ' active' : ''" sec:authorize="hasRole('PORTERIA')">
+            <i class="bi bi-car-front me-2"></i>
+            Vehículos registrados
+        </a>
+        <a th:href="@{/reservas}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/reservas')} ? ' active' : ''" sec:authorize="hasRole('ADMIN')">
             <i class="bi bi-calendar-check me-2"></i>
             Aprobacion de reservas
         </a>
-        <a href="/reservas/nueva" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/reservas')} ? ' active' : ''" sec:authorize="!hasRole('ADMIN')">
+        <a th:href="@{/reservas/nueva}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/reservas')} ? ' active' : ''" sec:authorize="hasRole('RESIDENTE')">
             <i class="bi bi-calendar-check me-2"></i>
             Crear reserva
         </a>
-
-        </a>
-        <a href="/pagos" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/pagos'} ? ' active' : ''" sec:authorize="isAuthenticated()">
+        <a th:href="@{/pagos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/pagos'} ? ' active' : ''" sec:authorize="hasAnyRole('ADMIN','RESIDENTE')">
             <i class="bi bi-cash-stack me-2"></i>
             Ver pagos
+        </a>
+        <a th:href="@{/incidencias}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/incidencias')} ? ' active' : ''" sec:authorize="hasAnyRole('ADMIN','RESIDENTE')">
+            <i class="bi bi-chat-square-text me-2"></i>
+            Incidencias / PQRS
+        </a>
+        <a th:href="@{/avisos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/avisos')} ? ' active' : ''" sec:authorize="hasAnyRole('ADMIN','RESIDENTE','PORTERIA')">
+            <i class="bi bi-megaphone me-2"></i>
+            Avisos
+        </a>
+        <a th:href="@{/notificaciones}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/notificaciones')} ? ' active' : ''">
+            <i class="bi bi-bell me-2"></i>
+            Notificaciones <span th:if="${notificacionesNoLeidas != null and notificacionesNoLeidas > 0}" class="badge text-bg-danger ms-auto" th:text="${notificacionesNoLeidas}">0</span>
         </a>
 
 

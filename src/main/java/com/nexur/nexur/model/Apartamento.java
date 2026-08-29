@@ -20,6 +20,9 @@ public class Apartamento {
 
     private String  estado;
 
+    @Column(name = "codigo_registro", unique = true, length = 32)
+    private String codigoRegistro;
+
     public Apartamento() {   
     }
 
@@ -69,5 +72,13 @@ public class Apartamento {
 
     public void setEstado(String estado){
         this.estado = estado;
+    }
+
+    public String getCodigoRegistro() {
+        return codigoRegistro;
+    }
+
+    public void setCodigoRegistro(String codigoRegistro) {
+        this.codigoRegistro = codigoRegistro;
     }
 }

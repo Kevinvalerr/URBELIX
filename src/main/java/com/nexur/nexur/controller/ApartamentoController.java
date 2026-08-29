@@ -15,6 +15,9 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 
 
@@ -65,6 +68,7 @@ public class ApartamentoController {
     apartamentoExistente.setTorre(apartamento.getTorre());
     apartamentoExistente.setPiso(apartamento.getPiso());
     apartamentoExistente.setEstado(apartamento.getEstado());
+    apartamentoExistente.setCodigoRegistro(apartamento.getCodigoRegistro());
 
 
     apartamentoService.guardarApartamento(apartamentoExistente);
@@ -100,7 +104,20 @@ public class ApartamentoController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/apartamentos/eliminar/{id}")
+    @PostMapping("/apartamentos/importar")
+    public String importarApartamentos(@RequestParam("archivo") MultipartFile archivo,
+                                       RedirectAttributes redirectAttributes) {
+        try {
+            int importados = apartamentoService.importarExcel(archivo);
+            redirectAttributes.addFlashAttribute("success", importados + " apartamentos importados");
+        } catch (IOException | IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("error", exception.getMessage());
+        }
+        return "redirect:/apartamentos";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/apartamentos/eliminar/{id}")
      public String eliminarApartamento(@PathVariable Long id, RedirectAttributes redirectAttributes){
         try {
             apartamentoService.eliminarApartamento(id);

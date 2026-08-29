@@ -7,6 +7,11 @@ import com.nexur.nexur.repository.ReservaRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.UUID;
+import java.io.IOException;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 
@@ -29,7 +34,44 @@ public class ApartamentoService {
     }
 
     public void guardarApartamento(Apartamento apartamento){
+        if (apartamento.getCodigoRegistro() == null || apartamento.getCodigoRegistro().isBlank()) {
+            apartamento.setCodigoRegistro(generarCodigoRegistro());
+        }
         apartamentoRepository.save(apartamento);
+    }
+
+    private String generarCodigoRegistro() {
+        return "URB-" + UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
+    }
+
+    public int importarExcel(MultipartFile archivo) throws IOException {
+        if (archivo == null || archivo.isEmpty()) {
+            throw new IllegalArgumentException("Seleccione un archivo Excel");
+        }
+        int importados = 0;
+        try (var workbook = WorkbookFactory.create(archivo.getInputStream())) {
+            var sheet = workbook.getSheetAt(0);
+            for (int indice = 1; indice <= sheet.getLastRowNum(); indice++) {
+                Row row = sheet.getRow(indice);
+                if (row == null || row.getCell(0) == null) {
+                    continue;
+                }
+                String numero = row.getCell(0).toString().trim();
+                if (numero.isBlank() || apartamentoRepository.existsByNumero(numero)) {
+                    continue;
+                }
+                Apartamento apartamento = new Apartamento();
+                apartamento.setNumero(numero);
+                apartamento.setTorre(row.getCell(1) == null ? "" : row.getCell(1).toString().trim());
+                if (row.getCell(2) != null) {
+                    apartamento.setPiso((int) row.getCell(2).getNumericCellValue());
+                }
+                apartamento.setEstado(row.getCell(3) == null ? "DISPONIBLE" : row.getCell(3).toString().trim());
+                apartamentoRepository.save(apartamento);
+                importados++;
+            }
+        }
+        return importados;
     }
 
     public Apartamento obtenerApartamentoPorId(Long id){

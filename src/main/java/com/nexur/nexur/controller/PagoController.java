@@ -11,12 +11,22 @@ import com.nexur.nexur.service.PagoService;
 import com.nexur.nexur.service.ResidenteService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import com.nexur.nexur.service.ExcelExportService;
+import com.nexur.nexur.service.EstadoCuentaPdfService;
+import com.nexur.nexur.service.FacturaPagoPdfService;
+import com.nexur.nexur.service.WompiService;
+import com.nexur.nexur.service.PagoSimulacionService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,11 +39,140 @@ public class PagoController {
     private final PagoService pagoService;
     private final ResidenteService residenteService;
     private final ApartamentoService apartamentoService;
+    private final ExcelExportService excelExportService;
+    private final EstadoCuentaPdfService estadoCuentaPdfService;
+    private final FacturaPagoPdfService facturaPagoPdfService;
+    private final WompiService wompiService;
+    private final PagoSimulacionService pagoSimulacionService;
 
-    public PagoController(PagoService pagoService, ResidenteService residenteService, ApartamentoService apartamentoService) {
+    public PagoController(PagoService pagoService, ResidenteService residenteService, ApartamentoService apartamentoService,
+                          ExcelExportService excelExportService, EstadoCuentaPdfService estadoCuentaPdfService,
+                          FacturaPagoPdfService facturaPagoPdfService, WompiService wompiService,
+                          PagoSimulacionService pagoSimulacionService) {
         this.pagoService = pagoService;
         this.residenteService = residenteService;
         this.apartamentoService = apartamentoService;
+        this.excelExportService = excelExportService;
+        this.estadoCuentaPdfService = estadoCuentaPdfService;
+        this.facturaPagoPdfService = facturaPagoPdfService;
+        this.wompiService = wompiService;
+        this.pagoSimulacionService = pagoSimulacionService;
+    }
+
+    @GetMapping("/excel")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<byte[]> exportarExcel() {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pagos.xlsx")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(excelExportService.exportarPagos(pagoService.listarPagos()));
+    }
+
+    @GetMapping("/estado-cuenta")
+    @PreAuthorize("hasRole('RESIDENTE')")
+    public ResponseEntity<byte[]> descargarEstadoCuenta(Authentication authentication) {
+        try {
+            Residente residente = residenteService.buscarPorUsuarioEmail(authentication.getName());
+            byte[] pdf = estadoCuentaPdfService.generar(residente,
+                    pagoService.listarPagosPorUsuario(authentication.getName()));
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=estado-cuenta.pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
+        } catch (RuntimeException exception) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping({"/{id}/pse/iniciar", "/{id}/iniciar"})
+    @PreAuthorize("hasRole('RESIDENTE')")
+    public String iniciarPagoPse(@PathVariable Long id,
+                                 Authentication authentication,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            Pago pago = pagoService.iniciarPagoOnline(id, authentication.getName());
+            redirectAttributes.addFlashAttribute("success", "Checkout preparado. Referencia: "
+                    + pago.getReferenciaPago());
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("error", exception.getMessage());
+            return "redirect:/pagos";
+        }
+        return "redirect:/pagos/" + id;
+    }
+
+    @GetMapping("/{id}/factura")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESIDENTE')")
+    public ResponseEntity<byte[]> descargarFactura(@PathVariable Long id,
+                                                   Authentication authentication) {
+        try {
+            Pago pago = pagoService.buscarPorId(id);
+            validarAccesoPago(pago, authentication);
+            byte[] pdf = facturaPagoPdfService.generar(pago);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=factura-pago-" + String.format("%06d", id) + ".pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
+        } catch (RuntimeException exception) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{id}/simulador")
+    @PreAuthorize("hasRole('RESIDENTE')")
+    public String mostrarSimulador(@PathVariable Long id,
+                                   Authentication authentication,
+                                   Model model,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            Pago pago = pagoService.buscarPorId(id);
+            validarAccesoPago(pago, authentication);
+            if (!pagoSimulacionService.puedeSimular(pago)) {
+                redirectAttributes.addFlashAttribute("error",
+                        "Este pago todavía no está listo para el sandbox local");
+                return "redirect:/pagos/" + id;
+            }
+            model.addAttribute("pago", pago);
+            model.addAttribute("titulo", "Sandbox de pagos | Urbelix");
+            model.addAttribute("currentPath", "/pagos");
+            model.addAttribute("volverUrl", "/pagos/" + id);
+            return "pagos/simulador";
+        } catch (AccessDeniedException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            redirectAttributes.addFlashAttribute("error", exception.getMessage());
+            return "redirect:/pagos";
+        }
+    }
+
+    @PostMapping("/{id}/simulador/resultado")
+    @PreAuthorize("hasRole('RESIDENTE')")
+    public String procesarSimulador(@PathVariable Long id,
+                                    @RequestParam String estado,
+                                    Authentication authentication,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            Pago pago = pagoService.buscarPorId(id);
+            validarAccesoPago(pago, authentication);
+            PagoSimulacionService.Resultado resultado = pagoSimulacionService.simular(
+                    id, authentication.getName(), estado);
+            String mensaje = switch (resultado.estadoProveedor()) {
+                case "APPROVED" -> "El sandbox aprobó el pago y el webhook lo marcó como pagado.";
+                case "PENDING" -> "El sandbox dejó el pago pendiente, como ocurriría mientras el proveedor procesa la transacción.";
+                case "DECLINED" -> "El sandbox rechazó el pago; el movimiento permanece pendiente.";
+                case "VOIDED" -> "El sandbox anuló la transacción; el movimiento permanece pendiente.";
+                default -> "El sandbox simuló un error del proveedor; el movimiento permanece pendiente.";
+            };
+            redirectAttributes.addFlashAttribute("simulacionMensaje", mensaje);
+            redirectAttributes.addFlashAttribute("simulacionEstado", resultado.estadoProveedor());
+            redirectAttributes.addFlashAttribute("simulacionTransaccionId", resultado.transactionId());
+        } catch (AccessDeniedException exception) {
+            throw exception;
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            redirectAttributes.addFlashAttribute("error", exception.getMessage());
+            return "redirect:/pagos/" + id;
+        }
+        return "redirect:/pagos/" + id;
     }
 
     /**
@@ -42,6 +181,7 @@ public class PagoController {
      * RESIDENTE: ve solo sus pagos
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESIDENTE')")
     public String listarPagos(Model model, Authentication authentication) {
         String email = authentication.getName();
         boolean isAdmin = authentication.getAuthorities().stream()
@@ -60,12 +200,23 @@ public class PagoController {
         // Estadísticas para el dashboard
         long totalPendiente = pagos.stream().filter(p -> p.getEstadoPago() == EstadoPago.PENDIENTE).count();
         long totalPagado = pagos.stream().filter(p -> p.getEstadoPago() == EstadoPago.PAGADO).count();
-        BigDecimal montoTotal = pagos.stream().map(Pago::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
+        long totalVencido = pagos.stream().filter(p -> p.getEstadoPago() == EstadoPago.VENCIDO).count();
+        BigDecimal montoPendiente = pagos.stream()
+            .filter(p -> p.getEstadoPago() == EstadoPago.PENDIENTE || p.getEstadoPago() == EstadoPago.VENCIDO)
+            .map(Pago::getMonto)
+            .filter(java.util.Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal montoTotal = pagos.stream()
+            .map(Pago::getMonto)
+            .filter(java.util.Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         model.addAttribute("pagos", pagos);
         model.addAttribute("totalPagos", pagos.size());
         model.addAttribute("totalPendiente", totalPendiente);
         model.addAttribute("totalPagado", totalPagado);
+        model.addAttribute("totalVencido", totalVencido);
+        model.addAttribute("montoPendiente", montoPendiente);
         model.addAttribute("montoTotal", montoTotal);
         model.addAttribute("titulo", "Gestión de Pagos");
         model.addAttribute("currentPath", "/pagos");
@@ -106,8 +257,8 @@ public class PagoController {
     public String guardarPago(
             @Valid @ModelAttribute("pago") Pago pago,
             BindingResult bindingResult,
-            @RequestParam("residenteId") Long residenteId,
-            @RequestParam("apartamentoId") Long apartamentoId,
+            @RequestParam(value = "residenteId", required = false) Long residenteId,
+            @RequestParam(value = "apartamentoId", required = false) Long apartamentoId,
             Model model,
             RedirectAttributes redirectAttributes) {
 
@@ -127,6 +278,11 @@ public class PagoController {
         if (pago.getMetodo() == null) {
             bindingResult.rejectValue("metodo", "error.metodo", "Debe seleccionar método de pago");
         }
+        if (pago.getFecha() != null && pago.getFechaVencimiento() != null
+                && pago.getFechaVencimiento().isBefore(pago.getFecha())) {
+            bindingResult.rejectValue("fechaVencimiento", "error.fechaVencimiento",
+                    "La fecha de vencimiento no puede ser anterior a la fecha de emisión");
+        }
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("residentes", residenteService.obtenerTodos());
@@ -136,6 +292,8 @@ public class PagoController {
             model.addAttribute("titulo", "Registrar Nuevo Pago");
             model.addAttribute("currentPath", "/pagos/nuevo");
             model.addAttribute("volverUrl", "/pagos");
+            model.addAttribute("selectedResidenteId", residenteId);
+            model.addAttribute("selectedApartamentoId", apartamentoId);
             return "pagos/nuevo";
         }
 
@@ -177,33 +335,64 @@ public class PagoController {
      * Vista detalle del pago para confirmar pago (ADMIN y RESIDENTE)
      */
     @GetMapping("/{id}")
-    public String verDetallePago(@PathVariable Long id, Model model, Authentication authentication) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESIDENTE')")
+    public String verDetallePago(@PathVariable Long id,
+                                 @RequestParam(name = "id", required = false) String wompiTransactionId,
+                                 Model model,
+                                 Authentication authentication) {
         Pago pago = pagoService.buscarPorId(id);
 
-        // Validar acceso: ADMIN ve todo, RESIDENTE solo ve sus pagos
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        validarAccesoPago(pago, authentication);
 
-        if (!isAdmin) {
-            String email = authentication.getName();
-            Residente residente = residenteService.buscarPorUsuarioEmail(email);
-            if (!pago.getResidente().getId().equals(residente.getId())) {
-                throw new RuntimeException("No tienes permiso para ver este pago");
-            }
+        if (StringUtils.hasText(wompiTransactionId)) {
+            WompiService.SincronizacionResultado resultado =
+                    wompiService.sincronizarTransaccion(pago, wompiTransactionId);
+            model.addAttribute("wompiResultado", resultado);
         }
 
         model.addAttribute("pago", pago);
         model.addAttribute("titulo", "Detalle del Pago");
         model.addAttribute("currentPath", "/pagos");
         model.addAttribute("volverUrl", "/pagos");
+        boolean wompiConfigurado = wompiService.estaConfigurado()
+                && pago.getReferenciaPago() != null;
+        model.addAttribute("wompiConfigurado", wompiConfigurado);
+        model.addAttribute("simulacionHabilitada", pagoSimulacionService.puedeSimular(pago));
+        if (wompiConfigurado) {
+            model.addAttribute("wompiPublicKey", wompiService.getPublicKey());
+            model.addAttribute("wompiAmountInCents", wompiService.montoEnCentavos(pago.getMonto()));
+            model.addAttribute("wompiIntegrity", wompiService.firmaIntegridad(
+                    pago.getReferenciaPago(), pago.getMonto()));
+            model.addAttribute("wompiRedirectUrl", wompiService.urlRedireccion(pago.getId()));
+        }
 
         return "pagos/detalle";
     }
 
+    private void validarAccesoPago(Pago pago, Authentication authentication) {
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (isAdmin) {
+            return;
+        }
+        try {
+            Residente residente = residenteService.buscarPorUsuarioEmail(authentication.getName());
+            if (pago.getResidente() == null || residente == null
+                    || !pago.getResidente().getId().equals(residente.getId())) {
+                throw new AccessDeniedException("No tienes permiso para ver este pago");
+            }
+        } catch (AccessDeniedException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw new AccessDeniedException("No tienes permiso para ver este pago");
+        }
+    }
+
     /**
-     * Confirmar pago - Cambiar estado a PAGADO (ADMIN y RESIDENTE)
+     * Confirmar pago recibido por transferencia o efectivo (SOLO ADMIN)
      */
     @PostMapping("/{id}/confirmar")
+    @PreAuthorize("hasRole('ADMIN')")
     public String confirmarPago(
             @PathVariable Long id,
             Authentication authentication,
@@ -212,21 +401,10 @@ public class PagoController {
         try {
             Pago pago = pagoService.buscarPorId(id);
 
-            // Validar acceso
-            boolean isAdmin = authentication.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-            if (!isAdmin) {
-                String email = authentication.getName();
-                Residente residente = residenteService.buscarPorUsuarioEmail(email);
-                if (!pago.getResidente().getId().equals(residente.getId())) {
-                    throw new RuntimeException("No tienes permiso para pagar este pago");
-                }
-            }
-
-            // Solo se puede pagar pagos PENDIENTE
-            if (pago.getEstadoPago() != EstadoPago.PENDIENTE) {
-                redirectAttributes.addFlashAttribute("error", "Solo se pueden pagar pagos con estado PENDIENTE");
+            // Una deuda vencida sigue siendo cobrable y puede regularizarse.
+            if (pago.getEstadoPago() != EstadoPago.PENDIENTE
+                    && pago.getEstadoPago() != EstadoPago.VENCIDO) {
+                redirectAttributes.addFlashAttribute("error", "Solo se pueden confirmar pagos pendientes o vencidos");
                 return "redirect:/pagos";
             }
 

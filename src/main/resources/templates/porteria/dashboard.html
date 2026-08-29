@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: page}">
+<div th:fragment="content">
+    <section class="page-top-section mb-4">
+        <div>
+            <h1>Centro de control de portería</h1>
+            <p class="text-muted">Gestiona solicitudes de acceso y la operación de ingreso y salida.</p>
+        </div>
+    </section>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="card h-100"><div class="card-body"><span class="text-muted">Solicitudes pendientes</span><h2 th:text="${solicitudesPendientes}">0</h2></div></div></div>
+        <div class="col-md-4"><div class="card h-100"><div class="card-body"><span class="text-muted">Visitantes dentro</span><h2 th:text="${visitantesActivosCount}">0</h2></div></div></div>
+        <div class="col-md-4"><div class="card h-100"><div class="card-body"><span class="text-muted">Visitas registradas</span><h2 th:text="${visitantesTotal}">0</h2></div></div></div>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap mb-4">
+        <a th:href="@{/visitantes}" class="btn btn-primary"><i class="bi bi-person-check me-2"></i>Gestionar solicitudes</a>
+        <a th:href="@{/porteria/parqueaderos}" class="btn btn-outline-primary"><i class="bi bi-p-square me-2"></i>Control de parqueaderos</a>
+    </div>
+
+    <div class="card activity-card">
+        <div class="card-body">
+            <h2 class="h5">Visitantes dentro del conjunto</h2>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead><tr><th>Visitante</th><th>Documento</th><th>Apartamento</th><th>Entrada</th><th>Acción</th></tr></thead>
+                    <tbody>
+                    <tr th:each="visitante : ${visitantesActivos}">
+                        <td th:text="${visitante.nombre}">Visitante</td>
+                        <td th:text="${visitante.documento}">00000000</td>
+                        <td th:text="${visitante.apartamento != null ? visitante.apartamento.numero : 'Sin apartamento'}">101</td>
+                        <td th:text="${visitante.fechaEntrada != null ? #temporals.format(visitante.fechaEntrada, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+                        <td><form th:action="@{/visitantes/salida/{id}(id=${visitante.id})}" method="post"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"><button type="submit" class="btn btn-sm btn-outline-danger">Registrar salida</button></form></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(visitantesActivos)}"><td colspan="5" class="text-center text-muted py-4">No hay visitantes dentro.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

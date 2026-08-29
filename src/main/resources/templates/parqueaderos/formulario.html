@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: page}">
+<div th:fragment="content">
+    <section class="page-top-section mb-4">
+        <div>
+            <h1 th:text="${titulo}">Parqueadero</h1>
+            <p class="text-muted">Registra el espacio y, si corresponde, asígnalo a un apartamento.</p>
+        </div>
+    </section>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div class="card form-card">
+        <div class="card-body">
+            <form th:action="@{/parqueaderos/guardar}" th:object="${parqueadero}" method="post" class="form-grid">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                <input type="hidden" th:field="*{id}" />
+                <div class="form-group">
+                    <label for="numero">Número</label>
+                    <input id="numero" th:field="*{numero}" class="form-control" required maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label for="zona">Zona</label>
+                    <input id="zona" th:field="*{zona}" class="form-control" maxlength="80">
+                </div>
+                <div class="form-group">
+                    <label for="tipo">Tipo</label>
+                    <select id="tipo" th:field="*{tipo}" class="form-select" required>
+                        <option th:each="tipo : ${T(com.nexur.nexur.model.TipoVehiculo).values()}" th:value="${tipo}" th:text="${tipo}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="estado">Estado</label>
+                    <select id="estado" th:field="*{estado}" class="form-select" required>
+                        <option th:each="estado : ${estados}" th:value="${estado}" th:text="${estado}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="apartamentoId">Apartamento</label>
+                    <select id="apartamentoId" name="apartamentoId" class="form-select">
+                        <option value="">Sin asignar</option>
+                        <option th:each="apartamento : ${apartamentos}"
+                                th:value="${apartamento.id}"
+                                th:text="${apartamento.numero + ' - Torre ' + apartamento.torre}"
+                                th:selected="${parqueadero.apartamento != null and parqueadero.apartamento.id == apartamento.id}"></option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <a th:href="@{/parqueaderos}" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</html>

@@ -32,6 +32,9 @@ private MetodoPago metodo;
     @NotNull(message = "La fecha es obligatoria")
     private LocalDate fecha;
 
+    @Column(name = "fecha_pago")
+    private LocalDate fechaPago;
+
     @Enumerated(EnumType.STRING)
 @Column(nullable = false)
 private EstadoPago estadoPago;
@@ -99,6 +102,14 @@ public void setMetodo(MetodoPago metodo) {
         this.fecha = fecha;
     }
 
+    public LocalDate getFechaPago() {
+        return fechaPago;
+    }
+
+    public void setFechaPago(LocalDate fechaPago) {
+        this.fechaPago = fechaPago;
+    }
+
     public LocalDateTime getCreadoEn() {
         return creadoEn;
     }
@@ -127,7 +138,15 @@ public LocalDate getFechaVencimiento() {
     return fechaVencimiento;
 }
 
-public void setFechaVencimiento(LocalDate fechaVencimiento) {
-    this.fechaVencimiento = fechaVencimiento;
+    public void setFechaVencimiento(LocalDate fechaVencimiento) {
+        this.fechaVencimiento = fechaVencimiento;
+}
+
+public String getReferenciaPago() {
+    return referenciaPago;
+}
+
+public void setReferenciaPago(String referenciaPago) {
+    this.referenciaPago = referenciaPago;
 }
 }
