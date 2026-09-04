@@ -149,6 +149,8 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- The repository keeps a legacy package for reference; this is the active application. -->
+                    <mainClass>com.nexur.nexur.NexurApplication</mainClass>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
