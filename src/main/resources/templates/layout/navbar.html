@@ -1,23 +1,20 @@
 ﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmls:th="http://www.thymeleaf.org">
 <body>
-    <nav th:fragment="navbar"
+    <nav th fragment"navbar"
     class="navbar-expand-lg navbar-dark custom px-4">
 
-    <a class="navbar-brand  fw-bold" th:href="@{/dashboard}">
-        Urbelix
+    <a class="navbar-brand  fw-bold" href="/dashboard">
+        URBELIX
     </a>
 
     <div class="ms-auto d-flex align-items-center gap-3">
 
-        <span class="text-light small" sec:authorize="hasRole('ADMIN')">Administrador</span>
-        <span class="text-light small" sec:authorize="hasRole('RESIDENTE')">Residente</span>
-        <span class="text-light small" sec:authorize="hasRole('PORTERIA')">Portería</span>
+        <span class="text-ligt small">Admin</span>
 
-        <form th:action="@{/logout}" method="post" style="display: inline;">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
-            <button type="submit" class="btn btn-sm btn-outline-light">Cerrar sesión</button>
-        </form>
+        <a href="/logout" class="btn btn-sm btn-outline-light">
+            Logout
+        </a>
 
 
     </div>

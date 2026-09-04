@@ -21,7 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/usuarios")
 public class UsuarioController {
-     
+
     private final ApartamentoRepository apartamentoRepository;
     private final UsuarioService usuarioService;
     private final ExcelExportService excelExportService;

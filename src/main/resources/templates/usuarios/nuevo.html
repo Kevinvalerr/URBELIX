@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: page}">
-    <div th:fragment="content" th:with="titulo='Crear usuario | Urbelix'">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Crear usuario | URBELIX'">
         <section class="page-top-section">
             <div>
                 <h1>Crear usuario</h1>
@@ -14,14 +14,15 @@
         <div class="card form-card">
             <div class="card-body">
                 <form th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post" class="mt-3 form-grid">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div th:if="${formError}" class="alert alert-danger form-full-width" th:text="${formError}"></div>
 
                     <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
                         <ul>
                             <li th:each="err : ${#fields.globalErrors()}" th:text="${err}"></li>
                         </ul>
                     </div>
-                    <div th:if="${formError}" class="alert alert-danger" th:text="${formError}"></div>
 
                     <div class="form-group">
                         <label>Nombre</label>
@@ -36,6 +37,14 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="rol">Rol</label>
+                        <select id="rol" th:field="*{rol}" class="form-select" required onchange="toggleResidentFields()">
+                            <option value="">Seleccione un rol</option>
+                            <option th:each="rolOption : ${roles}" th:value="${rolOption}" th:text="${rolOption}"></option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <label>Password</label>
                         <input type="password" th:field="*{password}" class="form-control" required minlength="8" autocomplete="new-password"
                                title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo" />
@@ -45,59 +54,47 @@
 
                     <div class="form-group">
                         <label>Confirmar contraseña</label>
-                        <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" required minlength="8" autocomplete="new-password" title="Repita la contraseña anterior" />
+                        <input type="password" name="confirmPassword" class="form-control" required minlength="8" autocomplete="new-password" title="Repita la contraseña anterior" />
                     </div>
 
-                    <div class="form-group">
-                        <label>Rol</label>
-                        <select th:field="*{rol}" id="rol" class="form-select" required>
-                            <option value="RESIDENTE">Residente</option>
-                            <option value="PORTERIA">Portería</option>
-                            <option value="ADMIN">Administrador</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group residente-field">
+                    <div class="form-group resident-field">
                         <label>Documento</label>
-                        <input type="text" name="documento" class="form-control" th:value="${documento}" required inputmode="numeric"
-                               pattern="^[0-9]{8,}$"
-                               title="Solo números, mínimo 8 dígitos" />
+                        <input id="documento" type="text" name="documento" th:value="${documento}" class="form-control" inputmode="numeric"
+                               pattern="^[0-9]{6,12}$"
+                               title="Solo números, entre 6 y 12 dígitos" />
+                        <p class="error-message" th:if="${formError}" th:text="${formError}"></p>
                     </div>
 
-                    <div class="form-group residente-field">
+                    <div class="form-group resident-field">
                         <label>Teléfono</label>
-                        <input type="tel" name="telefono" class="form-control" th:value="${telefono}" required inputmode="tel"
-                               pattern="^[0-9]{10,}$"
-                               title="Solo números, mínimo 10 dígitos" />
+                        <input id="telefono" type="tel" name="telefono" th:value="${telefono}" class="form-control" inputmode="tel"
+                               pattern="^\+?[0-9]{7,15}$"
+                               title="Solo números, 7 a 15 dígitos, opcional prefijo +" />
                     </div>
 
-                    <div class="form-group residente-field">
+                    <div class="form-group resident-field">
                         <label>Apartamento</label>
-                        <input type="text" name="numeroApartamento" id="numeroApartamento" th:value="${numeroApartamento}" class="form-control" required />
+                        <input id="numeroApartamento" type="text" name="numeroApartamento" th:value="${numeroApartamento}" class="form-control" />
                     </div>
 
                     <div class="form-actions">
                         <button type="submit" class="btn btn-success">Crear usuario</button>
                     </div>
                 </form>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const rol = document.getElementById('rol');
-                        const campos = document.querySelectorAll('.residente-field');
-                        function actualizarCampos() {
-                            const esResidente = rol.value === 'RESIDENTE';
-                            campos.forEach(function (campo) {
-                                campo.classList.toggle('d-none', !esResidente);
-                                const input = campo.querySelector('input');
-                                if (input) input.required = esResidente;
-                            });
-                        }
-                        rol.addEventListener('change', actualizarCampos);
-                        actualizarCampos();
-                    });
-                </script>
             </div>
         </div>
     </div>
+    <script>
+        function toggleResidentFields() {
+            const isResident = document.getElementById('rol').value === 'RESIDENTE';
+            document.querySelectorAll('.resident-field').forEach(function (field) {
+                field.style.display = isResident ? '' : 'none';
+                field.querySelectorAll('input').forEach(function (input) {
+                    input.required = isResident;
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', toggleResidentFields);
+    </script>
 </html>
 

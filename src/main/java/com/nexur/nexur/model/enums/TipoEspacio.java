@@ -6,5 +6,5 @@ public enum TipoEspacio {
     PISCINA,
     GIMNASIO,
     SALON_SOCIAL,
-    
+
 }

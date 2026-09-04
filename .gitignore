@@ -1,16 +1,10 @@
-HELP.md
+﻿HELP.md
 target/
-.venv/
 .mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-### Local databases and logs ###
-*.db
-*.mv.db
-*.trace.db
-*.log
-/data/
-
-### Spring Tools Suite ###
+### STS ###
 .apt_generated
 .classpath
 .factorypath
@@ -32,21 +26,32 @@ target/
 /nbdist/
 /.nb-gradle/
 
-### Build output ###
+### Build ###
 build/
 !**/src/main/**/build/
-/tmp/
 !**/src/test/**/build/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+*.log
+
+### Database local ###
+/data/
+
+### Artefactos locales de QA y documentacion ###
+/tmp/
+
+### Python ###
 __pycache__/
 *.pyc
 
-### Secretos y certificados ###
+### IDE / sistema ###
+.DS_Store
+Thumbs.db
+
+### Variables de entorno (credenciales) ###
 .env
 .env.*
 !.env.example
-*.pem
-*.key
-backups/

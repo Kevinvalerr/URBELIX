@@ -26,7 +26,7 @@ public class Usuario implements UserDetails {
 
 @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
 private Residente residente;
-      
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

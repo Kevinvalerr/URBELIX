@@ -20,7 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/residentes")
 public class ResidenteController {
-  
+
      // Servicios que se usan
     private final ResidenteService residenteService;
     private final ApartamentoService apartamentoService;
@@ -34,7 +34,7 @@ public class ResidenteController {
         this.usuarioService = usuarioService;
     }
 
-    @GetMapping 
+    @GetMapping
     public String listarResidentes(Model model) {
         model.addAttribute("residentes", residenteService.obtenerTodos());
         model.addAttribute("currentPath", "/residentes");
@@ -42,7 +42,7 @@ public class ResidenteController {
 
         return "residentes/lista";
     }
-    
+
     //Mostrar formulario para crear residente
     @GetMapping("/nuevo")
     public String mostrarFormulario(Model model) {
@@ -143,6 +143,5 @@ public class ResidenteController {
     }
 
 
-    
-}
 
+}

@@ -28,7 +28,7 @@ public class ApartamentoController {
     private ApartamentoService apartamentoService;
 
 
-   @GetMapping("/apartamentos") 
+   @GetMapping("/apartamentos")
 
    public String listarApartamentos(Model model) {
 
@@ -43,7 +43,7 @@ public class ApartamentoController {
 
    }
 
-   
+
 
    @GetMapping("/apartamentos/editar/{id}")
    public String mostrarFormularioEditar(@PathVariable Long id, Model model) {
@@ -58,12 +58,12 @@ public class ApartamentoController {
       return "apartamentos/editar";
 
    }
- 
+
    @PostMapping("/apartamentos/{id}")
    public String ActualizarApartamento(@PathVariable Long id,
                                        @ModelAttribute("apartamento") Apartamento apartamento) {
     Apartamento apartamentoExistente = apartamentoService.obtenerApartamentoPorId(id);
-     
+
     apartamentoExistente.setNumero(apartamento.getNumero());
     apartamentoExistente.setTorre(apartamento.getTorre());
     apartamentoExistente.setPiso(apartamento.getPiso());
@@ -72,14 +72,14 @@ public class ApartamentoController {
 
 
     apartamentoService.guardarApartamento(apartamentoExistente);
-    
 
-           return "redirect:/apartamentos";                           
+
+           return "redirect:/apartamentos";
          }
-    
-   
- 
-   
+
+
+
+
      @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/apartamentos/nuevo")
     public String mostrarFormularioCrear(Model model){
@@ -96,7 +96,7 @@ public class ApartamentoController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/apartamentos")
     public String guardarApartamento(@ModelAttribute("apartamento") Apartamento apartamento) {
-         
+
         apartamentoService.guardarApartamento(apartamento);
 
         return "redirect:/apartamentos";
@@ -125,7 +125,7 @@ public class ApartamentoController {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/apartamentos";
-     }   
+     }
 
-    
+
 }

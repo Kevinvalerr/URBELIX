@@ -13,9 +13,9 @@ public class Residente {
  @OneToOne
 @JoinColumn(name = "usuario_id", unique = true)
 private Usuario usuario;
- 
-   
-    
+
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -64,7 +64,7 @@ private Usuario usuario;
         return documento;
     }
 
-    
+
     public void setDocumento(String documento) {
         this.documento = documento;
     }
@@ -72,7 +72,7 @@ private Usuario usuario;
     public String getTelefono() {
         return telefono;
     }
-    
+
     public void setTelefono(String telefono) {
         this.telefono = telefono;
     }

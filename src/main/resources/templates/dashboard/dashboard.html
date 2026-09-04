@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{layout/base :: page}">
-    <div th:fragment="content" th:with="titulo='Dashboard | Urbelix'">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Dashboard | URBELIX'">
         <!-- Welcome Header -->
         <div class="dashboard-welcome-header">
             <div class="welcome-content">
@@ -11,11 +11,9 @@
                     <h1 class="welcome-title">¡Hola, <span th:text="${currentUser}">Usuario</span>!</h1>
                     <p class="welcome-subtitle" sec:authorize="hasRole('ADMIN')">Administrador del sistema</p>
                     <p class="welcome-subtitle" sec:authorize="hasRole('RESIDENTE')">Residente</p>
-                    <p class="welcome-subtitle" sec:authorize="hasRole('PORTERIA')">Personal de portería</p>
                     <div class="welcome-badges">
                         <span class="badge-pill" sec:authorize="hasRole('ADMIN')">Control central</span>
                         <span class="badge-pill" sec:authorize="hasRole('RESIDENTE')">Resumen personal</span>
-                        <span class="badge-pill" sec:authorize="hasRole('PORTERIA')">Operación de accesos</span>
                     </div>
                 </div>
             </div>
@@ -36,15 +34,15 @@
             <div class="activity-timeline-section">
                 <div class="timeline-header">
                     <h3>Actividad Reciente</h3>
-                    <a th:href="@{/reportes}" class="view-all-link">Ver todo</a>
+                    <a href="/reportes" class="view-all-link">Ver todo</a>
                 </div>
                 <div class="timeline-container">
                     <div class="timeline-item" th:each="actividad : ${actividades}">
                         <div class="timeline-marker"></div>
                         <div class="timeline-content">
-                            <p class="timeline-time" th:text="${actividad.fecha}">Ahora</p>
-                            <h5 th:text="${actividad.tipo}">Actividad</h5>
-                            <p><strong th:text="${actividad.usuario}">Usuario</strong> <span th:text="${actividad.accion}">realizó una acción.</span></p>
+                            <p class="timeline-time" th:text="${actividad.fecha}">Sin fecha</p>
+                            <h5 th:text="${actividad.accion}">Actividad registrada</h5>
+                            <p th:text="${actividad.usuario}">Sistema</p>
                         </div>
                     </div>
                 </div>
@@ -65,28 +63,21 @@
                                 <div class="alert-indicator warning"></div>
                                 <div class="alert-info">
                                     <span class="alert-title">Moras Pendientes</span>
-                            <span class="alert-count" th:text="${morasCount ?: 0}">0</span>
+                                    <span class="alert-count" th:text="${morasCount ?: '3'}">3</span>
                                 </div>
                             </div>
                             <div class="alert-item">
                                 <div class="alert-indicator danger"></div>
                                 <div class="alert-info">
                                     <span class="alert-title">Multas Activas</span>
-                            <span class="alert-count" th:text="${multasCount ?: 0}">0</span>
+                                    <span class="alert-count" th:text="${multasCount ?: '1'}">1</span>
                                 </div>
                             </div>
                             <div class="alert-item">
                                 <div class="alert-indicator info"></div>
                                 <div class="alert-info">
                                     <span class="alert-title">Reservas Pendientes</span>
-                            <span class="alert-count" th:text="${reservasPendientes ?: 0}">0</span>
-                                </div>
-                            </div>
-                            <div class="alert-item">
-                                <div class="alert-indicator warning"></div>
-                                <div class="alert-info">
-                                    <span class="alert-title">Incidencias Abiertas</span>
-                            <span class="alert-count" th:text="${incidenciasAbiertasCount ?: 0}">0</span>
+                                    <span class="alert-count" th:text="${reservasPendientes ?: '5'}">5</span>
                                 </div>
                             </div>
                         </div>
@@ -98,62 +89,32 @@
                                 <i class="bi bi-graph-up-arrow"></i>
                             </div>
                             <div>
-                                <h4>Indicadores operativos</h4>
-                                <small style="color: var(--text-secondary);">Calculados con datos actuales</small>
+                                <h4>Rendimiento General</h4>
+                                <small style="color: var(--text-secondary);">Información secundaria</small>
                             </div>
                         </div>
                         <div class="widget-content">
                             <div class="performance-metric">
                                 <div class="metric-label">Ocupación</div>
                                 <div class="metric-bar">
-                                    <div class="metric-fill" th:style="'width: ' + ${ocupacionPorcentaje ?: 0} + '%; background: linear-gradient(90deg, #06B6D4, #0891B2);'"></div>
+                                    <div class="metric-fill" style="width: 92%; background: linear-gradient(90deg, #06B6D4, #0891B2);"></div>
                                 </div>
-                                <div class="metric-value" th:text="${ocupacionPorcentaje ?: 0} + '%'">0%</div>
+                                <div class="metric-value">92%</div>
                             </div>
                             <div class="performance-metric">
-                                <div class="metric-label">Recaudo</div>
+                                <div class="metric-label">Cobranza</div>
                                 <div class="metric-bar">
-                                    <div class="metric-fill" th:style="'width: ' + ${cobranzaPorcentaje ?: 0} + '%; background: linear-gradient(90deg, #16A34A, #15803D);'"></div>
+                                    <div class="metric-fill" style="width: 85%; background: linear-gradient(90deg, #16A34A, #15803D);"></div>
                                 </div>
-                                <div class="metric-value" th:text="${cobranzaPorcentaje ?: 0} + '%'">0%</div>
+                                <div class="metric-value">85%</div>
                             </div>
                             <div class="performance-metric">
-                                <div class="metric-label">PQRS atendidas</div>
+                                <div class="metric-label">Satisfacción</div>
                                 <div class="metric-bar">
-                                    <div class="metric-fill" th:style="'width: ' + ${incidenciasAtendidasPorcentaje ?: 0} + '%; background: linear-gradient(90deg, #F59E0B, #D97706);'"></div>
+                                    <div class="metric-fill" style="width: 95%; background: linear-gradient(90deg, #F59E0B, #D97706);"></div>
                                 </div>
-                                <div class="metric-value" th:text="${incidenciasAtendidasPorcentaje ?: 0} + '%'">0%</div>
+                                <div class="metric-value">95%</div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div sec:authorize="hasRole('PORTERIA')" class="card activity-card mt-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h2 class="section-title mb-1">Panel de portería</h2>
-                    <p class="section-subtitle mb-0">Gestiona solicitudes de acceso y controla la operación de visitantes.</p>
-                </div>
-                <a th:href="@{/porteria}" class="btn btn-primary">Abrir centro de control</a>
-            </div>
-            <div class="row g-3 mt-3">
-                <div class="col-md-4">
-                    <div class="summary-card status-info h-100">
-                        <div class="summary-icon"><i class="bi bi-people-fill"></i></div>
-                        <div class="summary-content">
-                            <h4>Visitantes activos</h4>
-                            <p class="summary-value" th:text="${visitantesActivosCount ?: 0}">0</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-8">
-                    <div class="summary-card status-primary h-100">
-                        <div class="summary-icon"><i class="bi bi-shield-check"></i></div>
-                        <div class="summary-content">
-                            <h4>Solicitudes pendientes</h4>
-                            <p class="summary-text">Revisa y autoriza los accesos solicitados por residentes.</p>
                         </div>
                     </div>
                 </div>
@@ -182,8 +143,8 @@
                     <p class="section-subtitle">Tu información más importante para pagos y reservas.</p>
                 </div>
                 <div class="resident-actions">
-                    <a th:href="@{/pagos}" class="action-pill action-info">Ver mis pagos</a>
-                    <a th:href="@{/reservas}" class="action-pill action-primary">Ver mis reservas</a>
+                    <a href="/pagos" class="action-pill action-info">Ver mis pagos</a>
+                    <a href="/reservas" class="action-pill action-primary">Ver mis reservas</a>
                 </div>
             </div>
             <div class="summary-cards">
@@ -235,7 +196,7 @@
 
         <!-- Status Alerts -->
         <div sec:authorize="hasRole('RESIDENTE')" class="status-alerts-section">
-            <div class="alert-card warning" th:if="${estadoMora != null and estadoMora != 'No hay mora registrada'}">
+            <div class="alert-card warning" th:if="${estadoMora != null and estadoMora != 'Sin mora'}">
                 <div class="alert-icon warning">
                     <i class="bi bi-exclamation-triangle-fill"></i>
                 </div>
@@ -243,11 +204,11 @@
                     <h4>Estado de Mora</h4>
                     <p th:text="${estadoMora}">Tienes una mora pendiente</p>
                     <div class="alert-action">
-                        <a th:href="@{/pagos}" class="alert-btn"><i class="bi bi-credit-card" aria-hidden="true"></i><span>Pagar Ahora</span></a>
+                        <a href="/pagos/nuevo" class="alert-btn">Pagar Ahora</a>
                     </div>
                 </div>
             </div>
-            <div class="alert-card danger" th:if="${multa != null and multa != 'No se han registrado multas en tu cuenta'}">
+            <div class="alert-card danger" th:if="${multa != null and multa != 'Sin multas'}">
                 <div class="alert-icon danger">
                     <i class="bi bi-x-circle-fill"></i>
                 </div>
@@ -255,7 +216,7 @@
                     <h4>Multas Pendientes</h4>
                     <p th:text="${multa}">Tienes multas por pagar</p>
                     <div class="alert-action">
-                        <a th:href="@{/pagos}" class="alert-btn"><i class="bi bi-receipt" aria-hidden="true"></i><span>Ver Detalles</span></a>
+                        <a href="/pagos/nuevo" class="alert-btn">Ver Detalles</a>
                     </div>
                 </div>
             </div>
@@ -267,7 +228,7 @@
                     <h4>Reservas Activas</h4>
                     <p th:text="${#lists.size(reservasActivas)} + ' reservas confirmadas'">Tienes reservas activas</p>
                     <div class="alert-action">
-                        <a th:href="@{/reservas}" class="alert-btn"><i class="bi bi-calendar-check" aria-hidden="true"></i><span>Ver Reservas</span></a>
+                        <a href="/reservas" class="alert-btn">Ver Reservas</a>
                     </div>
                 </div>
             </div>
@@ -299,4 +260,3 @@
         });
     </script>
 </html>
-

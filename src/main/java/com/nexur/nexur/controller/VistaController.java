@@ -25,6 +25,3 @@ public class VistaController {
         return "redirect:/usuarios";
     }
 }
-
-
-

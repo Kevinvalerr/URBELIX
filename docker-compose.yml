@@ -46,20 +46,23 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DB_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-nexur_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      DB_USERNAME: ${MYSQL_USER:-urbelix_app}
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: ${MYSQL_DATABASE:-nexur_db}
+      DB_USER: ${MYSQL_USER:-urbelix_app}
       DB_PASSWORD: ${MYSQL_PASSWORD:?Define MYSQL_PASSWORD en .env}
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
-      UPLOAD_DIR: /app/data/uploads
-      URBELIX_FASTAPI_URL: http://reportes:8000
-      REPORTS_FASTAPI_ENABLED: ${REPORTS_FASTAPI_ENABLED:-true}
+      PORTAL_URL: ${PORTAL_URL:-http://localhost:8080/login}
+      APP_UPLOAD_DIR: /app/data/uploads
+      FASTAPI_URL: ${FASTAPI_URL:-http://127.0.0.1:8000}
+      APP_REPORTS_FASTAPI_ENABLED: ${REPORTS_FASTAPI_ENABLED:-true}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
-      ADMIN_BOOTSTRAP_ENABLED: ${ADMIN_BOOTSTRAP_ENABLED:-false}
-      ADMIN_BOOTSTRAP_EMAIL: ${ADMIN_BOOTSTRAP_EMAIL:-}
-      ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
-      ADMINISTRATION_AMOUNT: ${ADMINISTRATION_AMOUNT:-300000}
-      PASSWORD_RESET_EXPIRATION_MINUTES: ${PASSWORD_RESET_EXPIRATION_MINUTES:-30}
-      NOTIFICATIONS_EMAIL_ENABLED: ${NOTIFICATIONS_EMAIL_ENABLED:-false}
+      APP_ADMIN_BOOTSTRAP_ENABLED: ${ADMIN_BOOTSTRAP_ENABLED:-false}
+      APP_ADMIN_BOOTSTRAP_EMAIL: ${ADMIN_BOOTSTRAP_EMAIL:-}
+      APP_ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
+      APP_ADMINISTRATION_AMOUNT: ${ADMINISTRATION_AMOUNT:-300000}
+      APP_PASSWORD_RESET_EXPIRATION_MINUTES: ${PASSWORD_RESET_EXPIRATION_MINUTES:-30}
+      APP_NOTIFICATIONS_EMAIL_ENABLED: ${NOTIFICATIONS_EMAIL_ENABLED:-false}
       MAIL_HOST: ${MAIL_HOST:-}
       MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USERNAME: ${MAIL_USERNAME:-}
@@ -70,6 +73,12 @@ services:
     ports:
       # Fuerza el acceso local por IPv4 y evita el relay IPv6 de WSL en Windows.
       - "127.0.0.1:${APP_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/login > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
     volumes:
       - app-data:/app/data
     networks:

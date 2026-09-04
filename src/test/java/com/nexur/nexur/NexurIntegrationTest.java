@@ -65,8 +65,10 @@ import org.springframework.http.HttpHeaders;
         "spring.datasource.password=",
         "spring.datasource.driver-class-name=org.h2.Driver",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.sql.init.mode=always",
-        "spring.jpa.defer-datasource-initialization=true",
+        // En las pruebas de integracion Hibernate crea el esquema actual.
+        // Flyway se valida desde cero en la prueba Docker/MySQL de despliegue.
+        "spring.flyway.enabled=false",
+        "spring.sql.init.mode=never",
         "app.seed-data.enabled=false",
         "app.payments.simulation-enabled=true",
         "app.payments.simulation-secret=integration-sandbox-secret"

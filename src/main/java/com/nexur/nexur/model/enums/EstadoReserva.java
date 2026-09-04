@@ -4,5 +4,5 @@ public enum EstadoReserva {
 
     PENDIENTE,
     APROBADA,
-    RECHAZADA    
+    RECHAZADA
 }

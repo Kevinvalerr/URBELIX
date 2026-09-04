@@ -14,18 +14,19 @@ services:
     autoDeployTrigger: commit
     envVars:
       # Activa src/main/resources/application-prod.properties.
-      # "prod,demo" en el primer despliegue: siembra el administrador inicial,
-      # sin el cual no hay forma de entrar en una base vacia. Cuando ya existan
-      # usuarios reales, cambiar a "prod" a secas.
+      # La aplicacion activa vive en com.nexur.nexur. El acceso inicial se
+      # crea de forma controlada con el bootstrap administrativo de abajo.
       - key: SPRING_PROFILES_ACTIVE
-        value: prod,demo
+        value: prod
 
-      # --- Semilla inicial (solo se usan con el perfil demo) ---
-      - key: DEMO_ADMIN_EMAIL
+      # --- Acceso administrativo inicial ---
+      # Activarlo solo durante el primer despliegue o para recuperar el acceso.
+      # Despues, cambiar APP_ADMIN_BOOTSTRAP_ENABLED a false y redeployar.
+      - key: APP_ADMIN_BOOTSTRAP_ENABLED
         sync: false
-      - key: DEMO_ADMIN_PASSWORD
+      - key: APP_ADMIN_BOOTSTRAP_EMAIL
         sync: false
-      - key: DEMO_RESIDENTE_PASSWORD
+      - key: APP_ADMIN_BOOTSTRAP_PASSWORD
         sync: false
 
       # --- Aiven for MySQL (Service URI del dashboard de Aiven) ---

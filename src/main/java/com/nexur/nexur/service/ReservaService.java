@@ -43,7 +43,7 @@ public class ReservaService {
         this(reservaRepository, apartamentoRepository, null, null);
     }
 
-     
+
 
     public List<Reserva> listarReservas() {
         return reservaRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
@@ -118,7 +118,7 @@ public class ReservaService {
              com.nexur.nexur.model.enums.EstadoReserva.PENDIENTE
         );
     }
-    
+
 
     private String generarObservaciones(TipoEspacio tipoEspacio) {
     return switch (tipoEspacio) {

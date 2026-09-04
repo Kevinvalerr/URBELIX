@@ -1,16 +1,16 @@
 ﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{layout/base :: page}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
 
-<div th:if="${success}" class="alert alert-success">
+<div th:if="${success}" class="alert alert-success" style="position: fixed; top: 20px; right: 20px; z-index: 1000; max-width: 400px; border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
     <i class="bi bi-check-circle-fill me-2"></i>
     <span th:text="${success}"></span>
 </div>
 
-    <div th:fragment="content" th:with="titulo='Reservas | Urbelix'">
+    <div th:fragment="content" th:with="titulo='Reservas | URBELIX'">
         <!-- Page Header -->
-        <div class="dashboard-welcome-header">
-            <div class="welcome-content">
-                <div class="welcome-avatar welcome-avatar--reservations">
+        <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
+            <div class="welcome-content" style="gap: 2rem;">
+                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(251, 191, 36, 0.15));">
                     <i class="bi bi-calendar-check"></i>
                 </div>
                 <div class="welcome-text">
@@ -27,72 +27,70 @@
         </div>
 
         <!-- Create Reservation Button -->
-        <div sec:authorize="hasRole('RESIDENTE')" class="page-actions mb-4">
-            <a th:href="@{/reservas/nueva}" class="btn btn-primary btn-main-action">
+        <div sec:authorize="hasRole('RESIDENTE')" style="margin-bottom: 2rem;">
+            <a href="/reservas/nueva" class="btn btn-primary" style="background: linear-gradient(135deg, #2563EB, #06B6D4); border: none; padding: 0.75rem 2rem; border-radius: 12px; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: all 0.3s ease;">
                 <i class="bi bi-plus-circle"></i>
                 Crear Nueva Reserva
             </a>
         </div>
-        <div class="row g-3 mb-4 toolbar-filter"><div class="col-md-8"><input class="form-control" data-filter-search="reservas" oninput="filterRows('reservas')" placeholder="Buscar por residente, apartamento o área"></div><div class="col-md-4"><select class="form-select" data-filter-status="reservas" onchange="filterRows('reservas')"><option value="ALL">Todos los estados</option><option value="PENDIENTE">Pendientes</option><option value="APROBADA">Aprobadas</option><option value="RECHAZADA">Rechazadas</option></select></div></div>
 
         <!-- Reservations Table -->
-        <div class="timeline-container table-surface">
-            <div class="table-responsive">
-                <table class="table data-table data-table--dense align-middle mb-0">
+        <div class="timeline-container" style="padding: 2rem;">
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: transparent;">
                     <thead>
-                        <tr>
-                            <th>Solicitante</th>
-                            <th>Apartamento</th>
-                            <th>Área</th>
-                            <th>Fecha y hora</th>
-                            <th>Observaciones</th>
-                            <th sec:authorize="hasRole('ADMIN')" class="text-center">Acciones</th>
-                            <th class="text-center">Estado</th>
+                        <tr style="border-bottom: 2px solid rgba(37, 99, 235, 0.1);">
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Solicitante</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Apartamento</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Área</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Fecha y Hora</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Observaciones</th>
+                            <th sec:authorize="hasRole('ADMIN')" style="padding: 1rem; text-align: center; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Acciones</th>
+                            <th style="padding: 1rem; text-align: center; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Estado</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="reserva : ${reservas}" data-filter-row="reservas" th:attr="data-status=${reserva.estado != null ? reserva.estado.name() : 'SIN_ESTADO'}">
-                            <td th:text="${reserva.residente != null ? reserva.residente.nombre : 'N/A'}"></td>
-                            <td th:text="${reserva.apartamento != null ? reserva.apartamento.numero : 'Sin asignar'}"></td>
-                            <td>
-                                <span th:if="${reserva.tipoEspacio != null and reserva.tipoEspacio.name() == 'SALON_SOCIAL'}" class="space-badge space-badge--blue">Salón social</span>
-                                <span th:if="${reserva.tipoEspacio == 'PISCINA'}" class="space-badge space-badge--cyan">Piscina</span>
-                                <span th:if="${reserva.tipoEspacio == 'GIMNASIO'}" class="space-badge space-badge--sky">Gimnasio</span>
-                                <span th:if="${reserva.tipoEspacio == null or (reserva.tipoEspacio.name() != 'SALON_SOCIAL' and reserva.tipoEspacio.name() != 'PISCINA' and reserva.tipoEspacio.name() != 'GIMNASIO')}" class="space-badge space-badge--neutral" th:text="${reserva.tipoEspacio != null ? reserva.tipoEspacio : 'Sin espacio'}"></span>
+                        <tr th:each="reserva : ${reservas}" style="border-bottom: 1px solid rgba(37, 99, 235, 0.06); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(37, 99, 235, 0.02)'" onmouseout="this.style.backgroundColor='transparent'">
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${reserva.residente != null ? reserva.residente.nombre : 'N/A'}"></td>
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${reserva.apartamento != null ? reserva.apartamento.numero : '—'}"></td>
+                            <td style="padding: 1rem;">
+                                <span th:if="${reserva.tipoEspacio.name() == 'SALON_SOCIAL' or reserva.tipoEspacio.name() == 'SALON_COMUNAL'}" style="background: rgba(37, 99, 235, 0.1); color: #2563EB; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Salón social</span>
+                                <span th:if="${reserva.tipoEspacio.name() == 'PISCINA'}" style="background: rgba(6, 182, 212, 0.1); color: #06B6D4; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Piscina</span>
+                                <span th:if="${reserva.tipoEspacio.name() == 'GIMNASIO'}" style="background: rgba(14, 165, 233, 0.1); color: #0EA5E9; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Gimnasio</span>
+                                <span th:if="${reserva.tipoEspacio.name() != 'SALON_SOCIAL' and reserva.tipoEspacio.name() != 'SALON_COMUNAL' and reserva.tipoEspacio.name() != 'PISCINA' and reserva.tipoEspacio.name() != 'GIMNASIO'}" style="background: rgba(148, 163, 184, 0.1); color: #64748B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;" th:text="${reserva.tipoEspacio}"></span>
                             </td>
-                            <td th:text="${#temporals.format(reserva.fechaInicio, 'dd/MM/yyyy HH:mm')}"></td>
-                            <td>
-                                <small class="reservation-note" th:text="${reserva.observaciones}"></small>
+                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${#temporals.format(reserva.fechaInicio, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td style="padding: 1rem; max-width: 200px;">
+                                <small style="color: var(--text-secondary); line-height: 1.4;" th:text="${reserva.observaciones}"></small>
                             </td>
-                            <td sec:authorize="hasRole('ADMIN')" class="text-center">
-                                <div th:if="${reserva.estado != null and reserva.estado.name() == 'PENDIENTE'}" class="reservation-actions">
-                                    <form method="post">
+                            <td sec:authorize="hasRole('ADMIN')" style="padding: 1rem; text-align: center;">
+                                <div th:if="${reserva.estado.name() == 'PENDIENTE'}" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <form method="post" style="display: flex; flex-direction: column; gap: 0.5rem;">
                                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                        <textarea name="comentario" class="form-control form-control-sm" placeholder="Mensaje al residente..." rows="2"></textarea>
-                                        <div class="reservation-action-buttons">
-                                            <button type="submit" class="btn btn-sm btn-outline-success" th:attr="formaction=@{/reservas/aprobar/{id}(id=${reserva.id})}">
+                                        <textarea name="comentario" style="width: 100%; padding: 0.5rem; border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 6px; font-size: 0.85rem; resize: vertical;" placeholder="Mensaje al residente..." rows="2"></textarea>
+                                        <div style="display: flex; gap: 0.25rem;">
+                                            <button type="submit" th:attr="formaction=@{/reservas/aprobar/{id}(id=${reserva.id})}" style="flex: 1; background: rgba(34, 197, 94, 0.1); color: #16A34A; border: none; padding: 0.5rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(34, 197, 94, 0.2)'" onmouseout="this.style.background='rgba(34, 197, 94, 0.1)'">
                                                 <i class="bi bi-check-circle"></i> Aprobar
                                             </button>
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" th:attr="formaction=@{/reservas/rechazar/{id}(id=${reserva.id})}">
+                                            <button type="submit" th:attr="formaction=@{/reservas/rechazar/{id}(id=${reserva.id})}" style="flex: 1; background: rgba(239, 68, 68, 0.1); color: #DC2626; border: none; padding: 0.5rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">
                                                 <i class="bi bi-x-circle"></i> Rechazar
                                             </button>
                                         </div>
                                     </form>
                                 </div>
-                                <div th:if="${reserva.estado == null or reserva.estado.name() != 'PENDIENTE'}" class="text-muted small fst-italic">
+                                <div th:if="${reserva.estado.name() != 'PENDIENTE'}" style="color: var(--text-muted); font-style: italic; font-size: 0.85rem;">
                                     Procesada
                                 </div>
                             </td>
-                            <td class="text-center">
-                                <span th:if="${reserva.estado != null and reserva.estado.name() == 'PENDIENTE'}" class="status-badge status-badge--pending">Pendiente</span>
-                                <span th:if="${reserva.estado != null and reserva.estado.name() == 'APROBADA'}" class="status-badge status-badge--approved">Aprobada</span>
-                                <span th:if="${reserva.estado != null and reserva.estado.name() == 'RECHAZADA'}" class="status-badge status-badge--rejected">Rechazada</span>
-                                <span th:if="${reserva.estado == null}" class="text-muted">Sin estado</span>
+                            <td style="padding: 1rem; text-align: center;">
+                                <span th:if="${reserva.estado.name() == 'PENDIENTE'}" style="background: rgba(251, 191, 36, 0.1); color: #D97706; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Pendiente</span>
+                                <span th:if="${reserva.estado.name() == 'APROBADA'}" style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Aprobada</span>
+                                <span th:if="${reserva.estado.name() == 'RECHAZADA'}" style="background: rgba(239, 68, 68, 0.1); color: #DC2626; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Rechazada</span>
                             </td>
                         </tr>
-                        <tr th:if="${#lists.isEmpty(reservas)}">
-                            <td colspan="7" class="table-empty">
-                                <i class="bi bi-calendar-check fs-1 d-block mb-2 text-muted"></i>
+                        <tr th:if="${#lists.isEmpty(reservas)}" style="border-bottom: none;">
+                            <td colspan="7" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
+                                <i class="bi bi-calendar-check" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
                                 <br>
                                 No hay reservas registradas
                             </td>
@@ -103,5 +101,3 @@
         </div>
     </div>
 </html>
-
-

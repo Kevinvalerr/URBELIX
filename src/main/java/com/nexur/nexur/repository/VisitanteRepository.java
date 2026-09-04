@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface VisitanteRepository extends JpaRepository<Visitante,Long>{
     /*Esto habilita automaticamente métodos CRUD
-     save() , finALl(),findBYId(),delteById() 
+     save() , finALl(),findBYId(),delteById()
     */
 
     List<Visitante> findByEstadoOrderByFechaEntradaDesc(EstadoVisitante estado);
