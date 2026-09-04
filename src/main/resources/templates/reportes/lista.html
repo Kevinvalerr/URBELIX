@@ -19,6 +19,11 @@
         </div>
     </section>
 
+    <div th:if="${errorReporte}" class="alert alert-danger report-alert" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${errorReporte}">Revisa los filtros del reporte.</span>
+    </div>
+
     <!-- ALERTA DE CARGA -->
     <div id="loadingAlert" class="alert alert-info d-none" role="alert">
         <div class="spinner-border spinner-border-sm me-2" role="status">
@@ -199,5 +204,4 @@
 </div>
 
 </html>
-
 

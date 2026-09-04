@@ -54,10 +54,10 @@
                             <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${reserva.residente != null ? reserva.residente.nombre : 'N/A'}"></td>
                             <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${reserva.apartamento != null ? reserva.apartamento.numero : '—'}"></td>
                             <td style="padding: 1rem;">
-                                <span th:if="${reserva.tipoEspacio == 'SALON_COMUNAL'}" style="background: rgba(37, 99, 235, 0.1); color: #2563EB; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Salón Comunal</span>
-                                <span th:if="${reserva.tipoEspacio == 'PISCINA'}" style="background: rgba(6, 182, 212, 0.1); color: #06B6D4; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Piscina</span>
-                                <span th:if="${reserva.tipoEspacio == 'GIMNASIO'}" style="background: rgba(14, 165, 233, 0.1); color: #0EA5E9; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Gimnasio</span>
-                                <span th:if="${reserva.tipoEspacio != 'SALON_COMUNAL' and reserva.tipoEspacio != 'PISCINA' and reserva.tipoEspacio != 'GIMNASIO'}" style="background: rgba(148, 163, 184, 0.1); color: #64748B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;" th:text="${reserva.tipoEspacio}"></span>
+                                <span th:if="${reserva.tipoEspacio.name() == 'SALON_SOCIAL' or reserva.tipoEspacio.name() == 'SALON_COMUNAL'}" style="background: rgba(37, 99, 235, 0.1); color: #2563EB; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Salón social</span>
+                                <span th:if="${reserva.tipoEspacio.name() == 'PISCINA'}" style="background: rgba(6, 182, 212, 0.1); color: #06B6D4; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Piscina</span>
+                                <span th:if="${reserva.tipoEspacio.name() == 'GIMNASIO'}" style="background: rgba(14, 165, 233, 0.1); color: #0EA5E9; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Gimnasio</span>
+                                <span th:if="${reserva.tipoEspacio.name() != 'SALON_SOCIAL' and reserva.tipoEspacio.name() != 'SALON_COMUNAL' and reserva.tipoEspacio.name() != 'PISCINA' and reserva.tipoEspacio.name() != 'GIMNASIO'}" style="background: rgba(148, 163, 184, 0.1); color: #64748B; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;" th:text="${reserva.tipoEspacio}"></span>
                             </td>
                             <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${#temporals.format(reserva.fechaInicio, 'dd/MM/yyyy HH:mm')}"></td>
                             <td style="padding: 1rem; max-width: 200px;">
@@ -101,5 +101,3 @@
         </div>
     </div>
 </html>
-
-

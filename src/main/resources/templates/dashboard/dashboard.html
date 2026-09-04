@@ -37,28 +37,12 @@
                     <a href="/reportes" class="view-all-link">Ver todo</a>
                 </div>
                 <div class="timeline-container">
-                    <div class="timeline-item">
+                    <div class="timeline-item" th:each="actividad : ${actividades}">
                         <div class="timeline-marker"></div>
                         <div class="timeline-content">
-                            <p class="timeline-time">Ahora</p>
-                            <h5>Nuevo residente registrado</h5>
-                            <p>Se añadió un nuevo usuario al edificio.</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker"></div>
-                        <div class="timeline-content">
-                            <p class="timeline-time">Hace 1 hora</p>
-                            <h5>Pago registrado</h5>
-                            <p>Se procesó un pago para el apartamento 304.</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker"></div>
-                        <div class="timeline-content">
-                            <p class="timeline-time">Ayer</p>
-                            <h5>Reserva confirmada</h5>
-                            <p>La reserva de la piscina fue confirmada para mañana.</p>
+                            <p class="timeline-time" th:text="${actividad.fecha}">Sin fecha</p>
+                            <h5 th:text="${actividad.accion}">Actividad registrada</h5>
+                            <p th:text="${actividad.usuario}">Sistema</p>
                         </div>
                     </div>
                 </div>
@@ -276,4 +260,3 @@
         });
     </script>
 </html>
-

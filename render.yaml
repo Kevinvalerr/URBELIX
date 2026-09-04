@@ -1,0 +1,65 @@
+# Blueprint de Render para URBELIX.
+# La base MySQL se gestiona en Aiven, fuera de Render: este blueprint declara
+# solo el servicio web y espera las credenciales como variables de entorno
+# (sync: false = se cargan a mano en el dashboard, no se versionan).
+services:
+  - type: web
+    name: urbelix
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /login
+    autoDeployTrigger: commit
+    envVars:
+      # Activa src/main/resources/application-prod.properties.
+      # La aplicacion activa vive en com.nexur.nexur. El acceso inicial se
+      # crea de forma controlada con el bootstrap administrativo de abajo.
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+
+      # --- Acceso administrativo inicial ---
+      # Activarlo solo durante el primer despliegue o para recuperar el acceso.
+      # Despues, cambiar APP_ADMIN_BOOTSTRAP_ENABLED a false y redeployar.
+      - key: APP_ADMIN_BOOTSTRAP_ENABLED
+        sync: false
+      - key: APP_ADMIN_BOOTSTRAP_EMAIL
+        sync: false
+      - key: APP_ADMIN_BOOTSTRAP_PASSWORD
+        sync: false
+
+      # --- Aiven for MySQL (Service URI del dashboard de Aiven) ---
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # El plan gratuito de Aiven limita las conexiones simultaneas.
+      - key: DB_POOL_SIZE
+        value: "5"
+
+      # URL publica del servicio, usada en los correos a residentes.
+      # Ej: https://urbelix.onrender.com/login
+      - key: PORTAL_URL
+        sync: false
+
+      # --- SMTP (opcional; sin esto las notificaciones quedan inactivas) ---
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+
+      # --- Ejecucion ---
+      # 512 MB en el plan free: se limita el heap y se usa GC serie.
+      - key: JAVA_OPTS
+        value: "-XX:MaxRAMPercentage=65 -XX:+UseSerialGC"

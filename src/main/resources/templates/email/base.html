@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<body style="margin:0;padding:0;background:#eef4f8;color:#243447;font-family:Arial,Helvetica,sans-serif;">
+<div th:fragment="layout">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef4f8;padding:34px 12px;">
+    <tr><td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border:1px solid #d8e4ed;border-radius:18px;overflow:hidden;box-shadow:0 12px 34px rgba(22,59,101,.10);">
+            <tr><td style="height:6px;background:#2a9d8f;font-size:0;line-height:0;">&nbsp;</td></tr>
+            <tr><td style="background:#163b65;padding:26px 32px;color:#ffffff;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+                    <td style="width:48px;vertical-align:middle;"><div style="width:40px;height:40px;border-radius:12px;background:#2a9d8f;color:#ffffff;text-align:center;font-size:16px;font-weight:bold;line-height:40px;">UR</div></td>
+                    <td style="vertical-align:middle;"><div style="font-size:22px;font-weight:bold;letter-spacing:1.5px;">URBELIX</div><div style="font-size:11px;color:#bfe5e0;margin-top:4px;letter-spacing:.4px;">GESTIÓN RESIDENCIAL INTELIGENTE</div></td>
+                </tr></table>
+            </td></tr>
+            <tr><td style="padding:34px 32px 30px;">
+                <div style="margin-bottom:18px;color:#2a9d8f;font-size:11px;font-weight:bold;letter-spacing:1.4px;text-transform:uppercase;">Centro de actividad</div>
+                <h1 th:text="${titulo}" style="margin:0 0 14px;color:#163b65;font-size:25px;line-height:31px;">Notificación de Urbelix</h1>
+                <p th:if="${preheader}" th:text="${preheader}" style="margin:0 0 18px;color:#526273;font-size:15px;line-height:24px;">Información importante de tu residencia.</p>
+                <p th:if="${mensaje}" th:text="${mensaje}" style="margin:0 0 24px;color:#243447;font-size:15px;line-height:25px;white-space:pre-line;">Consulta la información en Urbelix.</p>
+                <table th:if="${detalleEtiqueta}" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;background:#f1f8f8;border:1px solid #d6ece9;border-radius:12px;">
+                    <tr><td style="padding:15px 17px;border-left:4px solid #2a9d8f;"><div th:text="${detalleEtiqueta}" style="color:#718096;font-size:11px;font-weight:bold;letter-spacing:.8px;text-transform:uppercase;">Detalle</div><strong th:text="${detalle}" style="display:block;margin-top:5px;color:#163b65;font-size:17px;line-height:23px;">-</strong></td></tr>
+                </table>
+                <p th:if="${enlace}" style="margin:0 0 24px;"><a th:href="${enlace}" th:text="${textoEnlace}" style="display:inline-block;background:#2a9d8f;color:#ffffff;text-decoration:none;padding:13px 22px;border-radius:9px;font-weight:bold;font-size:14px;box-shadow:0 5px 12px rgba(42,157,143,.22);">Ver en Urbelix</a></p>
+                <p th:if="${expiracion}" th:text="${expiracion}" style="margin:0;color:#718096;font-size:13px;line-height:20px;">-</p>
+            </td></tr>
+            <tr><td style="border-top:1px solid #e6edf5;padding:19px 32px;color:#718096;font-size:12px;line-height:19px;background:#fbfcfd;">
+                Este mensaje fue enviado automáticamente por <strong style="color:#163b65;">Urbelix</strong>. Si no reconoces esta actividad, contacta a la administración de tu conjunto.
+            </td></tr>
+        </table>
+    </td></tr>
+</table>
+</div>
+</body>
+</html>

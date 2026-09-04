@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: page}">
+<div th:fragment="content">
+    <section class="page-top-section mb-4">
+        <div><h1>Mis vehículos</h1><p class="text-muted">Registra los vehículos asociados a tu unidad residencial.</p></div>
+        <a th:href="@{/parqueaderos/mis-vehiculos/nuevo}" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Registrar vehículo</a>
+    </section>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div class="card"><div class="card-body"><div class="table-responsive">
+        <table class="table align-middle"><thead><tr><th>Placa</th><th>Tipo</th><th>Marca / modelo</th><th>Color</th><th>Acciones</th></tr></thead>
+        <tbody>
+        <tr th:each="vehiculo : ${vehiculos}">
+            <td th:text="${vehiculo.placa}">ABC123</td>
+            <td th:text="${vehiculo.tipo}">CARRO</td>
+            <td th:text="${(vehiculo.marca ?: '') + ' ' + (vehiculo.modelo ?: '')}">Marca Modelo</td>
+            <td th:text="${vehiculo.color ?: 'Sin definir'}">Blanco</td>
+            <td><a class="btn btn-sm btn-outline-primary" th:href="@{/parqueaderos/mis-vehiculos/editar/{id}(id=${vehiculo.id})}"><i class="bi bi-pencil"></i> Editar</a></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(vehiculos)}"><td colspan="5" class="text-center text-muted py-4">No tienes vehículos registrados.</td></tr>
+        </tbody></table>
+    </div></div></div>
+</div>
+</html>

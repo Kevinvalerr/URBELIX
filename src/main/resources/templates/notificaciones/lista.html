@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: page}">
+<div th:fragment="content" th:with="titulo='Notificaciones | Urbelix'" class="notification-page">
+    <section class="notification-hero">
+        <div>
+            <span class="notification-eyebrow">Centro de actividad</span>
+            <h1>Notificaciones</h1>
+            <p>Consulta cambios, confirmaciones y novedades relacionadas con tu cuenta.</p>
+        </div>
+        <div class="notification-hero__counter" aria-label="Notificaciones sin leer">
+            <strong th:text="${noLeidas}">0</strong>
+            <span>sin leer</span>
+        </div>
+    </section>
+
+    <div th:if="${success}" class="notification-alert notification-alert--success" role="status">
+        <i class="bi bi-check-circle-fill"></i><span th:text="${success}">Actualizado.</span>
+    </div>
+    <div th:if="${error}" class="notification-alert notification-alert--danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i><span th:text="${error}">No fue posible completar la acción.</span>
+    </div>
+
+    <section class="notification-toolbar" aria-label="Acciones de notificaciones">
+        <div>
+            <strong th:text="${#lists.size(notificaciones) + ' notificación(es)'}">0 notificaciones</strong>
+            <span>Las más recientes aparecen primero.</span>
+        </div>
+        <form th:if="${noLeidas > 0}" th:action="@{/notificaciones/todas/leer}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+            <button type="submit" class="notification-button"><i class="bi bi-check2-all"></i> Marcar todas como leídas</button>
+        </form>
+    </section>
+
+    <div th:if="${#lists.isEmpty(notificaciones)}" class="notification-empty">
+        <span class="notification-empty__icon"><i class="bi bi-bell-slash"></i></span>
+        <h2>Todo está al día</h2>
+        <p>No tienes notificaciones para revisar en este momento.</p>
+        <a th:href="@{/dashboard}" class="notification-button notification-button--primary">Volver al dashboard</a>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(notificaciones)}" class="notification-list">
+        <article th:each="notificacion : ${notificaciones}"
+                 class="notification-card"
+                 th:classappend="${!notificacion.leida ? ' notification-card--unread' : ''}">
+            <span class="notification-card__icon" aria-hidden="true">
+                <i th:class="${!notificacion.leida ? 'bi bi-bell-fill' : 'bi bi-bell'}"></i>
+            </span>
+            <div class="notification-card__body">
+                <div class="notification-card__meta">
+                    <span th:if="${!notificacion.leida}" class="notification-badge">Nueva</span>
+                    <time th:text="${#temporals.format(notificacion.creadaEn, 'dd/MM/yyyy HH:mm')}">01/01/2026 08:00</time>
+                </div>
+                <h2 th:text="${notificacion.titulo}">Notificación</h2>
+                <p th:text="${notificacion.mensaje}">Mensaje de la notificación.</p>
+                <div class="notification-card__actions">
+                    <a th:if="${notificacion.enlace != null and !#strings.isEmpty(notificacion.enlace)}"
+                       th:href="${notificacion.enlace}" class="notification-button notification-button--primary">
+                        <i class="bi bi-arrow-up-right"></i> Ver detalle
+                    </a>
+                    <form th:if="${!notificacion.leida}" th:action="@{/notificaciones/{id}/leer(id=${notificacion.id})}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                        <button class="notification-button" type="submit"><i class="bi bi-check2"></i> Marcar como leída</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+</html>

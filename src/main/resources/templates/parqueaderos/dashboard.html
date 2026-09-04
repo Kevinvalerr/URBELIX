@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{layout/base :: page}">
+<div th:fragment="content" th:with="titulo='Parqueaderos | Urbelix'">
+    <section class="page-top-section mb-4">
+        <div><h1>Parqueaderos</h1><p class="text-muted">Control de ocupación e ingreso de vehículos.</p></div>
+        <div class="page-actions"><a th:href="@{/porteria/parqueaderos/ingreso}" class="btn btn-primary"><i class="bi bi-box-arrow-in-right me-2"></i>Registrar ingreso</a></div>
+    </section>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3"><div class="card h-100"><div class="card-body"><span class="text-muted">Total</span><h2 th:text="${total}">0</h2></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card h-100"><div class="card-body"><span class="text-muted">Disponibles</span><h2 class="text-success" th:text="${disponibles}">0</h2></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card h-100"><div class="card-body"><span class="text-muted">Ocupados</span><h2 class="text-primary" th:text="${ocupados}">0</h2></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card h-100"><div class="card-body"><span class="text-muted">Dentro</span><h2 th:text="${vehiculosDentro}">0</h2></div></div></div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap mb-4">
+        <a th:href="@{/porteria/parqueaderos/vehiculos}" class="btn btn-outline-primary"><i class="bi bi-car-front me-2"></i>Vehículos</a>
+        <a th:href="@{/porteria/parqueaderos/historial}" class="btn btn-outline-primary"><i class="bi bi-clock-history me-2"></i>Historial</a>
+    </div>
+    <div class="card activity-card"><div class="card-body"><h2 class="h5">Vehículos dentro del conjunto</h2>
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Placa</th><th>Residente</th><th>Parqueadero</th><th>Ingreso</th><th>Acción</th></tr></thead><tbody>
+        <tr th:each="movimiento : ${movimientosActivos}"><td th:text="${movimiento.vehiculo.placa}">ABC123</td><td th:text="${movimiento.vehiculo.residente.nombre}">Residente</td><td th:text="${movimiento.parqueadero.numero}">P-01</td><td th:text="${#temporals.format(movimiento.fechaHoraIngreso, 'dd/MM/yyyy HH:mm')}">26/08/2026 08:00</td><td><form th:action="@{/porteria/parqueaderos/salida/{id}(id=${movimiento.id})}" method="post"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"><button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-box-arrow-right"></i> Salida</button></form></td></tr>
+        <tr th:if="${#lists.isEmpty(movimientosActivos)}"><td colspan="5" class="text-center text-muted py-4">No hay vehículos dentro.</td></tr>
+        </tbody></table></div>
+    </div></div>
+</div>
+</html>

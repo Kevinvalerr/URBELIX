@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: page}">
+<div th:fragment="content" th:with="titulo='Mi perfil | Urbelix'">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div th:if="${mostrarCambioPassword}" class="alert alert-warning"><strong>Debes cambiar tu contraseña.</strong> Actualízala para continuar usando la cuenta.</div>
+    <section class="page-top-section mb-4">
+        <div><h1>Mi perfil</h1><p class="text-muted">Actualiza tus datos de contacto. Los datos de identidad y apartamento son administrados por la copropiedad.</p></div>
+    </section>
+    <div class="card form-card"><div class="card-body">
+        <form th:action="@{/perfil}" method="post" class="form-grid">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+            <div class="form-group"><label for="nombre">Nombre</label><input id="nombre" name="nombre" th:value="${usuario.nombre}" class="form-control" required maxlength="120"></div>
+            <div class="form-group"><label>Correo electrónico</label><input class="form-control" th:value="${usuario.email}" readonly></div>
+            <div class="form-group"><label>Rol</label><input class="form-control" th:value="${usuario.rol}" readonly></div>
+            <div class="form-group" th:if="${residente != null}"><label for="telefono">Teléfono</label><input id="telefono" name="telefono" th:value="${residente.telefono}" class="form-control" required pattern="[0-9]{10,}"></div>
+            <div class="form-group" th:if="${residente != null}"><label>Documento</label><input class="form-control" th:value="${residente.documento}" readonly></div>
+            <div class="form-group" th:if="${residente != null}"><label>Apartamento</label><input class="form-control" th:value="${residente.apartamento != null ? residente.apartamento.numero : 'Sin asignar'}" readonly></div>
+            <div class="form-actions form-group-full"><button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Guardar cambios</button></div>
+        </form>
+    </div></div>
+    <div class="card form-card mt-4"><div class="card-body">
+        <h2 class="h5 mb-3">Cambiar contraseña</h2>
+        <form th:action="@{/perfil/password}" method="post" class="form-grid">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+            <div class="form-group"><label for="password">Nueva contraseña</label><input id="password" name="password" type="password" class="form-control" required minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}" autocomplete="new-password"><small class="text-muted">Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.</small></div>
+            <div class="form-group"><label for="confirmPassword">Confirmar contraseña</label><input id="confirmPassword" name="confirmPassword" type="password" class="form-control" required minlength="8" autocomplete="new-password"></div>
+            <div class="form-actions form-group-full"><button type="submit" class="btn btn-outline-primary">Actualizar contraseña</button></div>
+        </form>
+    </div></div>
+</div>
+</html>
