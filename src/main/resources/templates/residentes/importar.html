@@ -1,43 +1,60 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
-<div th:fragment="content" th:with="titulo='Importar residentes | URBELIX'">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: page}">
+<div th:fragment="content" th:with="titulo='Importar residentes | Urbelix'">
     <section class="page-top-section mb-4">
         <div>
             <h1>Importar residentes desde Excel</h1>
-            <p class="text-muted">Carga residentes y sus cuentas sin incluir contraseñas.</p>
+            <p class="text-muted">Carga residentes y crea sus cuentas sin guardar contraseñas en el archivo.</p>
+        </div>
+        <div class="page-actions">
+            <a th:href="@{/residentes}" class="btn btn-outline-primary">Volver a residentes</a>
         </div>
     </section>
 
-    <div class="form-card mb-4">
-        <h2 class="h5">Reglas del archivo</h2>
-        <ul>
-            <li>Formato permitido: Excel <strong>.xlsx</strong>.</li>
-            <li>Columnas obligatorias: Nombre, Documento, Telefono, Correo, Apartamento, Torre y Piso.</li>
-            <li>Documento y teléfono deben contener sólo números.</li>
-            <li>El apartamento debe existir y coincidir con torre y piso.</li>
-            <li>Filas duplicadas o inválidas se informan sin detener las demás.</li>
-            <li>La contraseña se genera automáticamente y no se guarda en el archivo.</li>
+    <div class="card activity-card mb-4">
+        <h5>Reglas del archivo</h5>
+        <ul class="mb-3">
+            <li>Formato permitido: <strong>.xlsx</strong>, máximo 1000 filas de datos.</li>
+            <li>Columnas: Nombre, Documento, Telefono, Correo, Apartamento, Torre, Piso y CodigoRegistro.</li>
+            <li>Documento y teléfono deben contener solo números.</li>
+            <li>El apartamento, torre, piso y código deben coincidir con la base de datos.</li>
+            <li>Las filas duplicadas o inválidas se informan sin detener las demás.</li>
+            <li>La contraseña temporal se genera de forma aleatoria y se envía por SMTP si está activo.</li>
         </ul>
         <a class="btn btn-outline-primary" th:href="@{/residentes/importar/plantilla}">Descargar plantilla Excel</a>
     </div>
 
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-    <div class="form-card">
+    <div class="card form-card">
         <form th:action="@{/residentes/importar}" method="post" enctype="multipart/form-data">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <label for="archivo">Seleccionar archivo</label>
-            <input id="archivo" type="file" name="archivo" accept=".xlsx" required>
+            <label for="archivo" class="form-label">Seleccionar archivo</label>
+            <input id="archivo" type="file" name="archivo" accept=".xlsx" class="form-control" required>
             <button class="btn btn-primary mt-3" type="submit">Importar residentes</button>
         </form>
     </div>
 
-    <div th:if="${resultado != null and resultado.total > 0}" class="timeline-container mt-4 p-4">
-        <h2 class="h5">Resultado de importación</h2>
-        <p>Total: <strong th:text="${resultado.total}"></strong> · Creados: <strong th:text="${resultado.creados}"></strong> · Omitidos: <strong th:text="${resultado.omitidos}"></strong> · Duplicados: <strong th:text="${resultado.duplicados}"></strong> · Errores: <strong th:text="${resultado.errores}"></strong></p>
+    <div th:if="${resultado != null and resultado.total > 0}" class="card activity-card mt-4">
+        <h5>Resultado de importación</h5>
+        <p class="text-muted">
+            Total: <strong th:text="${resultado.total}"></strong> |
+            Creados: <strong th:text="${resultado.creados}"></strong> |
+            Omitidos: <strong th:text="${resultado.omitidos}"></strong> |
+            Duplicados: <strong th:text="${resultado.duplicados}"></strong> |
+            Errores: <strong th:text="${resultado.errores}"></strong>
+        </p>
         <div class="table-responsive">
-            <table class="table">
+            <table class="table table-sm align-middle">
                 <thead><tr><th>Fila</th><th>Documento</th><th>Nombre</th><th>Estado</th><th>Motivo</th></tr></thead>
-                <tbody><tr th:each="fila : ${resultado.filas}"><td th:text="${fila.fila}"></td><td th:text="${fila.documento}"></td><td th:text="${fila.nombre}"></td><td th:text="${fila.estado}"></td><td th:text="${fila.motivo}"></td></tr></tbody>
+                <tbody>
+                <tr th:each="fila : ${resultado.filas}">
+                    <td th:text="${fila.fila}"></td>
+                    <td th:text="${fila.documento}"></td>
+                    <td th:text="${fila.nombre}"></td>
+                    <td th:text="${fila.estado}"></td>
+                    <td th:text="${fila.motivo}"></td>
+                </tr>
+                </tbody>
             </table>
         </div>
     </div>

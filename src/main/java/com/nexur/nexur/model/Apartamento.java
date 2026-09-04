@@ -11,7 +11,7 @@ public class Apartamento {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
     private String numero;
 
     private String torre;
@@ -23,7 +23,7 @@ public class Apartamento {
     @Column(name = "codigo_registro", unique = true, length = 32)
     private String codigoRegistro;
 
-    public Apartamento() {
+    public Apartamento() {   
     }
 
     public Apartamento(String numero, String torre, Integer piso, String estado){

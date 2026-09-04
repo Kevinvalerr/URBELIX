@@ -4,5 +4,5 @@ public enum Rol {
     ADMIN,
     RESIDENTE,
     PORTERIA
-
+    
 }

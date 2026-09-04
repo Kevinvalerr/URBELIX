@@ -29,7 +29,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     @EntityGraph(attributePaths = {"residente", "apartamento"})
     List<Reserva> findByResidenteIdOrderByIdDesc(Long residenteId);
     long countByEstado(String estado);
-
+    
     Long countByEstado(EstadoReserva estado);
     boolean existsByApartamentoId(Long apartamentoId);
     long countByApartamentoId(Long apartamentoId);

@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: page}">
 
 <div th:fragment="content" th:with="titulo='Reportes'">
 
-    <section class="page-top-section mb-4">
+    <section class="page-top-section mb-4 report-page-header">
         <div>
             <h1>Generador de Reportes</h1>
             <p class="text-muted">
@@ -11,17 +11,40 @@
             </p>
         </div>
 
-        <div class="page-actions">
+        <div class="page-actions report-page-actions">
             <button type="button" class="btn btn-primary btn-main-action" id="generarReportBtn">
                 <i class="bi bi-file-pdf me-2"></i>
                 Generar Reporte PDF
             </button>
+            <a class="btn btn-outline-success btn-main-action" id="exportarExcelBtn" href="/reportes/generar-excel">
+                <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+                Descargar Excel
+            </a>
         </div>
     </section>
 
-    <div th:if="${errorReporte}" class="alert alert-danger report-alert" role="alert">
-        <i class="bi bi-exclamation-triangle me-2"></i>
-        <span th:text="${errorReporte}">Revisa los filtros del reporte.</span>
+    <div class="card activity-card mb-4 report-filter-card">
+        <h5>Filtros del reporte</h5>
+        <div class="row g-3 mt-1">
+            <div class="col-md-4">
+                <label for="tipoReporte" class="form-label">Tipo</label>
+                <select id="tipoReporte" class="form-select">
+                    <option value="TODOS" th:selected="${tipo == 'TODOS'}">Todos</option>
+                    <option value="PAGOS" th:selected="${tipo == 'PAGOS'}">Pagos</option>
+                    <option value="RESERVAS" th:selected="${tipo == 'RESERVAS'}">Reservas</option>
+                    <option value="VISITANTES" th:selected="${tipo == 'VISITANTES'}">Visitantes</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="fechaInicio" class="form-label">Desde</label>
+                <input id="fechaInicio" type="date" class="form-control" th:value="${fechaInicio}">
+            </div>
+            <div class="col-md-4">
+                <label for="fechaFin" class="form-label">Hasta</label>
+                <input id="fechaFin" type="date" class="form-control" th:value="${fechaFin}">
+            </div>
+        </div>
+        <p class="text-muted small mt-3 mb-0">Si no eliges fechas, se usará el último mes.</p>
     </div>
 
     <!-- ALERTA DE CARGA -->
@@ -44,21 +67,24 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
-    <!-- TARJETA CON EL REPORTE GENERADO -->
-    <div id="reportCard" class="card activity-card d-none">
-        <h5>Reporte Generado</h5>
-        <div class="mt-3">
-            <p id="reportText" class="mb-0" style="line-height: 1.8; font-size: 1.1rem;"></p>
-        </div>
-        <div class="mt-3">
-            <button class="btn btn-secondary btn-sm" id="downloadBtn">
-                <i class="bi bi-download me-1"></i>
-                Descargar reporte
-            </button>
-            <button class="btn btn-primary btn-sm" id="printBtn">
-                <i class="bi bi-printer me-1"></i>
-                Imprimir
-            </button>
+    <div th:if="${errorReporte}" class="alert alert-warning" role="alert" th:text="${errorReporte}"></div>
+
+    <div class="card activity-card mt-4 report-preview-card">
+        <h5>Vista previa de resultados (<span class="text-muted" th:text="${#lists.size(registros)}">0</span>)</h5>
+        <div class="table-responsive mt-3">
+            <table class="table table-sm align-middle mb-0">
+                <thead><tr><th>Tipo</th><th>Referencia</th><th>Residente/visitante</th><th>Descripción</th><th>Fecha</th></tr></thead>
+                <tbody>
+                <tr th:each="registro : ${registros}">
+                    <td th:text="${registro.tipo}">Pago</td>
+                    <td th:text="${registro.entidad}">Pago #1</td>
+                    <td th:text="${registro.residente}">Usuario</td>
+                    <td th:text="${registro.descripcion}">Descripción</td>
+                    <td th:text="${registro.fechaHora != null ? #temporals.format(registro.fechaHora, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}">Sin fecha</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(registros)}"><td colspan="5" class="text-center text-muted py-4">No hay registros para los filtros seleccionados.</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -97,11 +123,12 @@
     <div class="card activity-card mt-4">
         <h5>Información Técnica</h5>
         <p class="text-muted mb-2">
-            Este módulo utiliza un microservicio Python (FastAPI) que analiza las estadísticas
-            del sistema y genera reportes automáticos en lenguaje natural.
+            Este módulo consolida pagos, reservas y visitantes registrados en Urbelix.
         </p>
         <p class="text-muted">
-            <strong>Arquitectura:</strong> Spring Boot ↔ FastAPI REST
+            <strong>Generación:</strong>
+            <span th:if="${fastApiReportesHabilitado}">FastAPI/ReportLab con respaldo Spring Boot</span>
+            <span th:unless="${fastApiReportesHabilitado}">Spring Boot e iText PDF</span>
         </p>
     </div>
 
@@ -112,7 +139,6 @@
             const loadingAlert = document.getElementById('loadingAlert');
             const errorAlert = document.getElementById('errorAlert');
             const successAlert = document.getElementById('successAlert');
-            const reportCard = document.getElementById('reportCard');
 
             if (!generarBtn) {
                 console.error('No se encontró el botón Generar Reporte PDF');
@@ -130,7 +156,6 @@
                 loadingAlert.classList.remove('d-none');
                 errorAlert.classList.add('d-none');
                 successAlert.classList.add('d-none');
-                reportCard.classList.add('d-none');
 
                 const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
@@ -147,7 +172,14 @@
                     headers[csrfHeader] = csrfToken;
                 }
 
-                fetch('/reportes/generar-pdf', {
+                const params = new URLSearchParams();
+                params.set('tipo', document.getElementById('tipoReporte').value);
+                ['fechaInicio', 'fechaFin'].forEach(function(id) {
+                    const value = document.getElementById(id).value;
+                    if (value) params.set(id, value);
+                });
+
+                fetch('/reportes/generar-pdf?' + params.toString(), {
                     method: 'POST',
                     headers: headers
                 })
@@ -155,7 +187,7 @@
                     console.log('[generarReportePDF] Respuesta recibida', response.status, response.statusText);
                     
                     if (!response.ok) {
-                        throw new Error('No fue posible generar el reporte en este momento. El servicio de reportes no está disponible.');
+                        throw new Error('Error HTTP ' + response.status + ': ' + response.statusText);
                     }
                     
                     return response.blob();
@@ -183,25 +215,29 @@
                     console.error('[generarReportePDF] Error:', error);
                     loadingAlert.classList.add('d-none');
                     errorAlert.classList.remove('d-none');
-                    document.getElementById('errorText').textContent = error.message;
+                    document.getElementById('errorText').textContent = 'Error: ' + error.message;
                 });
             }
 
-            // Botón de impresión
-            document.getElementById('printBtn').addEventListener('click', function() {
-                const printWindow = window.open('', '_blank');
-                const reportText = document.getElementById('reportText').textContent;
-                printWindow.document.write('<html><head><title>Reporte URBELIX</title></head><body>');
-                printWindow.document.write('<h2>Reporte del Sistema URBELIX</h2>');
-                printWindow.document.write('<p>' + reportText + '</p>');
-                printWindow.document.write('<p style="font-size: 0.8em; color: #999; margin-top: 2em;">Generado el: ' + new Date().toLocaleString() + '</p>');
-                printWindow.document.write('</body></html>');
-                printWindow.document.close();
-                printWindow.print();
+            function actualizarEnlaceExcel() {
+                const params = new URLSearchParams();
+                params.set('tipo', document.getElementById('tipoReporte').value);
+                ['fechaInicio', 'fechaFin'].forEach(function(id) {
+                    const value = document.getElementById(id).value;
+                    if (value) params.set(id, value);
+                });
+                document.getElementById('exportarExcelBtn').href = '/reportes/generar-excel?' + params.toString();
+            }
+
+            ['tipoReporte', 'fechaInicio', 'fechaFin'].forEach(function(id) {
+                document.getElementById(id).addEventListener('change', actualizarEnlaceExcel);
             });
+            actualizarEnlaceExcel();
+
         });
     </script>
 </div>
 
 </html>
+
 

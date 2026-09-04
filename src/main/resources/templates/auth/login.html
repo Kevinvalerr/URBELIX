@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar sesión | URBELIX</title>
+    <title>Iniciar sesión | Urbelix</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
             </div>
 
             <form th:action="@{/login}" th:method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
 
                 <div th:if="${loginError}" class="alert alert-danger" th:text="${loginError}"></div>
                 <div th:if="${logoutMessage}" class="alert alert-success" th:text="${logoutMessage}"></div>
@@ -41,7 +41,10 @@
                 <a class="forgot-link" th:href="@{/forgot-password}">¿Olvidaste tu contraseña?</a>
             </form>
 
-           
+            <div class="link-group">
+                ¿No tienes cuenta? <a th:href="@{/register}">Crear una cuenta</a>
+            </div>
+            <a class="secondary-button auth-home-link" th:href="@{/}">Volver a la página principal</a>
         </section>
     </main>
 </body>
