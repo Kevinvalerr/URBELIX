@@ -20,7 +20,9 @@ pid_fastapi=$!
 
 echo "[urbelix] iniciando Spring Boot en 0.0.0.0:${PORT}"
 # shellcheck disable=SC2086
-java ${JAVA_OPTS:-} -jar /app/urbelix.jar &
+java ${JAVA_OPTS:-} -jar /app/urbelix.jar \
+    --spring.profiles.active="${SPRING_PROFILES_ACTIVE:-prod}" \
+    --server.port="${PORT}" &
 pid_spring=$!
 
 # wait -n devuelve en cuanto uno de los dos procesos termina.

@@ -50,6 +50,7 @@ USER urbelix
 
 # Render inyecta PORT; 8080 es solo el valor por defecto para uso local.
 ENV PORT=8080 \
+    SPRING_PROFILES_ACTIVE=prod \
     FASTAPI_PORT=8000 \
     FASTAPI_URL=http://127.0.0.1:8000 \
     JAVA_OPTS="-XX:MaxRAMPercentage=65 -XX:+UseSerialGC"
