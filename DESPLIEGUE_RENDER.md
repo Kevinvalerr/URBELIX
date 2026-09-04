@@ -12,8 +12,8 @@ La base de datos **no vive en Render**: es un MySQL gestionado en Aiven.
 1. Crear un servicio *Aiven for MySQL*.
 2. En la pestaña *Overview*, copiar la cadena JDBC o construirla con `Host`,
    `Port`, `User`, `Password` y `Database name` (por defecto `defaultdb`).
-3. Aiven solo acepta conexiones TLS. El perfil `prod` ya añade
-   `?sslMode=REQUIRED` a la URL JDBC, no hay que tocar nada.
+3. Aiven solo acepta conexiones TLS. En `DB_URL` incluye
+   `?sslMode=REQUIRED` al final de la URL JDBC.
 
 La base arranca vacia: Flyway aplicara `V1` a `V4` en el primer despliegue y
 creara el esquema completo.
