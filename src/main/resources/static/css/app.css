@@ -204,6 +204,22 @@ body, button, input, select, textarea {
     transform: translateX(2px);
 }
 
+.sidebar-nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.65rem;
+}
+
+.sidebar-section-label {
+    padding: 0.35rem 1rem 0.15rem;
+    color: rgba(191, 219, 254, 0.72);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
 .dashboard-actions {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
