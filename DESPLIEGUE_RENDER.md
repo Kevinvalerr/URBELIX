@@ -1,22 +1,17 @@
 # Despliegue de URBELIX en Render
 
 La aplicacion se despliega como **un unico servicio web Docker** en Render. La
-imagen contiene los dos procesos del sistema:
-
-- **Spring Boot** (`urbelix.jar`), que escucha en el puerto publico `$PORT`.
-- **FastAPI/ReportLab** (`fastapi_reportes.py`), que escucha solo en
-  `127.0.0.1:8000` y genera los PDFs que pide `ReporteController`.
-
-Los lanza `docker-entrypoint.sh`; si cualquiera de los dos muere, el contenedor
-termina y Render lo reinicia.
+imagen ejecuta Spring Boot y escucha el puerto que Render inyecta en `$PORT`.
+La generacion de PDF local de Spring Boot queda activa por defecto; FastAPI es
+un proveedor opcional para ejecuciones locales y no es necesario para Render.
 
 La base de datos **no vive en Render**: es un MySQL gestionado en Aiven.
 
 ## 1. Crear la base en Aiven
 
 1. Crear un servicio *Aiven for MySQL*.
-2. En la pestaña *Overview*, copiar los datos de conexion: `Host`, `Port`,
-   `User`, `Password` y `Database name` (por defecto `defaultdb`).
+2. En la pestaña *Overview*, copiar la cadena JDBC o construirla con `Host`,
+   `Port`, `User`, `Password` y `Database name` (por defecto `defaultdb`).
 3. Aiven solo acepta conexiones TLS. El perfil `prod` ya añade
    `?sslMode=REQUIRED` a la URL JDBC, no hay que tocar nada.
 
@@ -39,13 +34,10 @@ health check `/login`, y añadir las variables de entorno.
 | Variable | Obligatoria | Valor |
 |---|---|---|
 | `SPRING_PROFILES_ACTIVE` | si | `prod,demo` en el primer despliegue; luego `prod` |
-| `DB_HOST` | si | host de Aiven (`mysql-xxxx.aivencloud.com`) |
-| `DB_PORT` | si | puerto de Aiven (no es 3306) |
-| `DB_NAME` | si | `defaultdb` |
-| `DB_USER` | si | `avnadmin` |
+| `DB_URL` | si | `jdbc:mysql://host:puerto/base?sslMode=REQUIRED` |
+| `DB_USERNAME` | si | `avnadmin` |
 | `DB_PASSWORD` | si | contraseña de Aiven |
-| `DB_POOL_SIZE` | no | `5` |
-| `PORTAL_URL` | recomendada | `https://<tu-servicio>.onrender.com/login` |
+| `APP_BASE_URL` | recomendada | `https://<tu-servicio>.onrender.com` |
 | `DEMO_ADMIN_EMAIL` | solo con `demo` | correo del admin inicial |
 | `DEMO_ADMIN_PASSWORD` | solo con `demo` | contraseña del admin inicial |
 | `DEMO_RESIDENTE_PASSWORD` | solo con `demo` | contraseña de las cuentas sembradas |
@@ -53,14 +45,15 @@ health check `/login`, y añadir las variables de entorno.
 | `MAIL_PORT` | no | `587` |
 | `MAIL_USERNAME` | no | usuario SMTP |
 | `MAIL_PASSWORD` | no | contraseña SMTP |
-| `JAVA_OPTS` | no | `-XX:MaxRAMPercentage=65 -XX:+UseSerialGC` |
+| `JAVA_TOOL_OPTIONS` | no | `-XX:MaxRAMPercentage=65 -XX:+UseSerialGC` |
 
-`PORT` lo inyecta Render, no hay que definirla.
+`PORT` lo inyecta Render, no hay que definirla. La aplicacion ya la usa como
+`server.port` y localmente conserva el puerto `8080`.
 
 Sin las variables `MAIL_*` la app arranca igual; solo quedan inactivas las
 notificaciones por correo de incidencias.
 
-`PORTAL_URL` es el enlace que `EmailService` mete en los correos que reciben los
+`APP_BASE_URL` es el enlace que `EmailService` mete en los correos que reciben los
 residentes. Si no se define apunta a `localhost` y llega inservible, asi que hay
 que rellenarla con la URL publica de Render en cuanto el servicio exista.
 
@@ -96,8 +89,8 @@ docker build -t urbelix:local .
 
 docker run --rm -p 8080:8080 \
   -e SPRING_PROFILES_ACTIVE=prod \
-  -e DB_HOST=... -e DB_PORT=... -e DB_NAME=defaultdb \
-  -e DB_USER=avnadmin -e DB_PASSWORD=... \
+  -e DB_URL='jdbc:mysql://host:puerto/defaultdb?sslMode=REQUIRED' \
+  -e DB_USERNAME=avnadmin -e DB_PASSWORD=... \
   urbelix:local
 ```
 
