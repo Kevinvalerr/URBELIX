@@ -4,6 +4,7 @@ El perfil `prod` usa `spring.jpa.hibernate.ddl-auto=validate` y aplica las migra
 
 Migraciones versionadas incluidas:
 
+- `src/main/resources/db/migration/V0_1__esquema_base.sql`
 - `src/main/resources/db/migration/V1__urbelix_funcionalidades_nuevas.sql`
 - `src/main/resources/db/migration/V2__parqueaderos_vehiculos_movimientos.sql`
 - `src/main/resources/db/migration/V3__usuarios_activos.sql`
@@ -16,8 +17,16 @@ Migraciones versionadas incluidas:
 - `src/main/resources/db/migration/V10__auditoria_mutaciones.sql`
 - `src/main/resources/db/migration/V11__solicitudes_visitantes_por_rol.sql`
 - `src/main/resources/db/migration/V12__fecha_pago_facturacion.sql`
+- `src/main/resources/db/migration/V13__retirar_integracion_pago_externa.sql`
+- `src/main/resources/db/migration/V14__trazabilidad_sandbox_pagos.sql`
 
-## Prevalidacion
+## Instalaciones nuevas
+
+Las instalaciones nuevas no necesitan crear manualmente las tablas base. La
+migracion `V0_1__esquema_base.sql` crea `usuario`, `apartamentos`, `residentes`,
+`reservas`, `pagos` y `visitantes`; luego Flyway aplica V1-V14 en orden.
+
+## Prevalidacion de bases existentes
 
 1. Realizar un respaldo completo de la base de datos.
 2. Detener la aplicacion para evitar escrituras durante la migracion.
@@ -42,8 +51,10 @@ volver a `false` despues de un arranque exitoso. No se promueve una cuenta exist
 
 Las evidencias se guardan en el directorio indicado por `UPLOAD_DIR` (por defecto `./data/uploads`). En produccion debe apuntar a un volumen privado con respaldo y permisos de escritura para la aplicacion.
 
-El webhook PSE requiere definir `PSE_WEBHOOK_SECRET` fuera del repositorio. El proveedor debe enviar `X-PSE-Signature` con el HMAC-SHA256 hexadecimal del cuerpo JSON.
-El contrato esperado es `POST /webhooks/pagos` con un cuerpo como `{"eventoId":"evt-123","referenciaPago":"PSE-...","estado":"APPROVED","monto":300000}`. Los estados aceptados son `APPROVED`, `PENDING` y `REJECTED` (tambien sus equivalentes en espanol).
+Los pagos no exponen webhooks ni integraciones externas. PSE y tarjeta se recorren
+en el sandbox local controlado por la aplicacion; transferencia y efectivo solo
+pueden ser confirmados por ADMIN. La migracion V13 retira la tabla historica de
+eventos externos y V14 agrega resultado, transaccion y fecha de simulacion.
 
 Si la organizacion no permite que la aplicacion ejecute migraciones, se puede aplicar el archivo SQL manualmente antes del primer arranque y luego registrar la version en Flyway siguiendo un procedimiento de base de datos controlado. No se deben combinar ambos metodos sin actualizar el historial de Flyway.
 
@@ -57,12 +68,18 @@ SHOW TABLES LIKE 'parqueaderos';
 SHOW TABLES LIKE 'vehiculos';
 SHOW TABLES LIKE 'movimientos_parqueadero';
 SHOW TABLES LIKE 'incidencia_adjunto';
-SHOW TABLES LIKE 'pago_webhook_evento';
 SHOW TABLES LIKE 'auditoria';
 SHOW COLUMNS FROM usuario LIKE 'activo';
 SHOW COLUMNS FROM pagos LIKE 'fecha_pago';
+SHOW COLUMNS FROM pagos LIKE 'resultado_simulacion';
+SHOW COLUMNS FROM pagos LIKE 'transaccion_simulada';
+SHOW COLUMNS FROM pagos LIKE 'simulado_en';
 ```
 
 Luego iniciar con el perfil `prod` y revisar `flyway_schema_history`. Si Flyway o JPA informa una diferencia, detener el despliegue y revisar el esquema antes de cambiar `ddl-auto`; no se debe usar `update` en produccion.
 
-La validacion local del 28/08/2026 conecto correctamente con MySQL 8.0.45 en `nexur_db`, valido y aplico V1-V12; `flyway_schema_history` quedo en la version 12. V12 agrega `pagos.fecha_pago` y completa los registros historicos ya pagados usando su fecha de emision. Para el despliegue final se debe repetir el respaldo y usar un usuario MySQL exclusivo de la aplicacion, no `root`.
+La validacion local del 03/09/2026 conecto correctamente con MySQL 8.4 en
+`nexur_db`, valido y aplico V0.1-V14; `flyway_schema_history` quedo en la
+version 14. V12 agrega `pagos.fecha_pago`, V13 retira la integracion externa
+obsoleta y V14 agrega trazabilidad del sandbox. Para el despliegue final se debe
+repetir el respaldo y usar un usuario MySQL exclusivo de la aplicacion, no `root`.

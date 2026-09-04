@@ -18,15 +18,17 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import com.nexur.nexur.service.ExcelExportService;
 import com.nexur.nexur.service.EstadoCuentaPdfService;
 import com.nexur.nexur.service.FacturaPagoPdfService;
-import com.nexur.nexur.service.WompiService;
 import com.nexur.nexur.service.PagoSimulacionService;
+import com.nexur.nexur.service.NotificacionService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -42,21 +44,24 @@ public class PagoController {
     private final ExcelExportService excelExportService;
     private final EstadoCuentaPdfService estadoCuentaPdfService;
     private final FacturaPagoPdfService facturaPagoPdfService;
-    private final WompiService wompiService;
     private final PagoSimulacionService pagoSimulacionService;
+    private final NotificacionService notificacionService;
+
+    private static final Logger log = LoggerFactory.getLogger(PagoController.class);
 
     public PagoController(PagoService pagoService, ResidenteService residenteService, ApartamentoService apartamentoService,
                           ExcelExportService excelExportService, EstadoCuentaPdfService estadoCuentaPdfService,
-                          FacturaPagoPdfService facturaPagoPdfService, WompiService wompiService,
-                          PagoSimulacionService pagoSimulacionService) {
+                          FacturaPagoPdfService facturaPagoPdfService,
+                          PagoSimulacionService pagoSimulacionService,
+                          NotificacionService notificacionService) {
         this.pagoService = pagoService;
         this.residenteService = residenteService;
         this.apartamentoService = apartamentoService;
         this.excelExportService = excelExportService;
         this.estadoCuentaPdfService = estadoCuentaPdfService;
         this.facturaPagoPdfService = facturaPagoPdfService;
-        this.wompiService = wompiService;
         this.pagoSimulacionService = pagoSimulacionService;
+        this.notificacionService = notificacionService;
     }
 
     @GetMapping("/excel")
@@ -91,13 +96,13 @@ public class PagoController {
                                  RedirectAttributes redirectAttributes) {
         try {
             Pago pago = pagoService.iniciarPagoOnline(id, authentication.getName());
-            redirectAttributes.addFlashAttribute("success", "Checkout preparado. Referencia: "
+            redirectAttributes.addFlashAttribute("success", "Pago simulado preparado. Referencia: "
                     + pago.getReferenciaPago());
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("error", exception.getMessage());
             return "redirect:/pagos";
         }
-        return "redirect:/pagos/" + id;
+        return "redirect:/pagos/" + id + "/simulador";
     }
 
     @GetMapping("/{id}/factura")
@@ -157,15 +162,16 @@ public class PagoController {
             PagoSimulacionService.Resultado resultado = pagoSimulacionService.simular(
                     id, authentication.getName(), estado);
             String mensaje = switch (resultado.estadoProveedor()) {
-                case "APPROVED" -> "El sandbox aprobó el pago y el webhook lo marcó como pagado.";
-                case "PENDING" -> "El sandbox dejó el pago pendiente, como ocurriría mientras el proveedor procesa la transacción.";
-                case "DECLINED" -> "El sandbox rechazó el pago; el movimiento permanece pendiente.";
-                case "VOIDED" -> "El sandbox anuló la transacción; el movimiento permanece pendiente.";
-                default -> "El sandbox simuló un error del proveedor; el movimiento permanece pendiente.";
+                case "APPROVED" -> "La simulación local aprobó el pago y lo marcó como pagado.";
+                case "PENDING" -> "La simulación local dejó el pago pendiente.";
+                case "DECLINED" -> "La simulación local rechazó el pago; permanece pendiente.";
+                case "VOIDED" -> "La simulación local anuló la transacción; permanece pendiente.";
+                default -> "La simulación local registró un error; el pago permanece pendiente.";
             };
             redirectAttributes.addFlashAttribute("simulacionMensaje", mensaje);
             redirectAttributes.addFlashAttribute("simulacionEstado", resultado.estadoProveedor());
             redirectAttributes.addFlashAttribute("simulacionTransaccionId", resultado.transactionId());
+            notificarResultadoSimulacion(pago, resultado);
         } catch (AccessDeniedException exception) {
             throw exception;
         } catch (IllegalArgumentException | IllegalStateException exception) {
@@ -306,7 +312,9 @@ public class PagoController {
             pago.setApartamento(apartamento);
             pago.setEstadoPago(EstadoPago.PENDIENTE);
 
-            pagoService.guardar(pago, residenteId, apartamentoId);
+            Pago guardado = pagoService.guardar(pago, residenteId, apartamentoId);
+            crearNotificacionPago(guardado, "Nueva obligación de pago",
+                    "Se registró una nueva obligación de pago por valor de " + guardado.getMonto() + ".");
             redirectAttributes.addFlashAttribute("success", "Pago registrado exitosamente");
             return "redirect:/pagos";
         } catch (Exception e) {
@@ -322,8 +330,11 @@ public class PagoController {
     @PreAuthorize("hasRole('ADMIN')")
     public String generarAdministracion(RedirectAttributes redirectAttributes) {
         try {
-            pagoService.generarPagosAdministracion();
-            redirectAttributes.addFlashAttribute("success", "Administración generada exitosamente para todos los residentes");
+            List<Pago> generados = pagoService.generarPagosAdministracion();
+            generados.forEach(pago -> crearNotificacionPago(pago, "Nueva cuota de administración",
+                    "Se generó tu obligación mensual de administración por valor de " + pago.getMonto() + "."));
+            redirectAttributes.addFlashAttribute("success", "Administración generada para "
+                    + generados.size() + " residente(s)");
             return "redirect:/pagos";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al generar administración: " + e.getMessage());
@@ -337,34 +348,18 @@ public class PagoController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'RESIDENTE')")
     public String verDetallePago(@PathVariable Long id,
-                                 @RequestParam(name = "id", required = false) String wompiTransactionId,
                                  Model model,
                                  Authentication authentication) {
         Pago pago = pagoService.buscarPorId(id);
 
         validarAccesoPago(pago, authentication);
 
-        if (StringUtils.hasText(wompiTransactionId)) {
-            WompiService.SincronizacionResultado resultado =
-                    wompiService.sincronizarTransaccion(pago, wompiTransactionId);
-            model.addAttribute("wompiResultado", resultado);
-        }
-
         model.addAttribute("pago", pago);
         model.addAttribute("titulo", "Detalle del Pago");
         model.addAttribute("currentPath", "/pagos");
         model.addAttribute("volverUrl", "/pagos");
-        boolean wompiConfigurado = wompiService.estaConfigurado()
-                && pago.getReferenciaPago() != null;
-        model.addAttribute("wompiConfigurado", wompiConfigurado);
         model.addAttribute("simulacionHabilitada", pagoSimulacionService.puedeSimular(pago));
-        if (wompiConfigurado) {
-            model.addAttribute("wompiPublicKey", wompiService.getPublicKey());
-            model.addAttribute("wompiAmountInCents", wompiService.montoEnCentavos(pago.getMonto()));
-            model.addAttribute("wompiIntegrity", wompiService.firmaIntegridad(
-                    pago.getReferenciaPago(), pago.getMonto()));
-            model.addAttribute("wompiRedirectUrl", wompiService.urlRedireccion(pago.getId()));
-        }
+        model.addAttribute("pagoIniciado", StringUtils.hasText(pago.getReferenciaPago()));
 
         return "pagos/detalle";
     }
@@ -409,11 +404,39 @@ public class PagoController {
             }
 
             pagoService.marcarComoPagado(id);
+            notificarPagoConfirmado(pago);
             redirectAttributes.addFlashAttribute("success", "Pago confirmado exitosamente");
             return "redirect:/pagos";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al confirmar pago: " + e.getMessage());
             return "redirect:/pagos";
+        }
+    }
+
+    private void notificarResultadoSimulacion(Pago pago, PagoSimulacionService.Resultado resultado) {
+        String mensaje = switch (resultado.estadoProveedor()) {
+            case "APPROVED" -> "Tu pago simulado fue aprobado y quedó registrado como pagado.";
+            case "PENDING" -> "Tu pago simulado continúa pendiente de confirmación.";
+            case "DECLINED" -> "Tu pago simulado fue rechazado y la obligación continúa pendiente.";
+            case "VOIDED" -> "Tu pago simulado fue anulado y la obligación continúa pendiente.";
+            default -> "La simulación del pago terminó con un error.";
+        };
+        crearNotificacionPago(pago, "Resultado de pago", mensaje
+                + " Transacción: " + resultado.transactionId() + ".");
+    }
+
+    private void notificarPagoConfirmado(Pago pago) {
+        crearNotificacionPago(pago, "Pago confirmado", "Administración confirmó tu pago y registró la fecha efectiva.");
+    }
+
+    private void crearNotificacionPago(Pago pago, String titulo, String mensaje) {
+        try {
+            if (pago != null && pago.getResidente() != null && pago.getResidente().getUsuario() != null) {
+                notificacionService.crear(pago.getResidente().getUsuario(), titulo, mensaje,
+                        "/pagos/" + pago.getId());
+            }
+        } catch (RuntimeException exception) {
+            log.warn("No se pudo crear la notificacion del pago {}", pago == null ? null : pago.getId(), exception);
         }
     }
 }

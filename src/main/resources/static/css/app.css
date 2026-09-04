@@ -1928,23 +1928,43 @@ body, button, input, select, textarea {
 .alert-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    min-width: 132px;
+    min-height: 42px;
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    background: currentColor;
-    color: white;
+    background-color: #1f8f52;
+    border: 1px solid #1f8f52;
+    color: #ffffff !important;
     text-decoration: none;
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 700;
     transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.alert-card.warning .alert-btn {
+    background-color: #b46f08;
+    border-color: #b46f08;
+}
+
+.alert-card.danger .alert-btn {
+    background-color: #c43d3d;
+    border-color: #c43d3d;
+}
+
+.alert-card.success .alert-btn {
+    background-color: #168f50;
+    border-color: #168f50;
 }
 
 .alert-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
     text-decoration: none;
-    color: white;
+    color: #ffffff !important;
+    filter: brightness(0.93);
 }
 
 /* Welcome Meta Section */
@@ -2900,4 +2920,60 @@ body {
     color: rgba(255, 255, 255, 0.78);
     font-size: 0.86rem;
     letter-spacing: 0.01em;
+}
+
+/* Reportes: acciones y tablas con la misma identidad visual del panel. */
+.report-page-header {
+    align-items: flex-start;
+}
+
+.report-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.7rem;
+}
+
+.report-page-actions .btn {
+    min-height: 44px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.report-filter-card,
+.report-preview-card {
+    border: 1px solid rgba(31, 78, 121, 0.12);
+    border-radius: 22px;
+    box-shadow: 0 16px 40px rgba(15, 35, 60, 0.07);
+}
+
+.report-filter-card h5,
+.report-preview-card h5 {
+    color: #163a5c;
+    font-weight: 800;
+}
+
+.report-preview-card .table thead th {
+    border-bottom: 2px solid #d8e7f5;
+    color: #47637d;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.report-preview-card .table tbody td {
+    color: #304b66;
+    vertical-align: middle;
+}
+
+@media (max-width: 700px) {
+    .report-page-header,
+    .report-page-actions {
+        display: grid;
+        width: 100%;
+    }
+
+    .report-page-actions .btn {
+        width: 100%;
+    }
 }

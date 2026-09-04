@@ -7,7 +7,7 @@ Sistema web para la gestion de conjuntos residenciales.
 - Java 21 o superior compatible con el proyecto.
 - Maven Wrapper incluido: `mvnw.cmd` para Windows o `./mvnw` para Linux/macOS.
 - MySQL 8 para el perfil `prod`.
-- Cuenta SMTP y credenciales del proveedor de pagos solo si se prueban esos flujos.
+- Cuenta SMTP solo si se prueban los correos reales de recuperacion y avisos.
 - Python 3.12 o superior compatible y `requirements-fastapi.txt` solo si se habilita el proveedor opcional de reportes.
 
 ## Ejecutar en desarrollo
@@ -35,9 +35,41 @@ un solo arranque. Se activa temporalmente con `ADMIN_BOOTSTRAP_ENABLED=true`,
 a cambiar esa clave al ingresar. Desactiva la variable despues de recuperar el
 acceso y nunca guardes la clave en Git.
 
+## Ejecutar con Docker
+
+Docker Compose levanta Spring Boot con el perfil `prod`, MySQL 8.4 y el servicio
+opcional de reportes FastAPI. Flyway crea el esquema base y ejecuta las
+migraciones disponibles al iniciar la aplicacion.
+
+```powershell
+Copy-Item .env.example .env
+# Edita .env y cambia como minimo MYSQL_PASSWORD y MYSQL_ROOT_PASSWORD.
+docker compose --env-file .env up -d --build
+docker compose --env-file .env ps
+```
+
+La aplicacion queda disponible en `http://localhost:8080`. Para la primera
+instalacion, habilita temporalmente `ADMIN_BOOTSTRAP_ENABLED=true` en `.env`,
+define `ADMIN_BOOTSTRAP_EMAIL` y `ADMIN_BOOTSTRAP_PASSWORD`, inicia los servicios,
+entra al sistema, cambia la clave y vuelve a desactivar esa variable.
+
+Los datos de MySQL y los archivos subidos se conservan en volumenes Docker.
+Para detener los contenedores sin borrar datos usa `docker compose stop` o
+`docker compose down`. No uses `docker compose down -v` salvo que quieras borrar
+la base de datos y los archivos persistidos.
+
+Para un servidor publico, cambia `APP_BASE_URL` a HTTPS, activa
+`SESSION_COOKIE_SECURE=true`, configura un proxy TLS y completa las credenciales
+SMTP en el entorno del servidor. Consulta `.env.example` como plantilla;
+no subas `.env` al repositorio.
+
+Para desplegar en un VPS con HTTPS automatico, consulta
+[`VPS_DEPLOYMENT.md`](VPS_DEPLOYMENT.md) y usa la composicion adicional
+`docker-compose.prod.yml`.
+
 ## Ejecutar pruebas
 
-Las pruebas usan H2 en memoria y no necesitan MySQL, SMTP ni Wompi. La suite actual cuenta con 113 pruebas.
+Las pruebas usan H2 en memoria y no necesitan MySQL, SMTP ni proveedores de pago externos.
 
 ```powershell
 .\mvnw.cmd clean test
@@ -46,20 +78,17 @@ Las pruebas usan H2 en memoria y no necesitan MySQL, SMTP ni Wompi. La suite act
 ## Sandbox local de pagos
 
 En el perfil `dev`, el sandbox local de pagos está activo por defecto mediante
-`PAYMENTS_SIMULATION_ENABLED=true`. El flujo es: un administrador crea un pago
-PSE o tarjeta, el residente pulsa `Preparar pago en sandbox`, abre `Abrir checkout de prueba` y
-elige un resultado. La aplicación genera una transacción de prueba firmada y la
-procesa con el mismo validador de evento Wompi, incluyendo referencia, monto,
-checksum e idempotencia. Se pueden probar estados aprobados, pendientes,
-rechazados, anulados y con error. No se realiza ningún cobro ni se contacta al proveedor.
-El sandbox usa `PAYMENTS_SIMULATION_SECRET`, un secreto local separado de
-`WOMPI_EVENTS_SECRET`.
+`PAYMENTS_SIMULATION_ENABLED=true`. Un administrador crea un pago PSE o tarjeta,
+el residente pulsa `Preparar pago simulado`, abre el simulador local y elige un
+resultado. Solo una aprobación cambia el estado a pagado y registra la fecha
+efectiva. Se pueden probar estados aprobados, pendientes, rechazados, anulados y
+con error. No se realiza ningún cobro ni se contacta a un proveedor.
 
 Cada pago tiene fecha de emisión, vencimiento y fecha efectiva de pago. El residente
 puede abrir el detalle y descargar la factura/comprobante PDF de cualquier registro
 histórico que le pertenezca, mientras que el administrador puede hacerlo para todos.
 Transferencia y efectivo se confirman únicamente desde administración; PSE y tarjeta
-se confirman por el checkout y su evento validado.
+se confirman desde el simulador local.
 
 Para desactivarlo en desarrollo:
 
@@ -67,8 +96,7 @@ Para desactivarlo en desarrollo:
 $env:PAYMENTS_SIMULATION_ENABLED = "false"
 ```
 
-En `prod` está desactivado por defecto y solo se permite el flujo real con las
-credenciales de Wompi configuradas.
+En `prod` también puede desactivarse mediante `PAYMENTS_SIMULATION_ENABLED=false`.
 
 ## Perfil de produccion
 
@@ -76,7 +104,7 @@ El perfil `prod` usa MySQL, valida el esquema con Hibernate y ejecuta las
 migraciones Flyway de `src/main/resources/db/migration`.
 
 La validacion automatizada actual se ejecuta sobre H2. La validacion de arranque
-con MySQL/Flyway, el envio SMTP real, el proveedor Wompi, las pruebas de navegador
+con MySQL/Flyway, el envio SMTP real, las pruebas de navegador
 y la carga/estres deben repetirse antes de declarar el despliegue listo.
 
 Antes de iniciar, configurar las variables sin guardarlas en Git:
@@ -94,12 +122,9 @@ Variables opcionales:
 - `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`.
 - `NOTIFICATIONS_EMAIL_ENABLED`.
 - `URBELIX_FASTAPI_URL`, `REPORTS_FASTAPI_ENABLED`.
-- `PSE_WEBHOOK_SECRET`.
-- `WOMPI_BASE_URL`, `WOMPI_PUBLIC_KEY`, `WOMPI_PRIVATE_KEY`.
-- `WOMPI_INTEGRITY_SECRET`, `WOMPI_EVENTS_SECRET`.
 
 Para la preparacion de MySQL consultar [MYSQL_MIGRATION.md](MYSQL_MIGRATION.md).
-Para Wompi consultar [WOMPI_SETUP.md](WOMPI_SETUP.md).
+Para pagos simulados consultar [PAYMENTS_SIMULATION.md](PAYMENTS_SIMULATION.md).
 
 ## Modulos y roles
 
@@ -141,9 +166,10 @@ aleatoria; las credenciales solo se envian si SMTP esta habilitado.
    realizadas y cualquier variable externa requerida.
 4. No subir contraseñas, claves API, tokens, bases H2 ni archivos de `target`.
 
-La matriz de requisitos y el estado actual estan en
-[REQUIREMENTS_TRACEABILITY.md](REQUIREMENTS_TRACEABILITY.md) y
-[PROJECT_STATUS.md](PROJECT_STATUS.md).
+La especificacion completa de requisitos funcionales, no funcionales, permisos y
+flujos de aceptacion esta en [REQUISITOS_URBELIX.md](REQUISITOS_URBELIX.md).
+El resumen de trazabilidad esta en [REQUIREMENTS_TRACEABILITY.md](REQUIREMENTS_TRACEABILITY.md)
+y el estado del proyecto en [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ## Reportes y servicios externos
 

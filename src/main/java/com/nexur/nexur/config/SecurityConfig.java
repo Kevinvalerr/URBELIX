@@ -27,12 +27,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            AuthenticationSuccessHandler successHandler) throws Exception {
         http
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/webhooks/pagos", "/webhooks/wompi"))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                .requestMatchers("/", "/home", "/login", "/register", "/forgot-password", "/reset-password").permitAll()
-                .requestMatchers("/webhooks/pagos").permitAll()
-                .requestMatchers("/webhooks/wompi").permitAll()
+                .requestMatchers("/", "/home", "/landing", "/login", "/register", "/forgot-password", "/reset-password").permitAll()
                 .requestMatchers("/usuarios-vista", "/usuarios/**", "/guardar-usuario", "/eliminar-usuario", "/editar-usuario", "/actualizar-usuario").hasRole("ADMIN")
                 .requestMatchers("/reportes/**").hasRole("ADMIN")
                 .requestMatchers("/porteria/**").hasRole("PORTERIA")

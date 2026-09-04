@@ -9,44 +9,33 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.time.Instant;
-import java.util.HexFormat;
 import java.util.Locale;
 import java.util.UUID;
 
 /**
- * Sandbox local para probar el ciclo de pago sin contactar a Wompi.
- * El resultado se procesa mediante el mismo servicio de eventos firmado.
+ * Sandbox local para probar el ciclo de pago sin contactar proveedores externos.
+ * Solo cambia el estado del pago cuando el escenario seleccionado es aprobado.
  */
 @Service
 public class PagoSimulacionService {
 
     private final PagoService pagoService;
-    private final WompiService wompiService;
     private final boolean habilitada;
-    private final String simulationSecret;
 
     public PagoSimulacionService(PagoService pagoService,
-                                 WompiService wompiService,
-                                 @Value("${app.payments.simulation-enabled:false}") boolean habilitada,
-                                 @Value("${app.payments.simulation-secret:}") String simulationSecret) {
+                                 @Value("${app.payments.simulation-enabled:true}") boolean habilitada) {
         this.pagoService = pagoService;
-        this.wompiService = wompiService;
         this.habilitada = habilitada;
-        this.simulationSecret = simulationSecret;
     }
 
     public boolean estaHabilitada() {
-        return habilitada && StringUtils.hasText(simulationSecret);
+        return habilitada;
     }
 
     public boolean puedeSimular(Pago pago) {
         return habilitada
-                && StringUtils.hasText(simulationSecret)
                 && pago != null
-                && (pago.getMetodo() == MetodoPago.PSE || pago.getMetodo() == MetodoPago.TARJETA)
+                && esMetodoDePagoEnLinea(pago.getMetodo())
                 && (pago.getEstadoPago() == EstadoPago.PENDIENTE
                 || pago.getEstadoPago() == EstadoPago.VENCIDO)
                 && StringUtils.hasText(pago.getReferenciaPago());
@@ -57,14 +46,11 @@ public class PagoSimulacionService {
         if (!habilitada) {
             throw new IllegalStateException("El sandbox local de pagos está desactivado");
         }
-        if (!StringUtils.hasText(simulationSecret)) {
-            throw new IllegalStateException("El sandbox local no tiene configurado su secreto de eventos");
-        }
-
         Pago pago = pagoService.buscarPorId(pagoId);
         validarPropietario(pago, email);
-        if (pago.getMetodo() != MetodoPago.PSE && pago.getMetodo() != MetodoPago.TARJETA) {
-            throw new IllegalArgumentException("El sandbox local solo acepta pagos configurados para checkout en línea");
+        if (!esMetodoDePagoEnLinea(pago.getMetodo())) {
+            throw new IllegalArgumentException(
+                    "El sandbox local solo acepta pagos PSE o tarjeta");
         }
         if (pago.getEstadoPago() != EstadoPago.PENDIENTE
                 && pago.getEstadoPago() != EstadoPago.VENCIDO) {
@@ -75,16 +61,13 @@ public class PagoSimulacionService {
         }
 
         String estado = normalizarEstado(estadoSolicitado);
-        long montoEnCentavos = wompiService.montoEnCentavos(pago.getMonto());
-        String transactionId = "sim-" + UUID.randomUUID();
-        long timestamp = Instant.now().getEpochSecond();
-        String checksum = sha256(transactionId + estado + montoEnCentavos + timestamp + simulationSecret);
-        String cuerpo = construirEvento(transactionId, estado, montoEnCentavos,
-                pago.getReferenciaPago().trim(), timestamp, checksum);
+        String transactionId = "SIM-" + UUID.randomUUID();
+        pagoService.registrarResultadoSimulado(pago, estado, transactionId);
+        return new Resultado(transactionId, estado);
+    }
 
-        WompiService.Resultado resultadoWompi = wompiService.procesarEventoSimulado(
-                cuerpo, checksum, simulationSecret);
-        return new Resultado(transactionId, estado, resultadoWompi);
+    private boolean esMetodoDePagoEnLinea(MetodoPago metodo) {
+        return metodo == MetodoPago.PSE || metodo == MetodoPago.TARJETA;
     }
 
     private void validarPropietario(Pago pago, String email) {
@@ -107,35 +90,6 @@ public class PagoSimulacionService {
         };
     }
 
-    private String construirEvento(String transactionId, String estado, long monto,
-                                   String referencia, long timestamp, String checksum) {
-        return "{\"event\":\"transaction.updated\","
-                + "\"data\":{\"transaction\":{"
-                + "\"id\":\"" + escaparJson(transactionId) + "\","
-                + "\"status\":\"" + estado + "\","
-                + "\"amount_in_cents\":" + monto + ","
-                + "\"reference\":\"" + escaparJson(referencia) + "\"}},"
-                + "\"signature\":{\"properties\":[\"transaction.id\","
-                + "\"transaction.status\",\"transaction.amount_in_cents\"],"
-                + "\"checksum\":\"" + checksum + "\"},"
-                + "\"timestamp\":" + timestamp + "}";
-    }
-
-    private String escaparJson(String valor) {
-        return valor.replace("\\", "\\\\").replace("\"", "\\\"")
-                .replace("\r", "\\r").replace("\n", "\\n");
-    }
-
-    private String sha256(String valor) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return HexFormat.of().formatHex(digest.digest(valor.getBytes(StandardCharsets.UTF_8)));
-        } catch (Exception exception) {
-            throw new IllegalStateException("No se pudo firmar la transacción simulada", exception);
-        }
-    }
-
-    public record Resultado(String transactionId, String estadoProveedor,
-                            WompiService.Resultado resultadoWompi) {
+    public record Resultado(String transactionId, String estadoProveedor) {
     }
 }

@@ -35,6 +35,7 @@ target/
 ### Build output ###
 build/
 !**/src/main/**/build/
+/tmp/
 !**/src/test/**/build/
 
 ### VS Code ###
@@ -48,3 +49,4 @@ __pycache__/
 !.env.example
 *.pem
 *.key
+backups/

@@ -3,6 +3,8 @@ package com.nexur.nexur.controller;
 import com.nexur.nexur.model.Usuario;
 import com.nexur.nexur.service.UsuarioService;
 import com.nexur.nexur.service.PasswordResetService;
+import com.nexur.nexur.service.PagoService;
+import com.nexur.nexur.service.NotificacionService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,18 +17,27 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.Principal;
 
 @Controller
 public class AuthController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
     private final UsuarioService usuarioService;
     private final PasswordResetService passwordResetService;
+    private final PagoService pagoService;
+    private final NotificacionService notificacionService;
 
-    public AuthController(UsuarioService usuarioService, PasswordResetService passwordResetService) {
+    public AuthController(UsuarioService usuarioService, PasswordResetService passwordResetService,
+                          PagoService pagoService, NotificacionService notificacionService) {
         this.usuarioService = usuarioService;
         this.passwordResetService = passwordResetService;
+        this.pagoService = pagoService;
+        this.notificacionService = notificacionService;
     }
 
     @InitBinder("usuario")
@@ -46,7 +57,11 @@ public class AuthController {
     public String login(@RequestParam(required = false) String error,
                         @RequestParam(required = false) String logout,
                         @RequestParam(required = false) String registered,
+                        Principal principal,
                         Model model) {
+        if (principal != null) {
+            return "redirect:/dashboard";
+        }
         if (error != null) {
             model.addAttribute("loginError", "Correo electrónico o contraseña inválidos.");
         }
@@ -91,9 +106,10 @@ public class AuthController {
         }
 
         try {
-            usuarioService.crearUsuarioConResidente(
+            Usuario creado = usuarioService.crearUsuarioConResidente(
                     usuario.getNombre(), usuario.getEmail(), usuario.getPassword(),
                     documento, telefono, numeroApartamento, codigoRegistro);
+            registrarObligacionInicial(creado);
         } catch (RuntimeException exception) {
             bindingResult.reject("register", exception.getMessage());
             prepararDatosRegistro(model, documento, telefono, numeroApartamento, codigoRegistro);
@@ -101,6 +117,21 @@ public class AuthController {
         }
 
         return "redirect:/login?registered=true";
+    }
+
+    private void registrarObligacionInicial(Usuario usuario) {
+        if (usuario == null || usuario.getResidente() == null) {
+            return;
+        }
+        try {
+            var pago = pagoService.crearObligacionInicial(usuario.getResidente());
+            notificacionService.crear(usuario, "Obligación inicial registrada",
+                    "Administración registró tu obligación inicial por valor de " + pago.getMonto() + ".",
+                    "/pagos/" + pago.getId());
+        } catch (RuntimeException exception) {
+            // El registro de la cuenta no debe fallar si el aviso o la obligación no se pueden crear.
+            log.error("No se pudo crear la obligación inicial para {}", usuario.getEmail(), exception);
+        }
     }
 
     private void prepararDatosRegistro(Model model, String documento, String telefono,

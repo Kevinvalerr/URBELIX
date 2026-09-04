@@ -31,6 +31,7 @@ class NotificacionServiceTest {
     void creaNotificacionParaUnUsuarioPersistido() {
         Usuario usuario = new Usuario();
         usuario.setId(4L);
+        when(usuarioRepository.findById(4L)).thenReturn(Optional.of(usuario));
         when(notificacionRepository.save(any(Notificacion.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -67,5 +68,19 @@ class NotificacionServiceTest {
                 correoNotificacionService);
 
         assertEquals(0L, service.contarNoLeidas("residente@example.com"));
+    }
+
+    @Test
+    void marcaTodasLasNotificacionesDelUsuario() {
+        Usuario usuario = new Usuario();
+        usuario.setId(8L);
+        when(usuarioRepository.findByEmail("residente@example.com")).thenReturn(Optional.of(usuario));
+        when(notificacionRepository.marcarTodasLeidas(8L)).thenReturn(3);
+
+        NotificacionService service = new NotificacionService(notificacionRepository, usuarioRepository,
+                correoNotificacionService);
+
+        assertEquals(3, service.marcarTodasLeidas("residente@example.com"));
+        verify(notificacionRepository).marcarTodasLeidas(8L);
     }
 }

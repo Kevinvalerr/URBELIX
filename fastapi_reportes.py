@@ -96,10 +96,11 @@ def generar_pdf(registros: list[ReporteRegistro]) -> StreamingResponse:
 
         table = Table(data, colWidths=[25 * mm, 35 * mm, 45 * mm, 125 * mm, 35 * mm], repeatRows=1)
         table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#163B65")),
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2A9D8F")),
             ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#CBD5E1")),
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F4F7FB")]),
+            ("LINEBELOW", (0, 0), (-1, 0), 1.2, colors.HexColor("#163B65")),
             ("LEFTPADDING", (0, 0), (-1, -1), 5),
             ("RIGHTPADDING", (0, 0), (-1, -1), 5),
             ("TOPPADDING", (0, 0), (-1, -1), 5),

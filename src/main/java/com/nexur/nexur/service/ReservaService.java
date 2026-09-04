@@ -2,12 +2,18 @@ package com.nexur.nexur.service;
 
 import com.nexur.nexur.model.Apartamento;
 import com.nexur.nexur.model.Reserva;
+import com.nexur.nexur.model.Rol;
+import com.nexur.nexur.model.Usuario;
 import com.nexur.nexur.model.enums.EstadoReserva;
 import com.nexur.nexur.model.enums.TipoEspacio;
 import com.nexur.nexur.repository.ApartamentoRepository;
 import com.nexur.nexur.repository.ReservaRepository;
+import com.nexur.nexur.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.time.LocalDateTime;
@@ -16,12 +22,25 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReservaService {
 
+    private static final Logger log = LoggerFactory.getLogger(ReservaService.class);
+
     private final ReservaRepository reservaRepository;
     private final ApartamentoRepository apartamentoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final NotificacionService notificacionService;
 
-    public ReservaService(ReservaRepository reservaRepository, ApartamentoRepository apartamentoRepository) {
+    @Autowired
+    public ReservaService(ReservaRepository reservaRepository, ApartamentoRepository apartamentoRepository,
+                          UsuarioRepository usuarioRepository,
+                          NotificacionService notificacionService) {
         this.reservaRepository = reservaRepository;
         this.apartamentoRepository = apartamentoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.notificacionService = notificacionService;
+    }
+
+    public ReservaService(ReservaRepository reservaRepository, ApartamentoRepository apartamentoRepository) {
+        this(reservaRepository, apartamentoRepository, null, null);
     }
 
      
@@ -80,7 +99,14 @@ public class ReservaService {
          if (reserva.getObservaciones() == null || reserva.getObservaciones().isBlank()) {
     reserva.setObservaciones(generarObservaciones(reserva.getTipoEspacio()));
 }
-          return reservaRepository.save(reserva);
+          Reserva guardada = reservaRepository.save(reserva);
+          notificar(reserva.getResidente() == null ? null : reserva.getResidente().getUsuario(),
+                  "Solicitud de reserva recibida",
+                  "Tu solicitud para " + guardada.getTipoEspacio()
+                          + " fue registrada y está pendiente de aprobación.");
+          notificarRoles(Rol.ADMIN, "Nueva solicitud de reserva",
+                  "Hay una solicitud de reserva pendiente para " + guardada.getTipoEspacio() + ".");
+          return guardada;
           }
 
     public long contarReservas() {
@@ -118,6 +144,8 @@ public void aprobarReserva(Long id, String comentario) {
     }
 
     reservaRepository.save(reserva);
+    notificar(reserva.getResidente() == null ? null : reserva.getResidente().getUsuario(),
+            "Reserva aprobada", "Tu reserva para " + reserva.getTipoEspacio() + " fue aprobada.");
 }
 
 public void rechazarReserva(Long id, String comentario) {
@@ -135,5 +163,29 @@ public void rechazarReserva(Long id, String comentario) {
     }
 
     reservaRepository.save(reserva);
+    notificar(reserva.getResidente() == null ? null : reserva.getResidente().getUsuario(),
+            "Reserva rechazada", "Tu reserva para " + reserva.getTipoEspacio()
+                    + " fue rechazada." + (comentario == null || comentario.isBlank()
+                    ? "" : " Motivo: " + comentario.trim()));
+}
+
+private void notificar(Usuario usuario, String titulo, String mensaje) {
+    if (notificacionService == null || usuario == null) {
+        return;
+    }
+    try {
+        notificacionService.crear(usuario, titulo, mensaje, "/reservas");
+    } catch (RuntimeException exception) {
+        log.warn("No se pudo crear la notificacion de la reserva", exception);
+    }
+}
+
+private void notificarRoles(Rol rol, String titulo, String mensaje) {
+    if (usuarioRepository == null || rol == null) {
+        return;
+    }
+    usuarioRepository.findAll().stream()
+            .filter(usuario -> usuario.isActivo() && usuario.getRol() == rol)
+            .forEach(usuario -> notificar(usuario, titulo, mensaje));
 }
 }

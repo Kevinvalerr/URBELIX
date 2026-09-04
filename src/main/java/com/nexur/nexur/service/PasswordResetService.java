@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -18,6 +18,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class PasswordResetService {
@@ -29,17 +32,32 @@ public class PasswordResetService {
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
     private final long expirationMinutes;
     private final String applicationBaseUrl;
+    private final EmailTemplateService emailTemplateService;
+    private final CorreoNotificacionService correoNotificacionService;
 
+    @Autowired
     public PasswordResetService(UsuarioService usuarioService,
                                 PasswordResetTokenRepository tokenRepository,
                                 ObjectProvider<JavaMailSender> mailSenderProvider,
                                 @Value("${app.password-reset.expiration-minutes:30}") long expirationMinutes,
-                                @Value("${app.base-url:http://localhost:8080}") String applicationBaseUrl) {
+                                @Value("${app.base-url:http://localhost:8080}") String applicationBaseUrl,
+                                EmailTemplateService emailTemplateService,
+                                CorreoNotificacionService correoNotificacionService) {
         this.usuarioService = usuarioService;
         this.tokenRepository = tokenRepository;
         this.mailSenderProvider = mailSenderProvider;
         this.expirationMinutes = expirationMinutes;
         this.applicationBaseUrl = applicationBaseUrl;
+        this.emailTemplateService = emailTemplateService;
+        this.correoNotificacionService = correoNotificacionService;
+    }
+
+    public PasswordResetService(UsuarioService usuarioService,
+                                PasswordResetTokenRepository tokenRepository,
+                                ObjectProvider<JavaMailSender> mailSenderProvider,
+                                long expirationMinutes, String applicationBaseUrl) {
+        this(usuarioService, tokenRepository, mailSenderProvider, expirationMinutes,
+                applicationBaseUrl, new EmailTemplateService(), null);
     }
 
     @Transactional
@@ -70,14 +88,22 @@ public class PasswordResetService {
                 token, usuario, LocalDateTime.now().plusMinutes(expirationMinutes)));
         tokenRepository.flush();
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(usuario.getEmail());
-        message.setSubject("Restablecer contraseña de Urbelix");
-        message.setText("Solicitaste restablecer tu contraseña. Usa este enlace antes de "
-                + expirationMinutes + " minutos:\n\n" + link);
         try {
+            var message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+            helper.setTo(usuario.getEmail());
+            helper.setSubject("Restablecer contraseña de Urbelix");
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("titulo", "Restablece tu contraseña");
+            variables.put("preheader", "Recibimos una solicitud para actualizar el acceso a tu cuenta.");
+            variables.put("mensaje", "Usa el siguiente botón para crear una nueva contraseña segura.");
+            variables.put("enlace", link);
+            variables.put("textoEnlace", "Restablecer contraseña");
+            variables.put("expiracion", "Este enlace estará disponible durante " + expirationMinutes + " minutos.");
+            helper.setText("Solicitaste restablecer tu contraseña. Enlace: " + link,
+                emailTemplateService.render("email/recuperacion-contrasena", variables));
             mailSender.send(message);
-        } catch (RuntimeException exception) {
+        } catch (Exception exception) {
             log.error("No se pudo enviar el correo de recuperación a {}", usuario.getEmail(), exception);
             throw new IllegalStateException("No se pudo enviar el correo de recuperación. Revisa la configuración SMTP.");
         }
@@ -103,6 +129,9 @@ public class PasswordResetService {
         }
 
         usuarioService.cambiarPassword(resetToken.getUsuario(), password);
+        if (correoNotificacionService != null) {
+            correoNotificacionService.enviarCambioContrasena(resetToken.getUsuario());
+        }
         tokenRepository.delete(resetToken);
     }
 }

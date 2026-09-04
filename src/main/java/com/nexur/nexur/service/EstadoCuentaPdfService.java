@@ -24,8 +24,7 @@ public class EstadoCuentaPdfService {
         PdfDocument pdf = new PdfDocument(new PdfWriter(salida));
         Document documento = new Document(pdf);
 
-        documento.add(new Paragraph("Estado de cuenta residencial").setBold().setFontSize(18));
-        documento.add(new Paragraph("Urbelix"));
+        UrbelixPdfStyle.encabezado(documento, "Estado de cuenta residencial", "Resumen financiero de tu apartamento");
         documento.add(new Paragraph("Residente: " + nombreResidente(residente)));
         documento.add(new Paragraph("Apartamento: " + apartamento(residente)));
         documento.add(new Paragraph("Fecha de generacion: " + LocalDate.now()));
@@ -39,19 +38,19 @@ public class EstadoCuentaPdfService {
 
         Table tabla = new Table(UnitValue.createPercentArray(new float[]{13f, 19f, 17f, 17f, 17f, 17f}))
                 .useAllAvailableWidth();
-        tabla.addHeaderCell("Emisión");
-        tabla.addHeaderCell("Tipo");
-        tabla.addHeaderCell("Monto");
-        tabla.addHeaderCell("Vencimiento");
-        tabla.addHeaderCell("Fecha de pago");
-        tabla.addHeaderCell("Estado");
+        tabla.addHeaderCell(UrbelixPdfStyle.encabezadoCelda("Emisión"));
+        tabla.addHeaderCell(UrbelixPdfStyle.encabezadoCelda("Tipo"));
+        tabla.addHeaderCell(UrbelixPdfStyle.encabezadoCelda("Monto"));
+        tabla.addHeaderCell(UrbelixPdfStyle.encabezadoCelda("Vencimiento"));
+        tabla.addHeaderCell(UrbelixPdfStyle.encabezadoCelda("Fecha de pago"));
+        tabla.addHeaderCell(UrbelixPdfStyle.encabezadoCelda("Estado"));
         for (Pago pago : pagos) {
-            tabla.addCell(texto(pago.getFecha()));
-            tabla.addCell(pago.getTipoPago() == null ? "Sin tipo" : pago.getTipoPago().name());
-            tabla.addCell("$" + (pago.getMonto() == null ? BigDecimal.ZERO : pago.getMonto()));
-            tabla.addCell(texto(pago.getFechaVencimiento()));
-            tabla.addCell(texto(pago.getFechaPago()));
-            tabla.addCell(pago.getEstadoPago() == null ? "SIN ESTADO" : pago.getEstadoPago().name());
+            tabla.addCell(UrbelixPdfStyle.celda(texto(pago.getFecha())));
+            tabla.addCell(UrbelixPdfStyle.celda(pago.getTipoPago() == null ? "Sin tipo" : pago.getTipoPago().name()));
+            tabla.addCell(UrbelixPdfStyle.celda("$" + (pago.getMonto() == null ? BigDecimal.ZERO : pago.getMonto())));
+            tabla.addCell(UrbelixPdfStyle.celda(texto(pago.getFechaVencimiento())));
+            tabla.addCell(UrbelixPdfStyle.celda(texto(pago.getFechaPago())));
+            tabla.addCell(UrbelixPdfStyle.celda(pago.getEstadoPago() == null ? "SIN ESTADO" : pago.getEstadoPago().name()));
         }
         documento.add(tabla);
         documento.close();

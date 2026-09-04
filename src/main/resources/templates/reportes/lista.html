@@ -3,7 +3,7 @@
 
 <div th:fragment="content" th:with="titulo='Reportes'">
 
-    <section class="page-top-section mb-4">
+    <section class="page-top-section mb-4 report-page-header">
         <div>
             <h1>Generador de Reportes</h1>
             <p class="text-muted">
@@ -11,15 +11,19 @@
             </p>
         </div>
 
-        <div class="page-actions">
+        <div class="page-actions report-page-actions">
             <button type="button" class="btn btn-primary btn-main-action" id="generarReportBtn">
                 <i class="bi bi-file-pdf me-2"></i>
                 Generar Reporte PDF
             </button>
+            <a class="btn btn-outline-success btn-main-action" id="exportarExcelBtn" href="/reportes/generar-excel">
+                <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+                Descargar Excel
+            </a>
         </div>
     </section>
 
-    <div class="card activity-card mb-4">
+    <div class="card activity-card mb-4 report-filter-card">
         <h5>Filtros del reporte</h5>
         <div class="row g-3 mt-1">
             <div class="col-md-4">
@@ -65,7 +69,7 @@
 
     <div th:if="${errorReporte}" class="alert alert-warning" role="alert" th:text="${errorReporte}"></div>
 
-    <div class="card activity-card mt-4">
+    <div class="card activity-card mt-4 report-preview-card">
         <h5>Vista previa de resultados (<span class="text-muted" th:text="${#lists.size(registros)}">0</span>)</h5>
         <div class="table-responsive mt-3">
             <table class="table table-sm align-middle mb-0">
@@ -214,6 +218,21 @@
                     document.getElementById('errorText').textContent = 'Error: ' + error.message;
                 });
             }
+
+            function actualizarEnlaceExcel() {
+                const params = new URLSearchParams();
+                params.set('tipo', document.getElementById('tipoReporte').value);
+                ['fechaInicio', 'fechaFin'].forEach(function(id) {
+                    const value = document.getElementById(id).value;
+                    if (value) params.set(id, value);
+                });
+                document.getElementById('exportarExcelBtn').href = '/reportes/generar-excel?' + params.toString();
+            }
+
+            ['tipoReporte', 'fechaInicio', 'fechaFin'].forEach(function(id) {
+                document.getElementById(id).addEventListener('change', actualizarEnlaceExcel);
+            });
+            actualizarEnlaceExcel();
 
         });
     </script>

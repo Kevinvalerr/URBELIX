@@ -2,6 +2,10 @@ package com.nexur.nexur.controller;
 
 import com.nexur.nexur.model.TipoVehiculo;
 import com.nexur.nexur.model.Vehiculo;
+import com.nexur.nexur.model.Rol;
+import com.nexur.nexur.model.Usuario;
+import com.nexur.nexur.repository.UsuarioRepository;
+import com.nexur.nexur.service.NotificacionService;
 import com.nexur.nexur.service.VehiculoService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -20,9 +24,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class VehiculoResidenteController {
 
     private final VehiculoService vehiculoService;
+    private final UsuarioRepository usuarioRepository;
+    private final NotificacionService notificacionService;
 
-    public VehiculoResidenteController(VehiculoService vehiculoService) {
+    public VehiculoResidenteController(VehiculoService vehiculoService,
+                                       UsuarioRepository usuarioRepository,
+                                       NotificacionService notificacionService) {
         this.vehiculoService = vehiculoService;
+        this.usuarioRepository = usuarioRepository;
+        this.notificacionService = notificacionService;
     }
 
     @GetMapping
@@ -62,7 +72,9 @@ public class VehiculoResidenteController {
                           Model model,
                           RedirectAttributes redirectAttributes) {
         try {
-            vehiculoService.guardarParaResidente(vehiculo, authentication.getName());
+            boolean nuevo = vehiculo.getId() == null;
+            Vehiculo guardado = vehiculoService.guardarParaResidente(vehiculo, authentication.getName());
+            notificarPorteria(guardado, nuevo);
             redirectAttributes.addFlashAttribute("success", "Vehículo guardado correctamente");
             return "redirect:/parqueaderos/mis-vehiculos";
         } catch (IllegalArgumentException exception) {
@@ -78,5 +90,19 @@ public class VehiculoResidenteController {
         model.addAttribute("titulo", titulo);
         model.addAttribute("currentPath", "/parqueaderos/mis-vehiculos");
         model.addAttribute("volverUrl", "/parqueaderos/mis-vehiculos");
+    }
+
+    private void notificarPorteria(Vehiculo vehiculo, boolean nuevo) {
+        String accion = nuevo ? "registró" : "actualizó";
+        String mensaje = "Un residente " + accion + " el vehículo " + vehiculo.getPlaca()
+                + ". Revisa sus datos para la operación de acceso.";
+        for (Usuario usuario : usuarioRepository.findByRolAndActivoTrue(Rol.PORTERIA)) {
+            try {
+                notificacionService.crear(usuario, nuevo ? "Nuevo vehículo registrado" : "Vehículo actualizado",
+                        mensaje, "/porteria/parqueaderos/vehiculos");
+            } catch (RuntimeException exception) {
+                // El vehículo ya fue guardado; un fallo de correo no debe romper la operación.
+            }
+        }
     }
 }

@@ -77,17 +77,10 @@ CREATE TABLE IF NOT EXISTS incidencia_adjunto (
 
 CREATE INDEX IF NOT EXISTS idx_adjunto_incidencia ON incidencia_adjunto (incidencia_id, creado_en);
 
-CREATE TABLE IF NOT EXISTS pago_webhook_evento (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    evento_id VARCHAR(120) NOT NULL UNIQUE,
-    referencia_pago VARCHAR(255) NOT NULL,
-    estado VARCHAR(30) NOT NULL,
-    recibido_en TIMESTAMP NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_webhook_referencia ON pago_webhook_evento (referencia_pago, recibido_en);
-
-ALTER TABLE pagos ADD COLUMN IF NOT EXISTS fecha_pago DATE;
+  ALTER TABLE pagos ADD COLUMN IF NOT EXISTS fecha_pago DATE;
+  ALTER TABLE pagos ADD COLUMN IF NOT EXISTS resultado_simulacion VARCHAR(30);
+  ALTER TABLE pagos ADD COLUMN IF NOT EXISTS transaccion_simulada VARCHAR(80);
+  ALTER TABLE pagos ADD COLUMN IF NOT EXISTS simulado_en TIMESTAMP;
 
 CREATE TABLE IF NOT EXISTS auditoria (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

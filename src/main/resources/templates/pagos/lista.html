@@ -185,12 +185,30 @@
                             <span class="payment-status__dot"></span>
                             <span th:text="${pago.estadoPago != null ? (pago.estadoPago.name() == 'PAGADO' ? 'Pagado' : pago.estadoPago.name() == 'VENCIDO' ? 'Vencido' : 'Pendiente') : 'Sin estado'}">Pendiente</span>
                         </span>
+                        <small th:if="${pago.resultadoSimulacion != null}" class="payment-simulation-label"
+                               th:text="${'Sandbox: ' + pago.resultadoSimulacion}">Sandbox: APPROVED</small>
                     </td>
                     <td class="payment-table__actions">
                         <div class="payment-row-actions">
-                            <a th:href="@{/pagos/{id}(id=${pago.id})}" class="payment-icon-link payment-icon-link--main" th:title="${!isAdmin and pago.estadoPago != null and (pago.estadoPago.name() == 'PENDIENTE' or pago.estadoPago.name() == 'VENCIDO') and (pago.metodo != null and (pago.metodo.name() == 'PSE' or pago.metodo.name() == 'TARJETA')) ? 'Pagar pago' : 'Ver detalle'}">
-                                <i th:class="${!isAdmin and pago.estadoPago != null and (pago.estadoPago.name() == 'PENDIENTE' or pago.estadoPago.name() == 'VENCIDO') and (pago.metodo != null and (pago.metodo.name() == 'PSE' or pago.metodo.name() == 'TARJETA')) ? 'bi bi-arrow-up-right' : 'bi bi-eye'}"></i>
-                                <span th:text="${!isAdmin and pago.estadoPago != null and (pago.estadoPago.name() == 'PENDIENTE' or pago.estadoPago.name() == 'VENCIDO') and (pago.metodo != null and (pago.metodo.name() == 'PSE' or pago.metodo.name() == 'TARJETA')) ? 'Pagar' : 'Detalle'}">Detalle</span>
+                            <th:block sec:authorize="hasRole('RESIDENTE')">
+                                <form th:if="${pago.estadoPago != null and (pago.estadoPago.name() == 'PENDIENTE' or pago.estadoPago.name() == 'VENCIDO') and pago.metodo != null and (pago.metodo.name() == 'PSE' or pago.metodo.name() == 'TARJETA') and (pago.referenciaPago == null or #strings.isEmpty(pago.referenciaPago))}"
+                                      th:action="@{/pagos/{id}/iniciar(id=${pago.id})}" method="post">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                                    <button type="submit" class="payment-icon-link payment-icon-link--main payment-icon-button" title="Iniciar pago simulado">
+                                        <i class="bi bi-play-circle"></i><span>Pagar</span>
+                                    </button>
+                                </form>
+                                <a th:if="${pago.estadoPago != null and (pago.estadoPago.name() == 'PENDIENTE' or pago.estadoPago.name() == 'VENCIDO') and pago.metodo != null and (pago.metodo.name() == 'PSE' or pago.metodo.name() == 'TARJETA') and pago.referenciaPago != null and !#strings.isEmpty(pago.referenciaPago)}"
+                                   th:href="@{/pagos/{id}/simulador(id=${pago.id})}" class="payment-icon-link payment-icon-link--main" title="Continuar pago simulado">
+                                    <i class="bi bi-arrow-up-right"></i><span>Pagar</span>
+                                </a>
+                                <a th:if="${pago.estadoPago == null or (pago.estadoPago.name() != 'PENDIENTE' and pago.estadoPago.name() != 'VENCIDO') or pago.metodo == null or (pago.metodo.name() != 'PSE' and pago.metodo.name() != 'TARJETA')}"
+                                   th:href="@{/pagos/{id}(id=${pago.id})}" class="payment-icon-link payment-icon-link--main" title="Ver detalle">
+                                    <i class="bi bi-eye"></i><span>Detalle</span>
+                                </a>
+                            </th:block>
+                            <a sec:authorize="hasRole('ADMIN')" th:href="@{/pagos/{id}(id=${pago.id})}" class="payment-icon-link payment-icon-link--main" title="Ver detalle">
+                                <i class="bi bi-eye"></i><span>Detalle</span>
                             </a>
                             <a th:href="@{/pagos/{id}/factura(id=${pago.id})}" class="payment-icon-link" title="Descargar comprobante">
                                 <i class="bi bi-file-earmark-pdf"></i><span class="visually-hidden">Comprobante</span>

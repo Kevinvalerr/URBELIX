@@ -3,6 +3,8 @@ package com.nexur.nexur.controller;
 import com.nexur.nexur.model.Usuario;
 import com.nexur.nexur.model.Rol;
 import com.nexur.nexur.service.UsuarioService;
+import com.nexur.nexur.service.PagoService;
+import com.nexur.nexur.service.NotificacionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,12 +25,17 @@ public class UsuarioController {
     private final ApartamentoRepository apartamentoRepository;
     private final UsuarioService usuarioService;
     private final ExcelExportService excelExportService;
+    private final PagoService pagoService;
+    private final NotificacionService notificacionService;
 
     public UsuarioController(ApartamentoRepository apartamentoRepository, UsuarioService usuarioService,
-                             ExcelExportService excelExportService) {
+                             ExcelExportService excelExportService, PagoService pagoService,
+                             NotificacionService notificacionService) {
         this.apartamentoRepository = apartamentoRepository;
         this.usuarioService = usuarioService;
         this.excelExportService = excelExportService;
+        this.pagoService = pagoService;
+        this.notificacionService = notificacionService;
     }
 
     @GetMapping("/excel/residentes")
@@ -92,8 +99,9 @@ public String nuevo(Model model) {
             return "usuarios/nuevo";
         }
         try {
-            usuarioService.crearUsuario(nombre, email, password, rol,
+            Usuario creado = usuarioService.crearUsuario(nombre, email, password, rol,
                     documento, telefono, numeroApartamento);
+            registrarObligacionInicial(creado);
         } catch (RuntimeException exception) {
             Usuario usuario = new Usuario();
             usuario.setNombre(nombre);
@@ -134,6 +142,16 @@ public String nuevo(Model model) {
             return "redirect:/usuarios/editar/" + id;
         }
         return "redirect:/usuarios";
+    }
+
+    private void registrarObligacionInicial(Usuario usuario) {
+        if (usuario == null || usuario.getRol() != Rol.RESIDENTE || usuario.getResidente() == null) {
+            return;
+        }
+        var pago = pagoService.crearObligacionInicial(usuario.getResidente());
+        notificacionService.crear(usuario, "Obligación inicial registrada",
+                "Administración registró tu obligación inicial por valor de " + pago.getMonto() + ".",
+                "/pagos/" + pago.getId());
     }
 
     // Eliminar

@@ -189,6 +189,13 @@ body {
     border-color: #2563eb;
 }
 
+.auth-home-link {
+    display: block;
+    margin-top: 0.85rem;
+    text-align: center;
+    text-decoration: none;
+}
+
 .forgot-link {
     display: block;
     margin-top: 1.25rem;

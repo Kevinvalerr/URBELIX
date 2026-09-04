@@ -85,7 +85,19 @@ public class IncidenciaService {
         incidencia.setEstado(EstadoIncidencia.ABIERTA);
         incidencia.setCreadoEn(LocalDateTime.now());
         incidencia.setActualizadoEn(null);
-        return incidenciaRepository.save(incidencia);
+        Incidencia guardada = incidenciaRepository.save(incidencia);
+        try {
+            usuarioRepository.findAll().stream()
+                    .filter(usuario -> usuario.isActivo()
+                            && usuario.getRol() != null
+                            && usuario.getRol().name().equals("ADMIN"))
+                    .forEach(usuario -> notificacionService.crear(usuario, "Nueva incidencia registrada",
+                            "Un residente registró la incidencia '" + guardada.getAsunto() + "'.",
+                            "/incidencias"));
+        } catch (RuntimeException exception) {
+            // La incidencia debe conservarse aunque el servicio de avisos no esté disponible.
+        }
+        return guardada;
     }
 
     @Transactional

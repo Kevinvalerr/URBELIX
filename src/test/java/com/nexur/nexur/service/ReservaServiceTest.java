@@ -91,6 +91,41 @@ class ReservaServiceTest {
                 () -> reservaService.aprobarReserva(4L, "Aprobación tardía"));
     }
 
+    @Test
+    void validaFechasApartamentoConflictoYObservacionesPorDefecto() {
+        assertThrows(IllegalArgumentException.class, () -> reservaService.guardar(null, 1L));
+        Reserva sinFecha = new Reserva();
+        sinFecha.setTipoEspacio(TipoEspacio.BBQ);
+        assertThrows(IllegalArgumentException.class, () -> reservaService.guardar(sinFecha, 1L));
+        Reserva pasada = reservaBase();
+        pasada.setFechaInicio(LocalDateTime.now().minusHours(1));
+        assertThrows(IllegalArgumentException.class, () -> reservaService.guardar(pasada, 1L));
+        Reserva sinApartamento = reservaBase();
+        assertThrows(IllegalArgumentException.class, () -> reservaService.guardar(sinApartamento, null));
+        when(apartamentoRepository.findById(1L)).thenReturn(Optional.of(apartamento));
+        when(reservaRepository.findByTipoEspacioAndEstadoInAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+                any(TipoEspacio.class), any(), any(), any())).thenReturn(List.of(reservaBase()));
+        assertThrows(IllegalArgumentException.class, () -> reservaService.guardar(reservaBase(), 1L));
+    }
+
+    @Test
+    void generaObservacionesParaCadaEspacioYRechazaProcesamientoRepetido() {
+        when(apartamentoRepository.findById(1L)).thenReturn(Optional.of(apartamento));
+        when(reservaRepository.findByTipoEspacioAndEstadoInAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+                any(), any(), any(), any())).thenReturn(List.of());
+        when(reservaRepository.save(any(Reserva.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        for (TipoEspacio tipo : TipoEspacio.values()) {
+            Reserva reserva = reservaBase();
+            reserva.setTipoEspacio(tipo);
+            assertEquals(false, reservaService.guardar(reserva, 1L).getObservaciones().isBlank());
+        }
+        Reserva aprobada = reservaBase();
+        aprobada.setEstado(EstadoReserva.APROBADA);
+        when(reservaRepository.findById(5L)).thenReturn(Optional.of(aprobada));
+        assertThrows(IllegalArgumentException.class, () -> reservaService.aprobarReserva(5L, null));
+        assertThrows(IllegalArgumentException.class, () -> reservaService.rechazarReserva(5L, null));
+    }
+
     private Reserva reservaBase() {
         Reserva reserva = new Reserva();
         reserva.setTipoEspacio(TipoEspacio.SALON_SOCIAL);

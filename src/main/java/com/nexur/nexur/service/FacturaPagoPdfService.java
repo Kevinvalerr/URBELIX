@@ -35,14 +35,8 @@ public class FacturaPagoPdfService {
         PdfDocument pdf = new PdfDocument(new PdfWriter(salida));
         Document documento = new Document(pdf);
 
-        documento.add(new Paragraph("URBELIX")
-                .setBold()
-                .setFontSize(20));
-        documento.add(new Paragraph("Factura / comprobante de pago")
-                .setBold()
-                .setFontSize(16));
-        documento.add(new Paragraph("Documento interno de cobranza residencial")
-                .setFontSize(10));
+        UrbelixPdfStyle.encabezado(documento, "Factura / comprobante de pago",
+            "Documento interno de cobranza residencial");
 
         Table identificacion = tabla(new float[]{32f, 68f});
         fila(identificacion, "Número", numeroFactura(pago));
@@ -81,8 +75,9 @@ public class FacturaPagoPdfService {
     }
 
     private void fila(Table tabla, String etiqueta, String valor) {
-        tabla.addCell(new Paragraph(etiqueta).setBold());
-        tabla.addCell(valor);
+        tabla.addCell(new com.itextpdf.layout.element.Cell().add(new Paragraph(etiqueta).setBold())
+            .setBackgroundColor(UrbelixPdfStyle.FONDO));
+        tabla.addCell(UrbelixPdfStyle.celda(valor));
     }
 
     private String numeroFactura(Pago pago) {

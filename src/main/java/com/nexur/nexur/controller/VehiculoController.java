@@ -30,7 +30,7 @@ public class VehiculoController {
     @GetMapping
     public String listar(Model model) {
         model.addAttribute("vehiculos", vehiculoService.listar());
-        model.addAttribute("currentPath", "/porteria/parqueaderos");
+        model.addAttribute("currentPath", "/porteria/parqueaderos/vehiculos");
         model.addAttribute("titulo", "Vehículos");
         return "parqueaderos/vehiculos";
     }
@@ -77,7 +77,7 @@ public class VehiculoController {
         model.addAttribute("residentes", residenteService.obtenerTodos());
         model.addAttribute("parqueaderos", parqueaderoService.listarTodos());
         model.addAttribute("tipos", TipoVehiculo.values());
-        model.addAttribute("currentPath", "/porteria/parqueaderos");
+        model.addAttribute("currentPath", "/porteria/parqueaderos/vehiculos");
         model.addAttribute("titulo", titulo);
         return "parqueaderos/vehiculo-formulario";
     }

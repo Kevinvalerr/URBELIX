@@ -1,0 +1,51 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  db:
+    mem_limit: 1g
+    cpus: 1.0
+    logging: *default-logging
+
+  reportes:
+    mem_limit: 256m
+    cpus: 0.5
+    logging: *default-logging
+
+  app:
+    # Reemplaza la publicacion local del compose base: solo Caddy expone HTTP/S.
+    ports: !reset []
+    mem_limit: 1g
+    cpus: 1.5
+    logging: *default-logging
+    environment:
+      APP_BASE_URL: ${APP_BASE_URL:?Define APP_BASE_URL=https://tu-dominio en .env}
+      SESSION_COOKIE_SECURE: "true"
+
+  proxy:
+    image: caddy:2-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.25
+    logging: *default-logging
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Define APP_DOMAIN en .env}
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - urbelix-net
+
+volumes:
+  caddy-data:
+  caddy-config:

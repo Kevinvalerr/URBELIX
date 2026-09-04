@@ -44,8 +44,17 @@ private TipoPago tipoPago;
 
 private LocalDate fechaVencimiento;
 
-@Column(unique = true)
-private String referenciaPago;
+    @Column(unique = true)
+    private String referenciaPago;
+
+    @Column(name = "resultado_simulacion", length = 30)
+    private String resultadoSimulacion;
+
+    @Column(name = "transaccion_simulada", length = 80)
+    private String transaccionSimulada;
+
+    @Column(name = "simulado_en")
+    private LocalDateTime simuladoEn;
 
     private LocalDateTime creadoEn;
 
@@ -148,5 +157,29 @@ public String getReferenciaPago() {
 
 public void setReferenciaPago(String referenciaPago) {
     this.referenciaPago = referenciaPago;
+}
+
+public String getResultadoSimulacion() {
+    return resultadoSimulacion;
+}
+
+public void setResultadoSimulacion(String resultadoSimulacion) {
+    this.resultadoSimulacion = resultadoSimulacion;
+}
+
+public String getTransaccionSimulada() {
+    return transaccionSimulada;
+}
+
+public void setTransaccionSimulada(String transaccionSimulada) {
+    this.transaccionSimulada = transaccionSimulada;
+}
+
+public LocalDateTime getSimuladoEn() {
+    return simuladoEn;
+}
+
+public void setSimuladoEn(LocalDateTime simuladoEn) {
+    this.simuladoEn = simuladoEn;
 }
 }

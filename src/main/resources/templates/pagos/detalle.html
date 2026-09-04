@@ -3,7 +3,7 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{layout/base :: page}">
 <div th:fragment="content"
-     th:with="titulo='Detalle del pago | Urbelix', esOnline=${pago.metodo != null and (pago.metodo.name() == 'PSE' or pago.metodo.name() == 'TARJETA')}, esCobrable=${pago.estadoPago != null and (pago.estadoPago.name() == 'PENDIENTE' or pago.estadoPago.name() == 'VENCIDO')}"
+     th:with="titulo='Detalle del pago | Urbelix', esSimulable=${pago.metodo != null and (pago.metodo.name() == 'PSE' or pago.metodo.name() == 'TARJETA')}, esCobrable=${pago.estadoPago != null and (pago.estadoPago.name() == 'PENDIENTE' or pago.estadoPago.name() == 'VENCIDO')}"
      class="payments-page payment-detail-page">
     <section class="payments-hero payments-hero--compact">
         <div class="payments-hero__copy">
@@ -24,11 +24,6 @@
     <div th:if="${success}" class="payment-alert payment-alert--success" role="status"><i class="bi bi-check-circle-fill"></i><span th:text="${success}"></span></div>
     <div th:if="${error}" class="payment-alert payment-alert--danger" role="alert"><i class="bi bi-exclamation-triangle-fill"></i><span th:text="${error}"></span></div>
 
-    <div th:if="${wompiResultado != null}" class="payment-alert"
-         th:classappend="${wompiResultado.name() == 'CONFIRMADO' ? ' payment-alert--success' : wompiResultado.name() == 'PENDIENTE' ? ' payment-alert--info' : ' payment-alert--danger'}">
-        <i class="bi bi-info-circle-fill"></i>
-        <span th:text="${wompiResultado.name() == 'CONFIRMADO' ? 'El proveedor confirmó el pago.' : wompiResultado.name() == 'PENDIENTE' ? 'El proveedor todavía procesa la transacción.' : 'La transacción no fue aprobada o no pudo validarse.'}">Resultado del proveedor</span>
-    </div>
     <div th:if="${simulacionMensaje != null}" class="payment-alert payment-alert--info">
         <i class="bi bi-shield-check"></i>
         <span><strong>Sandbox local:</strong> <span th:text="${simulacionMensaje}">Resultado simulado.</span></span>
@@ -88,6 +83,17 @@
                     <dd th:text="${pago.id != null ? 'URB-' + #numbers.formatInteger(pago.id, 6) : 'No disponible'}">URB-000001</dd>
                 </div>
             </dl>
+
+            <div th:if="${pago.resultadoSimulacion != null}" class="payment-simulation-trace">
+                <div class="payment-simulation-trace__heading">
+                    <span><i class="bi bi-shield-check"></i> Trazabilidad del sandbox</span>
+                    <span class="payment-simulation-trace__status" th:text="${pago.resultadoSimulacion == 'APPROVED' ? 'APROBADO' : pago.resultadoSimulacion}">APROBADO</span>
+                </div>
+                <div class="payment-simulation-trace__grid">
+                    <div><small>Transacción</small><strong th:text="${pago.transaccionSimulada}">SIM-000000</strong></div>
+                    <div><small>Procesado</small><strong th:text="${pago.simuladoEn != null ? #temporals.format(pago.simuladoEn, 'dd/MM/yyyy HH:mm') : 'No disponible'}">01/01/2026 08:00</strong></div>
+                </div>
+            </div>
         </article>
 
         <aside class="payment-side-card">
@@ -101,7 +107,7 @@
 
             <div sec:authorize="hasRole('ADMIN')" class="payment-role-note payment-role-note--admin">
                 <i class="bi bi-person-badge"></i>
-                <span><strong>Vista administrativa</strong> Puedes validar pagos manuales. Los pagos en línea se confirman solo mediante su resultado validado.</span>
+                <span><strong>Vista administrativa</strong> Puedes validar pagos manuales o revisar el resultado del sandbox local.</span>
             </div>
             <div sec:authorize="hasRole('RESIDENTE')" class="payment-role-note payment-role-note--resident">
                 <i class="bi bi-shield-lock"></i>
@@ -109,36 +115,36 @@
             </div>
 
             <div class="payment-actions">
-                <div sec:authorize="hasRole('ADMIN')" th:if="${esCobrable and esOnline}" class="payment-action-message">
-                    <i class="bi bi-shield-check"></i><span>Este pago en línea se confirma únicamente cuando el sandbox o el proveedor entrega un resultado validado.</span>
+                <div sec:authorize="hasRole('ADMIN')" th:if="${esCobrable and esSimulable}" class="payment-action-message">
+                    <i class="bi bi-shield-check"></i><span>El residente puede probar este método en el sandbox local. La aprobación registra la fecha efectiva.</span>
                 </div>
 
-                <div sec:authorize="hasRole('RESIDENTE')" th:if="${esCobrable and esOnline and pago.referenciaPago == null}">
+                <div sec:authorize="hasRole('RESIDENTE')" th:if="${esCobrable and esSimulable and !pagoIniciado}">
                     <form th:action="@{/pagos/{id}/iniciar(id=${pago.id})}" method="post">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
                         <button type="submit" class="payment-button payment-button--primary payment-button--full">
-                            <i class="bi bi-arrow-right-circle"></i><span>Preparar pago en sandbox</span>
+                            <i class="bi bi-arrow-right-circle"></i><span>Preparar pago simulado</span>
                         </button>
                     </form>
                     <p class="payment-action-help">Se generará una referencia segura para iniciar la simulación de <span th:text="${pago.metodo.descripcion}">PSE</span>.</p>
                 </div>
 
-                <div sec:authorize="hasRole('RESIDENTE')" th:if="${esCobrable and esOnline and pago.referenciaPago != null and simulacionHabilitada}">
+                <div sec:authorize="hasRole('RESIDENTE')" th:if="${esCobrable and esSimulable and pagoIniciado and simulacionHabilitada}">
                     <a th:href="@{/pagos/{id}/simulador(id=${pago.id})}" class="payment-button payment-button--primary payment-button--full">
-                        <i class="bi bi-shield-check"></i><span>Abrir checkout de prueba</span>
+                        <i class="bi bi-shield-check"></i><span>Abrir simulador local</span>
                     </a>
-                    <p class="payment-action-help">Sandbox local: no mueve dinero y procesa el resultado con el flujo firmado.</p>
+                    <p class="payment-action-help">No mueve dinero ni usa APIs externas. Elige un escenario para probar el flujo.</p>
                 </div>
 
-                <div sec:authorize="hasRole('RESIDENTE')" th:if="${esCobrable and esOnline and pago.referenciaPago != null and !simulacionHabilitada}" class="payment-action-message payment-action-message--warning">
+                <div sec:authorize="hasRole('RESIDENTE')" th:if="${esCobrable and esSimulable and pagoIniciado and !simulacionHabilitada}" class="payment-action-message payment-action-message--warning">
                     <i class="bi bi-exclamation-circle"></i><span>El sandbox no está disponible en este entorno.</span>
                 </div>
 
-                <div sec:authorize="hasRole('RESIDENTE')" th:if="${esCobrable and !esOnline}" class="payment-action-message">
-                    <i class="bi bi-info-circle"></i><span>Este método se confirma cuando administración verifica la transferencia o el pago en efectivo.</span>
+                <div sec:authorize="hasRole('RESIDENTE')" th:if="${esCobrable and !esSimulable}" class="payment-action-message">
+                    <i class="bi bi-info-circle"></i><span>Este método se valida por fuera del sandbox. Administración debe confirmar la transferencia o el efectivo recibido.</span>
                 </div>
 
-                <div sec:authorize="hasRole('ADMIN')" th:if="${esCobrable and !esOnline}">
+                <div sec:authorize="hasRole('ADMIN')" th:if="${esCobrable and (pago.metodo == null or pago.metodo.name() == 'TRANSFERENCIA' or pago.metodo.name() == 'EFECTIVO')}">
                     <form th:action="@{/pagos/{id}/confirmar(id=${pago.id})}" method="post">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
                         <button type="submit" class="payment-button payment-button--success payment-button--full">

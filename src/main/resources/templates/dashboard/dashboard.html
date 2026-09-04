@@ -243,7 +243,7 @@
                     <h4>Estado de Mora</h4>
                     <p th:text="${estadoMora}">Tienes una mora pendiente</p>
                     <div class="alert-action">
-                        <a th:href="@{/pagos}" class="alert-btn">Pagar Ahora</a>
+                        <a th:href="@{/pagos}" class="alert-btn"><i class="bi bi-credit-card" aria-hidden="true"></i><span>Pagar Ahora</span></a>
                     </div>
                 </div>
             </div>
@@ -255,7 +255,7 @@
                     <h4>Multas Pendientes</h4>
                     <p th:text="${multa}">Tienes multas por pagar</p>
                     <div class="alert-action">
-                        <a th:href="@{/pagos}" class="alert-btn">Ver Detalles</a>
+                        <a th:href="@{/pagos}" class="alert-btn"><i class="bi bi-receipt" aria-hidden="true"></i><span>Ver Detalles</span></a>
                     </div>
                 </div>
             </div>
@@ -267,7 +267,7 @@
                     <h4>Reservas Activas</h4>
                     <p th:text="${#lists.size(reservasActivas)} + ' reservas confirmadas'">Tienes reservas activas</p>
                     <div class="alert-action">
-                        <a th:href="@{/reservas}" class="alert-btn">Ver Reservas</a>
+                        <a th:href="@{/reservas}" class="alert-btn"><i class="bi bi-calendar-check" aria-hidden="true"></i><span>Ver Reservas</span></a>
                     </div>
                 </div>
             </div>

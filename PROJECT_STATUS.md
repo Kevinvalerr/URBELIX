@@ -2,11 +2,16 @@
 
 ## Estado actual
 
+La especificacion fuente de verdad para requisitos y pruebas esta en
+[REQUISITOS_URBELIX.md](REQUISITOS_URBELIX.md). Los estados de ese documento
+distinguen implementacion comprobada, cobertura parcial y pendientes reales.
+
 La aplicacion Spring Boot se ejecuta con Java 21 y puede probarse localmente con el perfil `dev` y H2.
-La suite automatizada actual termina correctamente con 113 pruebas, incluyendo 40 pruebas de
-integracion web. En esta revision se valido el arranque local con H2, el login real del
-administrador y el smoke HTTP de los tres roles; no se repitio el arranque `prod` contra MySQL
-ni el envio SMTP externo.
+La suite automatizada actual termina correctamente con 185 pruebas, incluyendo pruebas de
+integracion web. En esta revision se valido el arranque local con H2, el flujo real de pago
+simulado del residente, el login y las restricciones de los tres roles, y el arranque `prod` en
+Docker contra MySQL 8.4 con Flyway hasta V14; el envio SMTP externo aun requiere una cuenta de
+prueba configurada en el entorno.
 La validacion manual local confirmo registro y primer ingreso de RESIDENTE, cambio obligatorio de
 contrasena, acceso operativo de PORTERIA, restricciones entre roles, formularios POST con CSRF y
 navegacion de los modulos principales. Tambien se completo un pago PSE simulado de extremo a
@@ -20,16 +25,16 @@ Si la carga de datos de desarrollo falla, la aplicacion detiene el arranque y mu
 
 ## Avance estimado
 
-Estimacion actual: **86% hacia una version final limpia**.
+Estimacion actual: **92% hacia una version candidata a despliegue**.
 
 - Base tecnica, autenticacion y navegacion: 75%
-- Roles y permisos: 85%
+- Roles y permisos: 95%
 - Residentes, apartamentos y registro controlado: 65%
-- Pagos y reservas: 92%
+- Pagos y reservas: 95%
 - Visitantes, porteria, parqueaderos, vehiculos e incidencias: 80%
-- Reportes y exportaciones: 75%
-- Pruebas automatizadas y pruebas por rol: 88%
-- Operacion final, SMTP, migraciones, auditoria y respaldos: 55%
+- Reportes y exportaciones: 88%
+- Pruebas automatizadas y pruebas por rol: 94%
+- Operacion final, SMTP, migraciones, auditoria y respaldos: 78%
 
 El porcentaje no mide cantidad de pantallas, sino cuanto falta para tener flujos completos, seguros, probados y desplegables.
 
@@ -44,7 +49,6 @@ $env:MAIL_USERNAME = "tu-correo@gmail.com"
 $env:MAIL_PASSWORD = "tu-contrasena-de-aplicacion"
 $env:APP_BASE_URL = "http://localhost:8080"
 $env:NOTIFICATIONS_EMAIL_ENABLED = "true"
-$env:PSE_WEBHOOK_SECRET = "secreto-compartido-con-el-proveedor"
 ```
 
 Para Gmail se debe usar una contraseña de aplicacion con verificacion en dos pasos; nunca se debe guardar esa clave en Git ni pegarla en el codigo.
@@ -62,10 +66,10 @@ Las notificaciones de PQRS por correo requieren ademas `NOTIFICATIONS_EMAIL_ENAB
 - Factura/comprobante PDF individual por pago, con fechas de emision, vencimiento y pago, disponible para registros historicos autorizados.
 - Importacion masiva de residentes desde Excel con validaciones, control de duplicados y auditoria.
 - Estado de cuenta PDF individual para residentes, sin exponer pagos de otros apartamentos.
-- Referencia única para pagos en línea, webhook firmado con HMAC y procesamiento idempotente preparados para el proveedor.
-- Checkout web Wompi en sandbox con firma de integridad, webhook firmado e idempotencia para eventos de transaccion.
-- Sandbox local de pagos activo solo en `dev`: checkout de prueba, resultados aprobado/pendiente/rechazado/error y procesamiento por el mismo evento Wompi firmado, sin cobro real.
-- Confirmacion protegida por metodo: transferencia y efectivo requieren validacion administrativa; PSE y tarjeta solo pasan a pagados mediante el checkout y evento validado.
+- Referencia única para pagos en línea y trazabilidad local de resultado, transacción simulada y fecha de procesamiento.
+- Sandbox local de pagos: PSE y tarjeta recorren un checkout de demostración sin cobro real; transferencia y efectivo requieren confirmación administrativa.
+- El sandbox conserva los resultados aprobado/pendiente/rechazado/anulado/error y solo `APPROVED` cambia el pago a `PAGADO`.
+- La regla de pago por rol y método se aplica en controlador, servicio y vista; no depende solo de ocultar botones.
 - Reservas con validacion de cruces y aprobacion administrativa.
 - Reservas protegidas contra apartamentos ajenos y transiciones administrativas duplicadas.
 - Parqueaderos.
@@ -104,24 +108,21 @@ No se deben iniciar dos instancias a la vez porque H2 mantiene bloqueado el arch
 - Probar importacion Excel con filas validas, duplicadas, apartamentos inconsistentes y archivos sobre el limite.
 - Repetir las pruebas funcionales con usuarios de cada rol contra el entorno MySQL de aceptación.
 - Repetir el login funcional en `prod` despues de definir/resetear de forma controlada la clave de `admin@nexur.com`.
-- Repetir antes de cada despliegue el respaldo y la migracion versionada de `MYSQL_MIGRATION.md`; la prueba local en `nexur_db` ya quedo en V12.
+- Repetir antes de cada despliegue el respaldo y la migracion versionada de `MYSQL_MIGRATION.md`; la prueba local en `nexur_db` ya quedo en V14.
 - Completar respaldos automatizados y politicas de proteccion de datos; la auditoria base ya esta implementada.
 - Crear un usuario MySQL exclusivo para la aplicacion con permisos minimos; no usar `root` en `DB_USERNAME` fuera de esta validacion.
 - Ejecutar una prueba de carga reproducible y revisar consultas del dashboard antes del despliegue.
-- Crear `Dockerfile` y `docker-compose.yml` cuando terminen las validaciones de MySQL/Flyway y los healthchecks del despliegue.
+- Validar en un entorno objetivo los limites de recursos, persistencia, proxy TLS y backups de Docker.
 - Validar el codigo residencial mediante un proceso de entrega administrado y documentado.
 - Repetir en aceptacion la prueba manual de registro, login, pagos, solicitudes de visitantes y permisos por rol.
-- Publicar el webhook Wompi en una URL HTTPS accesible y registrarlo en el ambiente sandbox del proveedor.
-- Confirmar en el dashboard que las credenciales Wompi correspondan al ambiente sandbox; la consulta de comercio probada devolvió HTTP 404.
-- Ejecutar una transaccion sandbox completa y validar el retorno, el evento `transaction.updated` y la actualizacion del pago.
 - Ejecutar manualmente los cinco resultados del sandbox local; la suite automatizada ya cubre que solo `APPROVED` cambia el pago a `PAGADO`.
-- Validar el envio SMTP real de PQRS y conectar el contrato del proveedor PSE real si se conserva ese flujo.
-- Consultar [WOMPI_SETUP.md](WOMPI_SETUP.md) para la configuracion local y la prueba end-to-end.
+- Validar el envio SMTP real de recuperación, PQRS y notificaciones en el ambiente de aceptación.
 - Completar las historias de usuario HU-006 en adelante y mantener la matriz de [REQUIREMENTS_TRACEABILITY.md](REQUIREMENTS_TRACEABILITY.md).
 
-## Resultado de la revision del 29/08/2026
+## Resultado de la revision del 03/09/2026
 
-- `.\mvnw.cmd clean test`: 113 pruebas, 0 fallos y 0 errores.
+- `.\mvnw.cmd clean test`: 185 pruebas, 0 fallos y 0 errores.
+- JaCoCo: paquete `service` con `90,2%` de lineas y `72,3%` de ramas.
 - Arranque `dev` con H2: correcto en `http://localhost:8080`.
 - Login real de `admin@nexur.com`: correcto y redirige al dashboard.
 - Smoke HTTP de ADMIN, RESIDENTE y PORTERIA: rutas principales en `200`, restricciones de rol en `403` y formularios POST con token CSRF.
@@ -131,5 +132,5 @@ No se deben iniciar dos instancias a la vez porque H2 mantiene bloqueado el arch
   la validacion de formularios se enlaza despues de cargar el DOM; los formularios POST incluyen
   CSRF; los enlaces internos usan rutas Thymeleaf; los reportes vuelven al generador local si
   FastAPI esta apagado o devuelve un PDF vacio.
-- Bloqueadores restantes: MySQL/Flyway en perfil `prod`, SMTP/PSE/Wompi externos,
-  repeticion en aceptacion y pruebas visuales por rol, carga/estres, backups y empaquetado Docker.
+- Validaciones operativas restantes: SMTP real, aceptación con datos controlados,
+  pruebas visuales por rol, carga/estres y respaldo/restauracion en el servidor objetivo.

@@ -9,10 +9,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import jakarta.mail.Session;
+import jakarta.mail.internet.MimeMessage;
 
 import java.time.LocalDateTime;
+import java.util.Properties;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,6 +46,8 @@ class PasswordResetServiceTest {
         Usuario usuario = usuario("ana@example.com");
         when(usuarioService.buscarPorEmail("ana@example.com")).thenReturn(usuario);
         when(mailSenderProvider.getIfAvailable()).thenReturn(mailSender);
+        when(mailSender.createMimeMessage()).thenReturn(
+                new MimeMessage(Session.getInstance(new Properties())));
 
         PasswordResetService service = service();
         service.solicitar(" Ana@Example.com ");
@@ -52,7 +56,7 @@ class PasswordResetServiceTest {
         verify(tokenRepository).deleteByUsuarioId(7L);
         verify(tokenRepository).save(tokenCaptor.capture());
         verify(tokenRepository, org.mockito.Mockito.times(2)).flush();
-        verify(mailSender).send(any(SimpleMailMessage.class));
+        verify(mailSender).send(any(MimeMessage.class));
 
         PasswordResetToken token = tokenCaptor.getValue();
         assertNotNull(token.getToken());
@@ -65,6 +69,8 @@ class PasswordResetServiceTest {
         Usuario usuario = usuario("ana@example.com");
         when(usuarioService.buscarPorEmail("ana@example.com")).thenReturn(usuario);
         when(mailSenderProvider.getIfAvailable()).thenReturn(mailSender);
+        when(mailSender.createMimeMessage()).thenReturn(
+                new MimeMessage(Session.getInstance(new Properties())));
 
         PasswordResetService service = service();
         service.solicitar("ana@example.com");
@@ -92,7 +98,7 @@ class PasswordResetServiceTest {
         assertThrows(IllegalStateException.class, () -> service.solicitar("ana@example.com"));
         verify(tokenRepository, never()).deleteByUsuarioId(7L);
         verify(tokenRepository, never()).save(any(PasswordResetToken.class));
-        verify(mailSender, never()).send(any(SimpleMailMessage.class));
+        verify(mailSender, never()).send(any(MimeMessage.class));
     }
 
     @Test

@@ -16,9 +16,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ParqueaderoServiceTest {
@@ -100,5 +102,87 @@ class ParqueaderoServiceTest {
 
         org.junit.jupiter.api.Assertions.assertSame(apartamento, guardado.getApartamento());
         org.junit.jupiter.api.Assertions.assertSame(vehiculo, guardado.getVehiculo());
+    }
+
+    @Test
+    void creaParqueaderoConValoresPorDefectoYListaYBusca() {
+        Parqueadero formulario = new Parqueadero();
+        formulario.setNumero(" p-01 ");
+        when(parqueaderoRepository.existsByNumero("P-01")).thenReturn(false);
+        when(parqueaderoRepository.save(any(Parqueadero.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Parqueadero guardado = service().guardar(formulario, null);
+        assertEquals("P-01", guardado.getNumero());
+        assertEquals(EstadoParqueadero.DISPONIBLE, guardado.getEstado());
+        assertEquals(TipoVehiculo.CARRO, guardado.getTipo());
+        when(parqueaderoRepository.findAllByOrderByNumeroAsc()).thenReturn(java.util.List.of(guardado));
+        when(parqueaderoRepository.findByApartamentoIdOrderByNumeroAsc(1L)).thenReturn(java.util.List.of(guardado));
+        assertEquals(1, service().listarTodos().size());
+        assertEquals(1, service().listarPorApartamento(1L).size());
+    }
+
+    @Test
+    void rechazaDuplicadoAsignadoSinApartamentoYOcupadoSinVehiculo() {
+        Parqueadero duplicado = new Parqueadero();
+        duplicado.setNumero("P-10");
+        when(parqueaderoRepository.existsByNumero("P-10")).thenReturn(true);
+        assertThrows(IllegalArgumentException.class, () -> service().guardar(duplicado, null));
+
+        Parqueadero asignado = new Parqueadero();
+        asignado.setNumero("P-11");
+        asignado.setEstado(EstadoParqueadero.ASIGNADO);
+        when(parqueaderoRepository.existsByNumero("P-11")).thenReturn(false);
+        assertThrows(IllegalArgumentException.class, () -> service().guardar(asignado, null));
+
+        Parqueadero ocupado = new Parqueadero();
+        ocupado.setNumero("P-12");
+        ocupado.setEstado(EstadoParqueadero.OCUPADO);
+        when(parqueaderoRepository.existsByNumero("P-12")).thenReturn(false);
+        assertThrows(IllegalArgumentException.class, () -> service().guardar(ocupado, null));
+    }
+
+    @Test
+    void validaApartamentoTipoYVehiculoDentro() {
+        Parqueadero formulario = new Parqueadero();
+        formulario.setId(20L);
+        formulario.setNumero("P-20");
+        formulario.setEstado(EstadoParqueadero.ASIGNADO);
+        when(parqueaderoRepository.existsByNumeroIgnoreCaseAndIdNot("P-20", 20L)).thenReturn(false);
+        when(parqueaderoRepository.findById(20L)).thenReturn(Optional.of(formulario));
+        when(apartamentoRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> service().guardar(formulario, 99L));
+
+        Vehiculo vehiculo = new Vehiculo();
+        vehiculo.setId(21L);
+        vehiculo.setTipo(TipoVehiculo.MOTO);
+        formulario.setEstado(EstadoParqueadero.DISPONIBLE);
+        formulario.setVehiculo(vehiculo);
+        formulario.setTipo(TipoVehiculo.CARRO);
+        when(movimientoRepository.findByVehiculoIdAndEstado(21L, EstadoMovimientoParqueadero.DENTRO))
+                .thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> service().guardar(formulario, null));
+        formulario.setTipo(TipoVehiculo.MOTO);
+        formulario.setEstado(EstadoParqueadero.ASIGNADO);
+        Apartamento apartamento = new Apartamento();
+        apartamento.setId(10L);
+        formulario.setApartamento(apartamento);
+        when(apartamentoRepository.findById(10L)).thenReturn(Optional.of(apartamento));
+        when(movimientoRepository.findByVehiculoIdAndEstado(21L, EstadoMovimientoParqueadero.DENTRO))
+                .thenReturn(Optional.of(new com.nexur.nexur.model.MovimientoParqueadero()));
+        assertThrows(IllegalArgumentException.class, () -> service().guardar(formulario, 10L));
+    }
+
+    @Test
+    void eliminaSoloParqueaderoSinRelaciones() {
+        Parqueadero parqueadero = new Parqueadero();
+        when(parqueaderoRepository.findById(30L)).thenReturn(Optional.of(parqueadero));
+        when(movimientoRepository.existsByParqueaderoId(30L)).thenReturn(false);
+        service().eliminar(30L);
+        verify(parqueaderoRepository).deleteById(30L);
+        when(parqueaderoRepository.findById(31L)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> service().buscarPorId(31L));
+    }
+
+    private ParqueaderoService service() {
+        return new ParqueaderoService(parqueaderoRepository, apartamentoRepository, movimientoRepository);
     }
 }

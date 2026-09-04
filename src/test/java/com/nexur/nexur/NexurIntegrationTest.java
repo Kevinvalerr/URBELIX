@@ -588,19 +588,19 @@ class NexurIntegrationTest {
     }
 
     @Test
-    void webhookPseRechazaFirmaAusenteSinDependerDeCsrf() throws Exception {
-        mockMvc.perform(post("/webhooks/pagos")
-                        .contentType(APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isUnauthorized());
+    void usuarioPuedeMarcarTodasSusNotificacionesComoLeidas() throws Exception {
+        mockMvc.perform(post("/notificaciones/todas/leer")
+                        .with(csrf())
+                        .with(user("residente@example.com").roles("RESIDENTE")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/notificaciones"));
     }
 
     @Test
-    void webhookWompiRechazaFirmaAusenteSinDependerDeCsrf() throws Exception {
-        mockMvc.perform(post("/webhooks/wompi")
-                        .contentType(APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isUnauthorized());
+    void landingEsPublicaParaVisitantes() throws Exception {
+        mockMvc.perform(get("/landing"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Gestión inteligente")));
     }
 
     @Test
@@ -781,7 +781,7 @@ class NexurIntegrationTest {
         mockMvc.perform(get("/pagos/{id}/simulador", pago.getId())
                         .with(user("sandbox.residente@example.com").roles("RESIDENTE")))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Checkout de prueba")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Simulador de pagos")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("PSE-SANDBOX-INTEGRATION")));
 
         mockMvc.perform(get("/pagos/{id}/simulador", pago.getId())
@@ -800,6 +800,52 @@ class NexurIntegrationTest {
                         .with(user("porteria@example.com").roles("PORTERIA")))
                 .andExpect(status().isForbidden())
                 .andExpect(forwardedUrl("/acceso-denegado"));
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void residentePuedeIniciarYCompletarPagoSimulado() throws Exception {
+        Apartamento apartamento = prepararApartamentoExistente();
+        Usuario usuario = new Usuario();
+        usuario.setNombre("Residente Pago Completo");
+        usuario.setEmail("pago.completo@example.com");
+        usuario.setPassword(passwordEncoder.encode("Segura123!"));
+        usuario.setRol(Rol.RESIDENTE);
+        usuario.setActivo(true);
+        usuario.setDebeCambiarPassword(false);
+
+        Residente residente = new Residente("Residente Pago Completo", "90123472", "3001234583", apartamento);
+        residente.setUsuario(usuario);
+        usuario.setResidente(residente);
+        usuarioRepository.save(usuario);
+
+        Pago pago = pagoDePrueba(residente, "PAGO-FLUJO-COMPLETO");
+        pago.setReferenciaPago(null);
+        pago.setMetodo(MetodoPago.TARJETA);
+        pago = pagoRepository.save(pago);
+
+        mockMvc.perform(post("/pagos/{id}/iniciar", pago.getId())
+                        .with(user("pago.completo@example.com").roles("RESIDENTE"))
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/pagos/" + pago.getId() + "/simulador"));
+
+        Pago iniciado = pagoRepository.findById(pago.getId()).orElseThrow();
+        org.junit.jupiter.api.Assertions.assertTrue(iniciado.getReferenciaPago().startsWith("CARD-"));
+
+        mockMvc.perform(post("/pagos/{id}/simulador/resultado", pago.getId())
+                        .param("estado", "APPROVED")
+                        .with(user("pago.completo@example.com").roles("RESIDENTE"))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/pagos/" + pago.getId()));
+
+        Pago finalizado = pagoRepository.findById(pago.getId()).orElseThrow();
+        org.junit.jupiter.api.Assertions.assertEquals(EstadoPago.PAGADO, finalizado.getEstadoPago());
+        org.junit.jupiter.api.Assertions.assertNotNull(finalizado.getFechaPago());
+        org.junit.jupiter.api.Assertions.assertEquals("APPROVED", finalizado.getResultadoSimulacion());
+        org.junit.jupiter.api.Assertions.assertTrue(finalizado.getTransaccionSimulada().startsWith("SIM-"));
+        org.junit.jupiter.api.Assertions.assertNotNull(finalizado.getSimuladoEn());
     }
 
     private Apartamento prepararApartamentoExistente() {

@@ -54,13 +54,13 @@
                 <i class="bi bi-shield-lock me-2"></i>
                 Auditoria
             </a>
-                <a th:href="@{/parqueaderos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/parqueaderos')} ? ' active' : ''">
+                <a th:href="@{/parqueaderos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/parqueaderos'} ? ' active' : ''">
                     <i class="bi bi-p-square me-2"></i>
                     Administrar parqueaderos
                 </a>
         </div>
 
-            <a th:href="@{/parqueaderos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/parqueaderos')} ? ' active' : ''" sec:authorize="hasRole('RESIDENTE')">
+            <a th:href="@{/parqueaderos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/parqueaderos'} ? ' active' : ''" sec:authorize="hasRole('RESIDENTE')">
                 <i class="bi bi-p-square me-2"></i>
                 Mi parqueadero
             </a>
@@ -81,7 +81,7 @@
             <i class="bi bi-shield-check me-2"></i>
             Centro de control
         </a>
-        <a th:href="@{/porteria/parqueaderos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath != null and currentPath.startsWith('/porteria/parqueaderos')} ? ' active' : ''" sec:authorize="hasRole('PORTERIA')">
+        <a th:href="@{/porteria/parqueaderos}" class="nav-link sidebar-link d-flex align-items-center" th:classappend="${currentPath == '/porteria/parqueaderos'} ? ' active' : ''" sec:authorize="hasRole('PORTERIA')">
             <i class="bi bi-p-square me-2"></i>
             Control de parqueaderos
         </a>

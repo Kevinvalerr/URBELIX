@@ -1,0 +1,84 @@
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-nexur_db}
+      MYSQL_USER: ${MYSQL_USER:-urbelix_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Define MYSQL_PASSWORD en .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - urbelix-net
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  reportes:
+    build:
+      context: .
+      dockerfile: Dockerfile.reportes
+    image: urbelix-reportes:local
+    restart: unless-stopped
+    networks:
+      - urbelix-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: urbelix-app:local
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      reportes:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-nexur_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: ${MYSQL_USER:-urbelix_app}
+      DB_PASSWORD: ${MYSQL_PASSWORD:?Define MYSQL_PASSWORD en .env}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+      UPLOAD_DIR: /app/data/uploads
+      URBELIX_FASTAPI_URL: http://reportes:8000
+      REPORTS_FASTAPI_ENABLED: ${REPORTS_FASTAPI_ENABLED:-true}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      ADMIN_BOOTSTRAP_ENABLED: ${ADMIN_BOOTSTRAP_ENABLED:-false}
+      ADMIN_BOOTSTRAP_EMAIL: ${ADMIN_BOOTSTRAP_EMAIL:-}
+      ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
+      ADMINISTRATION_AMOUNT: ${ADMINISTRATION_AMOUNT:-300000}
+      PASSWORD_RESET_EXPIRATION_MINUTES: ${PASSWORD_RESET_EXPIRATION_MINUTES:-30}
+      NOTIFICATIONS_EMAIL_ENABLED: ${NOTIFICATIONS_EMAIL_ENABLED:-false}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-true}
+      MAIL_SMTP_STARTTLS: ${MAIL_SMTP_STARTTLS:-true}
+      PAYMENTS_SIMULATION_ENABLED: ${PAYMENTS_SIMULATION_ENABLED:-true}
+    ports:
+      # Fuerza el acceso local por IPv4 y evita el relay IPv6 de WSL en Windows.
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    volumes:
+      - app-data:/app/data
+    networks:
+      - urbelix-net
+
+volumes:
+  mysql-data:
+  app-data:
+
+networks:
+  urbelix-net:
+    driver: bridge

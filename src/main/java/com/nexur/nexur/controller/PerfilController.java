@@ -4,6 +4,7 @@ import com.nexur.nexur.model.Residente;
 import com.nexur.nexur.model.Usuario;
 import com.nexur.nexur.service.ResidenteService;
 import com.nexur.nexur.service.UsuarioService;
+import com.nexur.nexur.service.CorreoNotificacionService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,10 +20,13 @@ public class PerfilController {
 
     private final UsuarioService usuarioService;
     private final ResidenteService residenteService;
+    private final CorreoNotificacionService correoNotificacionService;
 
-    public PerfilController(UsuarioService usuarioService, ResidenteService residenteService) {
+    public PerfilController(UsuarioService usuarioService, ResidenteService residenteService,
+                             CorreoNotificacionService correoNotificacionService) {
         this.usuarioService = usuarioService;
         this.residenteService = residenteService;
+        this.correoNotificacionService = correoNotificacionService;
     }
 
     @GetMapping
@@ -60,6 +64,7 @@ public class PerfilController {
         try {
             Usuario usuario = usuarioService.buscarPorEmail(authentication.getName());
             usuarioService.cambiarPassword(usuario, password);
+            correoNotificacionService.enviarCambioContrasena(usuario);
             redirectAttributes.addFlashAttribute("success", "Contraseña actualizada correctamente");
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("error", exception.getMessage());

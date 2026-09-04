@@ -7,9 +7,11 @@ import com.nexur.nexur.service.PagoService;
 import com.nexur.nexur.service.ReservaService;
 import com.nexur.nexur.service.ResidenteService;
 import com.nexur.nexur.service.ReportesFastApiService;
+import com.nexur.nexur.service.ExcelExportService;
 import com.nexur.nexur.model.enums.EstadoPago;
 import com.nexur.nexur.model.enums.EstadoReserva;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestClientException;
@@ -45,14 +47,17 @@ public class ReporteController {
     private final PagoService pagoService;
     private final ReservaService reservaService;
     private final ReportesFastApiService reportesFastApiService;
+    private final ExcelExportService excelExportService;
     private final boolean fastApiHabilitado;
 
+    @Autowired
     public ReporteController(ReporteService reporteService,
                              ResidenteService residenteService,
                              ApartamentoService apartamentoService,
                              PagoService pagoService,
                              ReservaService reservaService,
                              ReportesFastApiService reportesFastApiService,
+                             ExcelExportService excelExportService,
                              @Value("${app.reports.fastapi-enabled:false}") boolean fastApiHabilitado) {
         this.reporteService = reporteService;
         this.residenteService = residenteService;
@@ -60,7 +65,19 @@ public class ReporteController {
         this.pagoService = pagoService;
         this.reservaService = reservaService;
         this.reportesFastApiService = reportesFastApiService;
+        this.excelExportService = excelExportService;
         this.fastApiHabilitado = fastApiHabilitado;
+    }
+
+    public ReporteController(ReporteService reporteService,
+                             ResidenteService residenteService,
+                             ApartamentoService apartamentoService,
+                             PagoService pagoService,
+                             ReservaService reservaService,
+                             ReportesFastApiService reportesFastApiService,
+                             boolean fastApiHabilitado) {
+        this(reporteService, residenteService, apartamentoService, pagoService, reservaService,
+                reportesFastApiService, new com.nexur.nexur.service.ExcelExportService(), fastApiHabilitado);
     }
 
     @GetMapping("/reportes")
@@ -108,6 +125,39 @@ public class ReporteController {
         return "reportes/lista";
     }
 
+    @GetMapping("/reportes/generar-excel")
+    public ResponseEntity<byte[]> generarExcel(@RequestParam(required = false) String tipo,
+                                               @RequestParam(required = false) String fechaInicio,
+                                               @RequestParam(required = false) String fechaFin) {
+        LocalDate inicio;
+        LocalDate fin;
+        try {
+            inicio = parseFecha(fechaInicio);
+            fin = parseFecha(fechaFin);
+        } catch (DateTimeParseException exception) {
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("Las fechas deben tener el formato válido AAAA-MM-DD.".getBytes(StandardCharsets.UTF_8));
+        }
+        if (inicio != null && fin != null && fin.isBefore(inicio)) {
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("La fecha final no puede ser anterior a la fecha inicial.".getBytes(StandardCharsets.UTF_8));
+        }
+        if (!tipoValido(tipo)) {
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("El tipo de reporte seleccionado no es válido.".getBytes(StandardCharsets.UTF_8));
+        }
+        byte[] excel = excelExportService.exportarReporte(
+                reporteService.filtrarRegistros(tipo, inicio, fin), tipo, fechaInicio, fechaFin);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte-urbelix.xlsx")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(excel);
+    }
+
     @PostMapping("/reportes/generar-pdf")
     public ResponseEntity<byte[]> generarPdf(@RequestParam(required = false) String tipo,
                                              @RequestParam(required = false) String fechaInicio,
@@ -153,12 +203,31 @@ public class ReporteController {
         ByteArrayOutputStream salida = new ByteArrayOutputStream();
         PdfDocument pdf = new PdfDocument(new PdfWriter(salida));
         Document documento = new Document(pdf);
-        documento.add(new Paragraph("Reporte Urbelix"));
-        for (ReporteRegistro registro : registros) {
-            documento.add(new Paragraph(registro.getTipo() + " - " + registro.getDescripcion()));
+        com.nexur.nexur.service.UrbelixPdfStyle.encabezado(documento,
+            "Reporte operativo residencial",
+            "Generado el " + LocalDate.now() + " | Registros: " + registros.size());
+        com.itextpdf.layout.element.Table tabla = new com.itextpdf.layout.element.Table(
+                new float[]{1.2f, 1.5f, 2.0f, 4.0f, 2.2f});
+        tabla.setWidth(com.itextpdf.layout.properties.UnitValue.createPercentValue(100));
+        String[] encabezados = {"Tipo", "Referencia", "Residente / visitante", "Descripción", "Fecha"};
+        for (String encabezado : encabezados) {
+                tabla.addHeaderCell(com.nexur.nexur.service.UrbelixPdfStyle.encabezadoCelda(encabezado));
         }
+        for (ReporteRegistro registro : registros) {
+                tabla.addCell(com.nexur.nexur.service.UrbelixPdfStyle.celda(valor(registro.getTipo())));
+                tabla.addCell(com.nexur.nexur.service.UrbelixPdfStyle.celda(valor(registro.getEntidad())));
+                tabla.addCell(com.nexur.nexur.service.UrbelixPdfStyle.celda(valor(registro.getResidente())));
+                tabla.addCell(com.nexur.nexur.service.UrbelixPdfStyle.celda(valor(registro.getDescripcion())));
+                tabla.addCell(com.nexur.nexur.service.UrbelixPdfStyle.celda(
+                    registro.getFechaHora() == null ? "" : registro.getFechaHora().toString()));
+        }
+        documento.add(tabla);
         documento.close();
         return respuestaPdf(salida.toByteArray());
+    }
+
+    private String valor(String texto) {
+        return texto == null ? "" : texto;
     }
 
     private ResponseEntity<byte[]> respuestaPdf(byte[] pdf) {

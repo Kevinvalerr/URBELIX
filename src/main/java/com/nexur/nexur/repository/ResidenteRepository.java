@@ -14,6 +14,7 @@ Sprind Data JPA generará atumáticamente las operaciones CRUD.
 public interface ResidenteRepository extends JpaRepository<Residente, Long> {
 
     Optional<Residente> findByUsuarioEmail(String email);
+    Optional<Residente> findFirstByApartamentoId(Long apartamentoId);
     boolean existsByDocumento(String documento);
     boolean existsByDocumentoAndIdNot(String documento, Long id);
 

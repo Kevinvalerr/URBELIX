@@ -1,7 +1,10 @@
 package com.nexur.nexur.controller;
 
 import com.nexur.nexur.model.Aviso;
+import com.nexur.nexur.model.Usuario;
+import com.nexur.nexur.repository.UsuarioRepository;
 import com.nexur.nexur.service.AvisoService;
+import com.nexur.nexur.service.NotificacionService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -21,9 +24,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AvisoController {
 
     private final AvisoService avisoService;
+    private final UsuarioRepository usuarioRepository;
+    private final NotificacionService notificacionService;
 
-    public AvisoController(AvisoService avisoService) {
+    public AvisoController(AvisoService avisoService, UsuarioRepository usuarioRepository,
+                           NotificacionService notificacionService) {
         this.avisoService = avisoService;
+        this.usuarioRepository = usuarioRepository;
+        this.notificacionService = notificacionService;
     }
 
     @GetMapping
@@ -50,7 +58,10 @@ public class AvisoController {
             return "avisos/lista";
         }
         try {
-            avisoService.publicar(aviso);
+            Aviso publicado = avisoService.publicar(aviso);
+            usuarioRepository.findAll().stream()
+                    .filter(Usuario::isActivo)
+                    .forEach(usuario -> notificar(usuario, publicado));
             redirectAttributes.addFlashAttribute("success", "Aviso publicado correctamente");
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("error", exception.getMessage());
@@ -78,5 +89,14 @@ public class AvisoController {
         model.addAttribute("currentPath", "/avisos");
         model.addAttribute("titulo", "Avisos | Urbelix");
         model.addAttribute("volverUrl", "/dashboard");
+    }
+
+    private void notificar(Usuario usuario, Aviso aviso) {
+        try {
+            notificacionService.crear(usuario, "Nuevo aviso de administración",
+                    aviso.getTitulo(), "/avisos");
+        } catch (RuntimeException exception) {
+            // Publicar el aviso no debe fallar por un problema temporal de notificaciones.
+        }
     }
 }

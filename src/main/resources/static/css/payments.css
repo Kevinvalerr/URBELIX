@@ -616,6 +616,8 @@
     font-size: 0.75rem;
     font-weight: 800;
 }
+.payment-icon-button { font-family: inherit; cursor: pointer; }
+.payment-row-actions form { display: inline-flex; margin: 0; }
 
 .payment-icon-link:hover,
 .payment-icon-link:focus-visible {
@@ -929,4 +931,24 @@
     .payment-form-actions .payment-button,
     .sandbox-actions .payment-button { width: 100%; }
     .payment-detail-hero-meta { justify-items: start; margin-top: 1rem; }
+}
+
+.payment-simulation-trace {
+    margin-top: 1.4rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid #cce8e3;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f2fbf9, #f8fcff);
+}
+.payment-simulation-trace__heading { display: flex; align-items: center; justify-content: space-between; gap: .8rem; color: #176b58; font-size: .78rem; font-weight: 800; }
+.payment-simulation-trace__heading i { margin-right: .3rem; }
+.payment-simulation-trace__status { padding: .25rem .5rem; border-radius: 999px; background: #d9f3eb; font-size: .65rem; letter-spacing: .04em; }
+.payment-simulation-trace__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; margin-top: .9rem; }
+.payment-simulation-trace__grid div { display: grid; gap: .2rem; }
+.payment-simulation-trace__grid small { color: #71908c; font-size: .68rem; }
+.payment-simulation-trace__grid strong { overflow: hidden; color: #173e58; font-size: .75rem; text-overflow: ellipsis; }
+.payment-simulation-label { display: block; margin-top: .35rem; color: #0e7490; font-size: .66rem; font-weight: 700; }
+
+@media (max-width: 600px) {
+    .payment-simulation-trace__grid { grid-template-columns: 1fr; }
 }

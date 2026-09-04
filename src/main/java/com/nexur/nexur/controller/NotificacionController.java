@@ -23,6 +23,7 @@ public class NotificacionController {
     @GetMapping
     public String listar(Authentication authentication, Model model) {
         model.addAttribute("notificaciones", notificacionService.listar(authentication.getName()));
+        model.addAttribute("noLeidas", notificacionService.contarNoLeidas(authentication.getName()));
         model.addAttribute("currentPath", "/notificaciones");
         model.addAttribute("titulo", "Notificaciones | Urbelix");
         model.addAttribute("volverUrl", "/dashboard");
@@ -37,6 +38,16 @@ public class NotificacionController {
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("error", exception.getMessage());
         }
+        return "redirect:/notificaciones";
+    }
+
+    @PostMapping("/todas/leer")
+    public String marcarTodasLeidas(Authentication authentication,
+                                    RedirectAttributes redirectAttributes) {
+        int actualizadas = notificacionService.marcarTodasLeidas(authentication.getName());
+        redirectAttributes.addFlashAttribute("success",
+                actualizadas == 0 ? "No había notificaciones pendientes." :
+                        actualizadas + " notificación(es) marcada(s) como leída(s).");
         return "redirect:/notificaciones";
     }
 }

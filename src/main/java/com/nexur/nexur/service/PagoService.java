@@ -19,6 +19,8 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -99,6 +101,29 @@ public class PagoService {
         return pagoRepository.count();
     }
 
+    /**
+     * Crea la primera obligación para una cuenta residencial recién validada.
+     * Las cuotas posteriores se generan desde la operación mensual de ADMIN.
+     */
+    @Transactional
+    public Pago crearObligacionInicial(Residente residente) {
+        if (residente == null || residente.getId() == null || residente.getApartamento() == null) {
+            throw new IllegalArgumentException("El residente debe tener un apartamento asignado");
+        }
+
+        LocalDate fecha = LocalDate.now();
+        Pago pago = new Pago();
+        pago.setResidente(residente);
+        pago.setApartamento(residente.getApartamento());
+        pago.setMonto(montoAdministracion);
+        pago.setTipoPago(TipoPago.ADMINISTRACION);
+        pago.setMetodo(MetodoPago.TRANSFERENCIA);
+        pago.setFecha(fecha);
+        pago.setFechaVencimiento(fecha.plusDays(30));
+        pago.setEstadoPago(EstadoPago.PENDIENTE);
+        return pagoRepository.save(pago);
+    }
+
     public Pago buscarPorId(Long id) {
         return pagoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Pago no encontrado"));
@@ -109,7 +134,7 @@ public class PagoService {
         Pago pago = buscarPorId(id);
         if (pago.getMetodo() == MetodoPago.PSE || pago.getMetodo() == MetodoPago.TARJETA) {
             throw new IllegalArgumentException(
-                    "Los pagos en línea solo se confirman cuando el proveedor valida la transacción");
+                    "Los pagos PSE y tarjeta solo se confirman desde la simulación local");
         }
         if (pago.getEstadoPago() == EstadoPago.PAGADO) {
             if (pago.getFechaPago() == null) {
@@ -128,6 +153,57 @@ public class PagoService {
     }
 
     @Transactional
+    public Pago confirmarPagoSimulado(Pago pago) {
+        if (pago == null) {
+            throw new IllegalArgumentException("Pago no encontrado");
+        }
+        if (pago.getEstadoPago() == EstadoPago.PAGADO) {
+            if (pago.getFechaPago() == null) {
+                pago.setFechaPago(LocalDate.now());
+                pagoRepository.save(pago);
+            }
+            return pago;
+        }
+        if (pago.getEstadoPago() != EstadoPago.PENDIENTE
+                && pago.getEstadoPago() != EstadoPago.VENCIDO) {
+            throw new IllegalArgumentException("Solo se puede aprobar un pago pendiente o vencido");
+        }
+        pago.setEstadoPago(EstadoPago.PAGADO);
+        pago.setFechaPago(LocalDate.now());
+        return pagoRepository.save(pago);
+    }
+
+    /**
+     * Persiste el resultado del sandbox para que el residente y ADMIN consulten
+     * exactamente la misma trazabilidad, incluso cuando no fue aprobado.
+     */
+    @Transactional
+    public Pago registrarResultadoSimulado(Pago pago, String resultado, String transaccion) {
+        if (pago == null) {
+            throw new IllegalArgumentException("Pago no encontrado");
+        }
+        if (pago.getEstadoPago() != EstadoPago.PENDIENTE
+                && pago.getEstadoPago() != EstadoPago.VENCIDO) {
+            throw new IllegalArgumentException("Solo se puede registrar un resultado sobre un pago pendiente");
+        }
+        if (!List.of("APPROVED", "PENDING", "DECLINED", "VOIDED", "ERROR").contains(resultado)) {
+            throw new IllegalArgumentException("Resultado de simulacion no valido");
+        }
+        if (!StringUtils.hasText(transaccion)) {
+            throw new IllegalArgumentException("La transaccion simulada es obligatoria");
+        }
+
+        pago.setResultadoSimulacion(resultado);
+        pago.setTransaccionSimulada(transaccion);
+        pago.setSimuladoEn(LocalDateTime.now());
+        if ("APPROVED".equals(resultado)) {
+            pago.setEstadoPago(EstadoPago.PAGADO);
+            pago.setFechaPago(LocalDate.now());
+        }
+        return pagoRepository.save(pago);
+    }
+
+    @Transactional
     public Pago iniciarPagoPse(Long id, String email) {
         return iniciarPagoOnline(id, email);
     }
@@ -139,19 +215,35 @@ public class PagoService {
                 || email == null || !email.equalsIgnoreCase(pago.getResidente().getUsuario().getEmail())) {
             throw new IllegalArgumentException("No puede iniciar este pago");
         }
-        if (pago.getMetodo() != MetodoPago.PSE && pago.getMetodo() != MetodoPago.TARJETA) {
-            throw new IllegalArgumentException("Este pago no está configurado para un checkout en línea");
+        if (pago.getMetodo() == null) {
+            throw new IllegalArgumentException("Este pago no tiene un método configurado para simulación");
+        }
+        if (!esMetodoDePagoEnLinea(pago.getMetodo())) {
+            throw new IllegalArgumentException(
+                    "Transferencia y efectivo requieren confirmación administrativa");
         }
         if (pago.getEstadoPago() != EstadoPago.PENDIENTE
                 && pago.getEstadoPago() != EstadoPago.VENCIDO) {
             throw new IllegalArgumentException("Solo se puede iniciar un pago pendiente o vencido");
         }
         if (!StringUtils.hasText(pago.getReferenciaPago())) {
-            String prefijo = pago.getMetodo() == MetodoPago.TARJETA ? "CARD-" : "PSE-";
+            String prefijo = switch (pago.getMetodo()) {
+                case TARJETA -> "CARD-";
+                case PSE -> "PSE-";
+                default -> throw new IllegalArgumentException(
+                        "El metodo seleccionado requiere confirmacion administrativa");
+            };
             pago.setReferenciaPago(prefijo + UUID.randomUUID());
+            pago.setResultadoSimulacion(null);
+            pago.setTransaccionSimulada(null);
+            pago.setSimuladoEn(null);
             pagoRepository.save(pago);
         }
         return pago;
+    }
+
+    private boolean esMetodoDePagoEnLinea(MetodoPago metodo) {
+        return metodo == MetodoPago.PSE || metodo == MetodoPago.TARJETA;
     }
 
     @Transactional
@@ -190,7 +282,7 @@ public class PagoService {
     }
 
     @Transactional
-    public void generarPagosAdministracion() {
+    public List<Pago> generarPagosAdministracion() {
         List<Residente> residentes = residenteRepository.findAll();
         if (residentes.isEmpty()) {
             throw new IllegalArgumentException("No hay residentes registrados en el sistema");
@@ -198,7 +290,7 @@ public class PagoService {
 
         LocalDate inicioMes = LocalDate.now().withDayOfMonth(1);
         LocalDate finMes = inicioMes.plusMonths(1).minusDays(1);
-        int creados = 0;
+        List<Pago> pagosCreados = new ArrayList<>();
 
         for (Residente residente : residentes) {
             if (residente.getApartamento() == null) {
@@ -219,9 +311,10 @@ public class PagoService {
             pago.setFecha(LocalDate.now());
             pago.setFechaVencimiento(LocalDate.now().plusDays(30));
             pago.setEstadoPago(EstadoPago.PENDIENTE);
-            pagoRepository.save(pago);
-            creados++;
+            Pago guardado = pagoRepository.save(pago);
+            pagosCreados.add(guardado);
         }
-        log.info("Generación de administración completada: {} pagos creados", creados);
+        log.info("Generación de administración completada: {} pagos creados", pagosCreados.size());
+        return pagosCreados;
     }
 }

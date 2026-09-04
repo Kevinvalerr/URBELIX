@@ -1,10 +1,14 @@
 # URBELIX - Trazabilidad de requisitos
 
+> La especificacion completa y los casos de aceptacion estan en
+> [REQUISITOS_URBELIX.md](REQUISITOS_URBELIX.md). Este archivo conserva el resumen
+> historico de trazabilidad y debe mantenerse alineado con esa especificacion.
+
 Estado basado en la documentacion existente, pero contrastado con el codigo y las pruebas
-actuales de `URBELIXXX` el 29/08/2026. La documentacion de referencia se considera desactualizada
+actuales de `URBELIXXX` el 03/09/2026. La documentacion de referencia se considera desactualizada
 cuando contradice el comportamiento comprobado.
 
-Suite actual: 113 pruebas automatizadas, incluyendo 40 de integracion web con H2.
+Suite actual: 185 pruebas automatizadas, incluyendo la integracion web con H2.
 
 ## Requisitos funcionales
 
@@ -28,7 +32,7 @@ Suite actual: 113 pruebas automatizadas, incluyendo 40 de integracion web con H2
 | RF-16 | Cumple | Administrador crea, edita y elimina parqueaderos con validaciones. |
 | RF-17 | Cumple ampliado | Residente registra y edita sus propios vehiculos; solo PORTERIA gestiona el catalogo y los movimientos operativos. |
 | RF-18 | Cumple | Asignacion de parqueadero a residente/vehiculo con validacion de tipo y apartamento. |
-| RF-19 | Cumple parcial alto | Residente crea incidencias, agrega comentarios, adjunta evidencias privadas y consulta respuestas; administrador gestiona estados, comentarios y evidencias; las notificaciones internas y el envio por correo opcional ya estan implementados. Falta validar el correo real de PQRS y el proveedor externo de pagos. |
+| RF-19 | Cumple parcial alto | Residente crea incidencias, agrega comentarios, adjunta evidencias privadas y consulta respuestas; administrador gestiona estados, comentarios y evidencias; las notificaciones internas y el envio por correo opcional ya estan implementados. Falta validar el correo real de PQRS. |
 
 ## Requisitos no funcionales
 
@@ -40,7 +44,7 @@ Suite actual: 113 pruebas automatizadas, incluyendo 40 de integracion web con H2
 | RNF-04 | No verificado | No existe prueba de 100 usuarios concurrentes. |
 | RNF-05 | Parcial | Plantillas Bootstrap y CSS responsivo; las vistas principales entregan correctamente en local, pero falta verificacion visual en navegadores y dispositivos definidos. |
 | RNF-06 | Parcial | Navegacion y mensajes mejorados; falta prueba de usabilidad con usuarios finales. |
-| RNF-07 | Parcial alto | Entidades tienen claves foraneas y restricciones; V1-V12 estan disponibles y la importacion Excel valida relaciones con apartamento y codigo residencial. Falta repetir el arranque `prod` y las migraciones sobre el MySQL final. |
+| RNF-07 | Parcial alto | Entidades tienen claves foraneas y restricciones; V0.1-V14 estan disponibles y la importacion Excel valida relaciones con apartamento y codigo residencial. Falta repetir el arranque `prod` y las migraciones sobre el MySQL final. |
 | RNF-08 | Cumple | Separacion Model, Repository, Service y Controller visible en el proyecto. |
 | RNF-09 | Cumple | Repositorio Git disponible. Falta revisar politica de ramas y entregas. |
 | RNF-10 | Parcial alto | Modulos separados, consultas del dashboard separadas por rol, auditoria persistente y migraciones versionadas; falta desacoplar avisos y notificaciones. |
@@ -49,15 +53,15 @@ Suite actual: 113 pruebas automatizadas, incluyendo 40 de integracion web con H2
 
 - El DEA menciona cambio obligatorio de contrasena en el primer ingreso; esta implementado para registro y cuentas nuevas, con redireccion al perfil.
 - El DEA menciona gestion de perfil; existe un flujo propio para actualizar nombre y telefono sin modificar rol, correo o apartamento.
-- PSE y tarjeta ya tienen referencia única, checkout local de prueba, webhook con firma, validación de monto e idempotencia; falta conectar y validar el proveedor real. Transferencia y efectivo siguen el circuito de validación administrativa. La factura individual se genera bajo autorización y conserva el historial.
+- PSE y tarjeta tienen referencia única y checkout local de prueba sin cobro real; el resultado, la transaccion simulada y la fecha quedan persistidos. Transferencia y efectivo siguen el circuito de validacion administrativa. La factura individual se genera bajo autorizacion y conserva el historial.
 - Visitantes tienen flujo por estado: RESIDENTE solicita; PORTERIA aprueba, rechaza, registra entrada y registra salida. ADMIN no accede a la operación de portería.
 - El archivo de historias contiene HU-001 a HU-005, aunque los requisitos funcionales abarcan RF-01 a RF-19. Faltan historias y criterios para reservas, visitantes, parqueaderos, vehiculos, incidencias y reportes.
 - El DEA menciona un microservicio FastAPI de reportes; ya esta incluido como proveedor opcional y no persiste datos de negocio. Spring Boot mantiene el PDF local como respaldo.
 
 ## Brechas que impiden declarar version final
 
-- No existen aun `Dockerfile` ni `docker-compose.yml` verificados.
+- `Dockerfile`, `docker-compose.yml` y `docker-compose.prod.yml` ya fueron validados localmente con MySQL 8.4, Flyway V0.1-V14, healthchecks, limites y proxy TLS; faltan backups y configuracion del dominio en el entorno objetivo.
 - No hay mediciones reproducibles para RNF-03 ni prueba de 100 usuarios concurrentes para RNF-04.
 - Faltan pruebas de navegador de los tres roles y una repeticion controlada contra MySQL/Flyway.
 - El smoke HTTP de los tres roles y el flujo simulado de pagos ya fueron verificados en H2; falta repetirlos con navegador y MySQL/Flyway.
-- El correo SMTP, Wompi/PSE externos, backups y restauracion requieren validacion operativa.
+- El correo SMTP, backups y restauracion requieren validacion operativa.

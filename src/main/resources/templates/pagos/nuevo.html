@@ -71,7 +71,7 @@
                             <option value="">Selecciona un método</option>
                             <option th:each="metodo : ${metodosPago}" th:value="${metodo}" th:text="${metodo.descripcion}">Transferencia</option>
                         </select>
-                        <small class="payment-field-hint">PSE y tarjeta se completan en el sandbox; transferencia y efectivo requieren validación administrativa.</small>
+                        <small class="payment-field-hint">PSE y tarjeta usan el sandbox local. Transferencia y efectivo requieren confirmación manual de administración.</small>
                         <small class="payment-field-error" th:if="${#fields.hasErrors('metodo')}" th:errors="*{metodo}">Selecciona un método.</small>
                     </div>
                     <div class="payment-field">

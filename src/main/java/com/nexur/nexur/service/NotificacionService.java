@@ -30,14 +30,18 @@ public class NotificacionService {
         if (usuario == null || usuario.getId() == null) {
             return;
         }
+        Usuario usuarioGestionado = usuarioRepository.findById(usuario.getId()).orElse(null);
+        if (usuarioGestionado == null) {
+            return;
+        }
         Notificacion notificacion = new Notificacion();
-        notificacion.setUsuario(usuario);
+        notificacion.setUsuario(usuarioGestionado);
         notificacion.setTitulo(titulo);
         notificacion.setMensaje(mensaje);
         notificacion.setEnlace(enlace);
         notificacion.setCreadaEn(LocalDateTime.now());
         notificacionRepository.save(notificacion);
-        correoNotificacionService.enviar(usuario, titulo, mensaje, enlace);
+        correoNotificacionService.enviar(usuarioGestionado, titulo, mensaje, enlace);
     }
 
     public List<Notificacion> listar(String email) {
@@ -57,6 +61,12 @@ public class NotificacionService {
         }
         notificacion.setLeida(true);
         notificacionRepository.save(notificacion);
+    }
+
+    @Transactional
+    public int marcarTodasLeidas(String email) {
+        Long id = usuarioId(email);
+        return id < 0 ? 0 : notificacionRepository.marcarTodasLeidas(id);
     }
 
     private Long usuarioId(String email) {

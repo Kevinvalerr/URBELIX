@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.ui.Model;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 
 @ControllerAdvice
 public class GlobalModelAttributes {
@@ -17,7 +18,8 @@ public class GlobalModelAttributes {
 
     @ModelAttribute
     public void agregarContadorNotificaciones(Model model, Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken)) {
             model.addAttribute("notificacionesNoLeidas",
                     notificacionService.contarNoLeidas(authentication.getName()));
         }

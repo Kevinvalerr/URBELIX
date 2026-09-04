@@ -3,9 +3,13 @@ package com.nexur.nexur.controller;
 import com.nexur.nexur.model.EstadoParqueadero;
 import com.nexur.nexur.model.Parqueadero;
 import com.nexur.nexur.model.Residente;
+import com.nexur.nexur.model.Rol;
+import com.nexur.nexur.model.Usuario;
+import com.nexur.nexur.repository.UsuarioRepository;
 import com.nexur.nexur.service.ApartamentoService;
 import com.nexur.nexur.service.ParqueaderoService;
 import com.nexur.nexur.service.ResidenteService;
+import com.nexur.nexur.service.NotificacionService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -26,13 +30,19 @@ public class ParqueaderoController {
     private final ParqueaderoService parqueaderoService;
     private final ApartamentoService apartamentoService;
     private final ResidenteService residenteService;
+    private final UsuarioRepository usuarioRepository;
+    private final NotificacionService notificacionService;
 
     public ParqueaderoController(ParqueaderoService parqueaderoService,
                                  ApartamentoService apartamentoService,
-                                 ResidenteService residenteService) {
+                                 ResidenteService residenteService,
+                                 UsuarioRepository usuarioRepository,
+                                 NotificacionService notificacionService) {
         this.parqueaderoService = parqueaderoService;
         this.apartamentoService = apartamentoService;
         this.residenteService = residenteService;
+        this.usuarioRepository = usuarioRepository;
+        this.notificacionService = notificacionService;
     }
 
     @GetMapping
@@ -92,7 +102,8 @@ public class ParqueaderoController {
                           Model model,
                           RedirectAttributes redirectAttributes) {
         try {
-            parqueaderoService.guardar(parqueadero, apartamentoId);
+            Parqueadero guardado = parqueaderoService.guardar(parqueadero, apartamentoId);
+            notificarPorteria(guardado);
             redirectAttributes.addFlashAttribute("success", "Parqueadero guardado correctamente");
             return "redirect:/parqueaderos";
         } catch (IllegalArgumentException exception) {
@@ -115,5 +126,35 @@ public class ParqueaderoController {
             redirectAttributes.addFlashAttribute("error", exception.getMessage());
         }
         return "redirect:/parqueaderos";
+    }
+
+    private void notificarPorteria(Parqueadero parqueadero) {
+        String mensaje = "Se actualizó el parqueadero " + parqueadero.getNumero()
+                + ". Estado: " + parqueadero.getEstado() + ".";
+        for (Usuario usuario : usuarioRepository.findByRolAndActivoTrue(Rol.PORTERIA)) {
+            try {
+                notificacionService.crear(usuario, "Parqueadero actualizado", mensaje,
+                        "/porteria/parqueaderos");
+            } catch (RuntimeException exception) {
+                // La asignación ya fue persistida y no depende del correo.
+            }
+        }
+
+        if (parqueadero.getApartamento() != null) {
+            residenteService.obtenerTodos().stream()
+                    .filter(residente -> residente.getApartamento() != null
+                            && parqueadero.getApartamento().getId().equals(residente.getApartamento().getId()))
+                    .map(Residente::getUsuario)
+                    .filter(java.util.Objects::nonNull)
+                    .forEach(usuario -> {
+                        try {
+                            notificacionService.crear(usuario, "Parqueadero actualizado",
+                                    "El parqueadero " + parqueadero.getNumero()
+                                            + " quedó asociado a tu apartamento.", "/parqueaderos");
+                        } catch (RuntimeException exception) {
+                            // El aviso es secundario frente a la persistencia de la asignación.
+                        }
+                    });
+        }
     }
 }
