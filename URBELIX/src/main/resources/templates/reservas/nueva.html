@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Crear Reserva'">
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <section class="page-top-section mb-4">
+            <div>
+                <h1>Crear Reserva</h1>
+                <p class="text-muted">Gestiona la reserva de áreas comunes y servicios con un formulario rápido y sencillo.</p>
+            </div>
+        </section>
+
+        <div class="form-card">
+            <form th:action="@{/reservas/guardar}" th:object="${reserva}" method="post" class="form-grid">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+             
+                <div class="form-group">
+                    <label for="apartamentoId">Apartamento</label>
+                    <select id="apartamentoId" th:field="*{apartamento.id}" class="form-select" required>
+                        <option value="">Seleccione un apartamento</option>
+                        <option th:each="apto : ${apartamentos}" th:value="${apto.id}" th:text="${apto.numero} + ' - Torre ' + ${apto.torre} + ' - Piso ' + ${apto.piso}"></option>
+                    </select>
+                    <p class="form-error" th:if="${#fields.hasErrors('apartamento')}" th:errors="*{apartamento}"></p>
+                </div>
+                <div class="form-group">
+                    <label for="area">Área a reservar</label>
+                   <select id="tipoEspacio" th:field="*{tipoEspacio}" required>
+                        <option value="">Seleccione área</option>
+                       <option value="SALON_SOCIAL">Salón social</option>
+                          <option value="GIMNASIO">Gimnasio</option>
+                          <option value="PISCINA">Piscina</option>
+                         <option value="BBQ">BBQ</option>
+                    </select>
+                    <p class="form-error" th:if="${#fields.hasErrors('tipoEspacio')}" th:errors="*{tipoEspacio}"></p>
+                </div>
+            <div class="form-group">
+                <label for="fechaInicio">Fecha y hora inicio</label>
+                <input id="fechaInicio" type="datetime-local" th:field="*{fechaInicio}" class="form-control" required />
+             </div>
+
+            <div class="form-group">
+                 <label for="fechaFin">Fecha y hora fin</label>
+                <input id="fechaFin" type="datetime-local" th:field="*{fechaFin}" class="form-control" required />
+            </div>
+                <div class="form-group">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" th:field="*{observaciones}" class="form-control" rows="4" placeholder="Notas o detalles adicionales"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-main-action btn-sm">
+                        <i class="bi bi-calendar-check-fill me-2"></i>Reservar ahora
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</html>
+
