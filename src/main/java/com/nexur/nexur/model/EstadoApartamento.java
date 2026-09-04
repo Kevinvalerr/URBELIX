@@ -5,5 +5,5 @@ public enum EstadoApartamento {
     DISPONIBLE,
     OCUPADO,
     MANTENIMIENTO
-
+    
 }

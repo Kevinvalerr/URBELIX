@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: page}">
 
 <div th:fragment="content" th:with="titulo='Apartamentos'">
 
@@ -13,17 +13,16 @@
 
         <div class="page-actions">
 
-            <a href="/apartamentos/nuevo"
+            <a th:href="@{/apartamentos/nuevo}"
                class="btn btn-primary btn-main-action">
                 Nuevo Apartamento
             </a>
 
-            <button class="btn btn-success ms-2"
+                <button class="btn btn-success ms-2"
                     data-bs-toggle="modal"
                     data-bs-target="#modalImportarExcel">
                 Importar Excel
             </button>
-
 
         </div>
     </section>
@@ -43,6 +42,19 @@
 
     </div>
 
+    <div class="modal fade" id="modalImportarExcel" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Importar apartamentos desde Excel</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <form method="post" th:action="@{/apartamentos/importar}" enctype="multipart/form-data">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                    <div class="modal-body"><input type="file" name="archivo" accept=".xlsx,.xls" class="form-control" required><small class="text-muted">Columnas: número, torre, piso y estado.</small></div>
+                    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-success">Importar</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- MENSAJE SUCCESS -->
     <div th:if="${success}"
          class="alert alert-success alert-dismissible fade show"
@@ -56,6 +68,7 @@
         </button>
 
     </div>
+    <div class="mb-3"><input class="form-control" data-filter-search="apartamentos" oninput="filterRows('apartamentos')" placeholder="Buscar por número, torre, piso o estado"></div>
 
     <!-- IMPORT SUMMARY -->
     <div th:if="${importSummary}" class="alert alert-info alert-dismissible fade show" role="alert">
@@ -82,22 +95,24 @@
                 <thead>
                 <tr>
                     <th>ID</th>
-                    <th>APTO</th>
+                    <th>Número</th>
                     <th>Torre</th>
                     <th>Piso</th>
                     <th>Estado</th>
+                    <th>Código de registro</th>
                     <th>Acciones</th>
                 </tr>
                 </thead>
 
                 <tbody>
 
-                <tr th:each="ap : ${apartamentos}">
+                <tr th:each="ap : ${apartamentos}" data-filter-row="apartamentos">
                     <td th:text="${ap.id}">1</td>
                     <td th:text="${ap.numero}">101</td>
                     <td th:text="${ap.torre}">1</td>
                     <td th:text="${ap.piso}">1</td>
                     <td th:text="${ap.estado}">DISPONIBLE</td>
+                    <td th:text="${ap.codigoRegistro}">URB-XXXXXXXXXXXX</td>
 
                     <td>
                         <a th:href="@{/apartamentos/editar/{id}(id=${ap.id})}"
@@ -105,15 +120,15 @@
                             Editar
                         </a>
 
-                        <a th:href="@{/apartamentos/eliminar/{id}(id=${ap.id})}"
-                           class="btn btn-sm btn-outline-danger">
-                            Eliminar
-                        </a>
+                        <form th:action="@{/apartamentos/eliminar/{id}(id=${ap.id})}" method="post" style="display: inline;" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este apartamento?')">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                        </form>
                     </td>
                 </tr>
 
                 <tr th:if="${#lists.isEmpty(apartamentos)}">
-                    <td colspan="6"
+                    <td colspan="7"
                         class="text-center text-muted">
                         No hay apartamentos registrados todavía.
                     </td>
@@ -122,86 +137,6 @@
                 </tbody>
 
             </table>
-
-        </div>
-
-    </div>
-
-    <!-- MODAL IMPORTAR EXCEL -->
-
-    <div class="modal fade"
-         id="modalImportarExcel"
-         tabindex="-1"
-         aria-hidden="true">
-
-        <div class="modal-dialog">
-
-            <div class="modal-content">
-
-                <div class="modal-header">
-
-                    <h5 class="modal-title">
-                        Importar Apartamentos desde Excel
-                    </h5>
-
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal">
-                    </button>
-
-                </div>
-
-                <form method="post"
-                      th:action="@{/apartamentos/importar}"
-                      enctype="multipart/form-data">
-
-                    <!-- CSRF -->
-                    <input type="hidden"
-                           th:name="${_csrf.parameterName}"
-                           th:value="${_csrf.token}" />
-
-                    <div class="modal-body">
-
-                        <div class="alert alert-info">
-                            <strong>Formato requerido:</strong> usa las columnas Numero, Torre, Piso y Estado.
-                            Debes indicar el número de APTO. El ID interno se genera automáticamente en el sistema.
-                        </div>
-
-                        <a th:href="@{/apartamentos/plantilla}" class="btn btn-outline-success mb-3">
-                            Descargar plantilla Excel
-                        </a>
-
-                        <input type="file"
-                               name="archivo"
-                               accept=".xlsx"
-                               required>
-
-                        <br>
-
-                        <small class="text-muted">
-                            Selecciona un archivo Excel (.xlsx)
-                        </small>
-
-                    </div>
-
-                    <div class="modal-footer">
-
-                        <button type="button"
-                                class="btn btn-secondary"
-                                data-bs-dismiss="modal">
-                            Cancelar
-                        </button>
-
-                        <button type="submit"
-                                class="btn btn-success">
-                            Importar
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
 
         </div>
 

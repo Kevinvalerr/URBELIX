@@ -54,15 +54,6 @@ public class IncidenciaController {
         }
         model.addAttribute("incidencias", incidencias);
         model.addAttribute("estados", EstadoIncidencia.values());
-        model.addAttribute("esPropio", !esAdmin);
-        model.addAttribute("total", incidencias.size());
-        model.addAttribute("pendientes", incidencias.stream()
-                .filter(i -> i.getEstado() == EstadoIncidencia.ABIERTA).count());
-        model.addAttribute("enProceso", incidencias.stream()
-                .filter(i -> i.getEstado() == EstadoIncidencia.EN_REVISION).count());
-        model.addAttribute("resueltas", incidencias.stream()
-                .filter(i -> i.getEstado() == EstadoIncidencia.RESUELTA
-                        || i.getEstado() == EstadoIncidencia.CERRADA).count());
         model.addAttribute("currentPath", "/incidencias");
         model.addAttribute("titulo", "Incidencias | Urbelix");
         model.addAttribute("volverUrl", "/dashboard");

@@ -34,7 +34,7 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
     List<Pago> findByResidenteUsuarioEmail(String email);
     boolean existsByApartamentoId(Long apartamentoId);
     long countByApartamentoId(Long apartamentoId);
-
+    
     @EntityGraph(attributePaths = {"residente", "apartamento"})
     List<Pago> findByEstadoPago(EstadoPago estadoPago);
 

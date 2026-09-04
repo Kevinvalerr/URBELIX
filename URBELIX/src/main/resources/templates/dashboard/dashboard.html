@@ -1,0 +1,279 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
+    <div th:fragment="content" th:with="titulo='Dashboard | URBELIX'">
+        <!-- Welcome Header -->
+        <div class="dashboard-welcome-header">
+            <div class="welcome-content">
+                <div class="welcome-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="welcome-text">
+                    <h1 class="welcome-title">¡Hola, <span th:text="${currentUser}">Usuario</span>!</h1>
+                    <p class="welcome-subtitle" sec:authorize="hasRole('ADMIN')">Administrador del sistema</p>
+                    <p class="welcome-subtitle" sec:authorize="hasRole('RESIDENTE')">Residente</p>
+                    <div class="welcome-badges">
+                        <span class="badge-pill" sec:authorize="hasRole('ADMIN')">Control central</span>
+                        <span class="badge-pill" sec:authorize="hasRole('RESIDENTE')">Resumen personal</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Overview -->
+        <div sec:authorize="hasRole('ADMIN')" class="admin-overview-section">
+            <div class="overview-header">
+                <div>
+                    <h2 class="section-title">Vista General</h2>
+                    <p class="section-subtitle">Un panel limpio para supervisar el estado de la comunidad.</p>
+                </div>
+                <div class="overview-period">
+                    <span class="period-label">Este mes</span>
+                </div>
+            </div>
+
+            <div class="activity-timeline-section">
+                <div class="timeline-header">
+                    <h3>Actividad Reciente</h3>
+                    <a href="/reportes" class="view-all-link">Ver todo</a>
+                </div>
+                <div class="timeline-container">
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <p class="timeline-time">Ahora</p>
+                            <h5>Nuevo residente registrado</h5>
+                            <p>Se añadió un nuevo usuario al edificio.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <p class="timeline-time">Hace 1 hora</p>
+                            <h5>Pago registrado</h5>
+                            <p>Se procesó un pago para el apartamento 304.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <p class="timeline-time">Ayer</p>
+                            <h5>Reserva confirmada</h5>
+                            <p>La reserva de la piscina fue confirmada para mañana.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Widgets -->
+            <div class="admin-widgets-section">
+                <div class="admin-widgets-grid">
+                    <div class="widget-card alerts">
+                        <div class="widget-header">
+                            <div class="widget-icon">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <h4>Alertas del Sistema</h4>
+                        </div>
+                        <div class="widget-content">
+                            <div class="alert-item">
+                                <div class="alert-indicator warning"></div>
+                                <div class="alert-info">
+                                    <span class="alert-title">Moras Pendientes</span>
+                                    <span class="alert-count" th:text="${morasCount ?: '3'}">3</span>
+                                </div>
+                            </div>
+                            <div class="alert-item">
+                                <div class="alert-indicator danger"></div>
+                                <div class="alert-info">
+                                    <span class="alert-title">Multas Activas</span>
+                                    <span class="alert-count" th:text="${multasCount ?: '1'}">1</span>
+                                </div>
+                            </div>
+                            <div class="alert-item">
+                                <div class="alert-indicator info"></div>
+                                <div class="alert-info">
+                                    <span class="alert-title">Reservas Pendientes</span>
+                                    <span class="alert-count" th:text="${reservasPendientes ?: '5'}">5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="widget-card performance secondary-card">
+                        <div class="widget-header">
+                            <div class="widget-icon">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <div>
+                                <h4>Rendimiento General</h4>
+                                <small style="color: var(--text-secondary);">Información secundaria</small>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="performance-metric">
+                                <div class="metric-label">Ocupación</div>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" style="width: 92%; background: linear-gradient(90deg, #06B6D4, #0891B2);"></div>
+                                </div>
+                                <div class="metric-value">92%</div>
+                            </div>
+                            <div class="performance-metric">
+                                <div class="metric-label">Cobranza</div>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" style="width: 85%; background: linear-gradient(90deg, #16A34A, #15803D);"></div>
+                                </div>
+                                <div class="metric-value">85%</div>
+                            </div>
+                            <div class="performance-metric">
+                                <div class="metric-label">Satisfacción</div>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" style="width: 95%; background: linear-gradient(90deg, #F59E0B, #D97706);"></div>
+                                </div>
+                                <div class="metric-value">95%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagos Vencidos (Admin) -->
+        <div sec:authorize="hasRole('ADMIN')" class="card mt-4">
+            <h5>Pagos vencidos</h5>
+            <div th:if="${#lists.isEmpty(pagosVencidos)}">
+                <p>No hay pagos vencidos</p>
+            </div>
+            <ul th:if="${!#lists.isEmpty(pagosVencidos)}">
+                <li th:each="p : ${pagosVencidos}">
+                    <span th:text="${p.residente.nombre}"></span> -
+                    <span th:text="${p.monto}"></span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Resident Summary -->
+        <div sec:authorize="hasRole('RESIDENTE')" class="resident-summary-section">
+            <div class="resident-summary-top">
+                <div>
+                    <h2 class="section-title">Resumen personal</h2>
+                    <p class="section-subtitle">Tu información más importante para pagos y reservas.</p>
+                </div>
+                <div class="resident-actions">
+                    <a href="/pagos" class="action-pill action-info">Ver mis pagos</a>
+                    <a href="/reservas" class="action-pill action-primary">Ver mis reservas</a>
+                </div>
+            </div>
+            <div class="summary-cards">
+                <div class="summary-card status-good">
+                    <div class="summary-icon">
+                        <i class="bi bi-house-door"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h4>Mi apartamento</h4>
+                        <p class="summary-value" th:text="${miApartamento != null ? miApartamento : 'Sin asignar'}">Apt 101</p>
+                        <p class="summary-text">Ubicación y estado actual de tu vivienda.</p>
+                    </div>
+                </div>
+                <div class="summary-card status-info">
+                    <div class="summary-icon">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h4>Mis pagos</h4>
+                        <p class="summary-value" th:text="${misPagosCount != null ? misPagosCount : 0} + ' pagos'">3 pagos</p>
+                        <p class="summary-text">Pendientes: <strong th:text="${pagosPendientes != null ? pagosPendientes : 0}">0</strong></p>
+                        <p class="summary-text">Pagos al día: <strong th:text="${pagosAlDia != null ? pagosAlDia : 0}">0</strong></p>
+                    </div>
+                </div>
+                <div class="summary-card status-primary">
+                    <div class="summary-icon">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h4>Mis reservas</h4>
+                        <p class="summary-value" th:text="${misReservasCount != null ? misReservasCount : 0} + ' activas'">2 activas</p>
+                        <p class="summary-text" th:if="${proximaReserva}">Próxima reserva: <strong th:text="${proximaReserva}">Piscina - Hoy 15:00</strong></p>
+                        <p class="summary-text" th:unless="${proximaReserva}">No tienes reservas próximas.</p>
+                    </div>
+                </div>
+                <div class="summary-card status-warning">
+                    <div class="summary-icon">
+                        <i class="bi bi-bell"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h4>Notificaciones</h4>
+                        <p class="summary-value" th:text="${notificacionesCount != null ? notificacionesCount : 0} + ' nuevas'">1 nuevas</p>
+                        <p class="summary-text" th:if="${ultimaNotificacion}">Última: <strong th:text="${ultimaNotificacion}">Recordatorio de pago</strong></p>
+                        <p class="summary-text" th:unless="${ultimaNotificacion}">Sin notificaciones recientes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Alerts -->
+        <div sec:authorize="hasRole('RESIDENTE')" class="status-alerts-section">
+            <div class="alert-card warning" th:if="${estadoMora != null and estadoMora != 'Sin mora'}">
+                <div class="alert-icon warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h4>Estado de Mora</h4>
+                    <p th:text="${estadoMora}">Tienes una mora pendiente</p>
+                    <div class="alert-action">
+                        <a href="/pagos/nuevo" class="alert-btn">Pagar Ahora</a>
+                    </div>
+                </div>
+            </div>
+            <div class="alert-card danger" th:if="${multa != null and multa != 'Sin multas'}">
+                <div class="alert-icon danger">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h4>Multas Pendientes</h4>
+                    <p th:text="${multa}">Tienes multas por pagar</p>
+                    <div class="alert-action">
+                        <a href="/pagos/nuevo" class="alert-btn">Ver Detalles</a>
+                    </div>
+                </div>
+            </div>
+            <div class="alert-card success" th:if="${#lists.size(reservasActivas) > 0}">
+                <div class="alert-icon success">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="alert-content">
+                    <h4>Reservas Activas</h4>
+                    <p th:text="${#lists.size(reservasActivas)} + ' reservas confirmadas'">Tienes reservas activas</p>
+                    <div class="alert-action">
+                        <a href="/reservas" class="alert-btn">Ver Reservas</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.metric-card-large, .summary-card, .widget-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+</html>
+

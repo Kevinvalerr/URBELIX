@@ -1,0 +1,203 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: page">
+
+<div th:fragment="content" th:with="titulo='Reportes'">
+
+    <section class="page-top-section mb-4">
+        <div>
+            <h1>Generador de Reportes</h1>
+            <p class="text-muted">
+                Genera reportes automáticos con análisis textual de las estadísticas del sistema.
+            </p>
+        </div>
+
+        <div class="page-actions">
+            <button type="button" class="btn btn-primary btn-main-action" id="generarReportBtn">
+                <i class="bi bi-file-pdf me-2"></i>
+                Generar Reporte PDF
+            </button>
+        </div>
+    </section>
+
+    <!-- ALERTA DE CARGA -->
+    <div id="loadingAlert" class="alert alert-info d-none" role="alert">
+        <div class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <span id="loadingText">Generando reporte desde el servicio de análisis...</span>
+    </div>
+
+    <!-- ALERTA DE ERROR -->
+    <div id="errorAlert" class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+        <span id="errorText"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- ALERTA DE ÉXITO -->
+    <div id="successAlert" class="alert alert-success alert-dismissible fade show d-none" role="alert">
+        <span id="successText"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- TARJETA CON EL REPORTE GENERADO -->
+    <div id="reportCard" class="card activity-card d-none">
+        <h5>Reporte Generado</h5>
+        <div class="mt-3">
+            <p id="reportText" class="mb-0" style="line-height: 1.8; font-size: 1.1rem;"></p>
+        </div>
+        <div class="mt-3">
+            <button class="btn btn-secondary btn-sm" id="downloadBtn">
+                <i class="bi bi-download me-1"></i>
+                Descargar reporte
+            </button>
+            <button class="btn btn-primary btn-sm" id="printBtn">
+                <i class="bi bi-printer me-1"></i>
+                Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- INFORMACIÓN DEL SISTEMA -->
+    <div class="card activity-card mt-4">
+        <h5>Información del Sistema</h5>
+        <div class="table-dashboard mt-3">
+            <table class="table table-sm mb-0">
+                <tbody>
+                    <tr>
+                        <td class="text-muted">Residentes registrados:</td>
+                        <td><strong id="residentesCount" th:text="${residentes}">0</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Apartamentos registrados:</td>
+                        <td><strong id="apartamentosCount" th:text="${apartamentos}">0</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Pagos realizados:</td>
+                        <td><strong id="pagosRealizadosCount" th:text="${pagosRealizados}">0</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Pagos pendientes:</td>
+                        <td><strong id="pagosPendientesCount" th:text="${pagosPendientes}">0</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Reservas activas:</td>
+                        <td><strong id="reservasActivasCount" th:text="${reservasActivas}">0</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- INFORMACIÓN TÉCNICA -->
+    <div class="card activity-card mt-4">
+        <h5>Información Técnica</h5>
+        <p class="text-muted mb-2">
+            Este módulo utiliza un microservicio Python (FastAPI) que analiza las estadísticas
+            del sistema y genera reportes automáticos en lenguaje natural.
+        </p>
+        <p class="text-muted">
+            <strong>Arquitectura:</strong> Spring Boot ↔ FastAPI REST
+        </p>
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Reporte lista: DOMContentLoaded');
+            const generarBtn = document.getElementById('generarReportBtn');
+            const loadingAlert = document.getElementById('loadingAlert');
+            const errorAlert = document.getElementById('errorAlert');
+            const successAlert = document.getElementById('successAlert');
+            const reportCard = document.getElementById('reportCard');
+
+            if (!generarBtn) {
+                console.error('No se encontró el botón Generar Reporte PDF');
+                return;
+            }
+
+            generarBtn.addEventListener('click', function() {
+                console.log('Botón Generar Reporte PDF clickeado');
+                generarReportePDF();
+            });
+
+            function generarReportePDF() {
+                console.log('[generarReportePDF] Iniciando generación...');
+                
+                loadingAlert.classList.remove('d-none');
+                errorAlert.classList.add('d-none');
+                successAlert.classList.add('d-none');
+                reportCard.classList.add('d-none');
+
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+
+                console.log('[generarReportePDF] CSRF', {
+                    header: csrfHeader,
+                    present: !!csrfToken
+                });
+
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (csrfToken) {
+                    headers[csrfHeader] = csrfToken;
+                }
+
+                fetch('/reportes/generar-pdf', {
+                    method: 'POST',
+                    headers: headers
+                })
+                .then(response => {
+                    console.log('[generarReportePDF] Respuesta recibida', response.status, response.statusText);
+                    
+                    if (!response.ok) {
+                        throw new Error('No fue posible generar el reporte en este momento. El servicio de reportes no está disponible.');
+                    }
+                    
+                    return response.blob();
+                })
+                .then(pdfBlob => {
+                    console.log('[generarReportePDF] PDF recibido, tamaño:', pdfBlob.size, 'bytes');
+                    
+                    loadingAlert.classList.add('d-none');
+                    
+                    const url = window.URL.createObjectURL(pdfBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'reporte_' + new Date().toISOString().slice(0, 10) + '.pdf';
+                    document.body.appendChild(link);
+                    link.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(link);
+                    
+                    successAlert.classList.remove('d-none');
+                    document.getElementById('successText').textContent = '¡PDF generado y descargado exitosamente!';
+                    
+                    console.log('[generarReportePDF] PDF descargado correctamente');
+                })
+                .catch(error => {
+                    console.error('[generarReportePDF] Error:', error);
+                    loadingAlert.classList.add('d-none');
+                    errorAlert.classList.remove('d-none');
+                    document.getElementById('errorText').textContent = error.message;
+                });
+            }
+
+            // Botón de impresión
+            document.getElementById('printBtn').addEventListener('click', function() {
+                const printWindow = window.open('', '_blank');
+                const reportText = document.getElementById('reportText').textContent;
+                printWindow.document.write('<html><head><title>Reporte URBELIX</title></head><body>');
+                printWindow.document.write('<h2>Reporte del Sistema URBELIX</h2>');
+                printWindow.document.write('<p>' + reportText + '</p>');
+                printWindow.document.write('<p style="font-size: 0.8em; color: #999; margin-top: 2em;">Generado el: ' + new Date().toLocaleString() + '</p>');
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.print();
+            });
+        });
+    </script>
+</div>
+
+</html>
+
+

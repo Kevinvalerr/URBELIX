@@ -96,3 +96,4 @@ public class ResidenteService {
                 .orElseThrow(() -> new RuntimeException("Residente no encontrado"));
     }
 }
+

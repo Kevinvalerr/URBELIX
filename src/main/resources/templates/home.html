@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URBELIX - Gestión Inteligente para Comunidades Modernas</title>
+    <title>Urbelix - Gestión Inteligente para Comunidades Modernas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -107,6 +107,26 @@
             margin-bottom: 1.5rem;
             color: #0d2a4a;
             text-shadow: none;
+        }
+
+        .hero-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            margin-bottom: 1rem;
+            color: #1769e0;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .hero-kicker::before {
+            width: 30px;
+            height: 2px;
+            border-radius: 99px;
+            background: #0f9b8e;
+            content: '';
         }
 
         .hero-subtitle {
@@ -222,6 +242,22 @@
             object-fit: cover;
             display: block;
             transition: transform 2.5s ease-out;
+        }
+
+        .carousel-slide--fallback {
+            display: block;
+            background:
+                radial-gradient(circle at 75% 20%, rgba(92, 224, 207, 0.45), transparent 25%),
+                linear-gradient(135deg, #102b4f 0%, #1769e0 55%, #087f77 100%);
+        }
+
+        .carousel-slide--fallback::after {
+            position: absolute;
+            inset: 18%;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 28px;
+            content: '';
+            box-shadow: 0 0 0 18px rgba(255, 255, 255, 0.04);
         }
 
         .carousel-slide.fade-in img {
@@ -727,7 +763,8 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6 hero-content">
-                    <h1 class="hero-title">URBELIX</h1>
+                    <span class="hero-kicker">Convivencia · control · confianza</span>
+                    <h1 class="hero-title">Urbelix</h1>
                     <p class="hero-subtitle">Gestión inteligente para comunidades modernas. Digitaliza la administración de tu torre residencial y mejora la convivencia entre residentes.</p>
                     <div class="hero-buttons">
                         <a href="#benefits" class="btn-hero-secondary">Conocer Más</a>
@@ -738,19 +775,19 @@
                     <div class="hero-carousel-container">
                         <div class="custom-carousel">
                             <div class="carousel-slide fade-in">
-                                <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Torre residencial moderna" />
+                                <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Torre residencial moderna" onerror="this.style.display='none'; this.parentElement.classList.add('carousel-slide--fallback')" />
                             </div>
                             <div class="carousel-slide">
-                                <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Edificio de apartamentos" />
+                                <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Edificio de apartamentos" onerror="this.style.display='none'; this.parentElement.classList.add('carousel-slide--fallback')" />
                             </div>
                             <div class="carousel-slide">
-                                <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Fachada de apartamentos" />
+                                <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Fachada de apartamentos" onerror="this.style.display='none'; this.parentElement.classList.add('carousel-slide--fallback')" />
                             </div>
                             <div class="carousel-slide">
-                                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Vista exterior de conjunto residencial" />
+                                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Vista exterior de conjunto residencial" onerror="this.style.display='none'; this.parentElement.classList.add('carousel-slide--fallback')" />
                             </div>
                             <div class="carousel-slide">
-                                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Torre de apartamentos" />
+                                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Torre de apartamentos" onerror="this.style.display='none'; this.parentElement.classList.add('carousel-slide--fallback')" />
                             </div>
                         </div>
                         <div class="carousel-dots">
@@ -771,7 +808,7 @@
         <div class="container">
             <div class="row text-center mb-5">
                 <div class="col-12">
-                    <h2 class="display-5 fw-bold mb-3 fade-in-up">¿Por qué elegir URBELIX?</h2>
+                    <h2 class="display-5 fw-bold mb-3 fade-in-up">¿Por qué elegir Urbelix?</h2>
                     <p class="lead text-muted mb-5 fade-in-up">Tecnología avanzada para simplificar la gestión residencial de torres y conjuntos, con control claro sobre pagos, reservas y comunicaciones.</p>
                 </div>
             </div>
@@ -813,7 +850,7 @@
             <div class="row text-center mb-4">
                 <div class="col-12">
                     <h2 class="display-5 fw-bold mb-3 fade-in-up">Funcionalidad Principal</h2>
-                    <p class="lead text-muted mb-4">URBELIX reúne las funciones clave para operar tu comunidad desde una sola plataforma, con controles claros y resultados previsibles.</p>
+                    <p class="lead text-muted mb-4">Urbelix reúne las funciones clave para operar tu comunidad desde una sola plataforma, con controles claros y resultados previsibles.</p>
                 </div>
             </div>
             <div class="feature-carousel-wrapper">
@@ -859,7 +896,7 @@
                 <div class="col-lg-8">
                     <h2 class="display-5 fw-bold mb-4">Transforma tu Comunidad</h2>
                     <p class="lead mb-5">
-                        URBELIX no es solo una herramienta, es la evolución de la gestión residencial.
+                        Urbelix no es solo una herramienta, es la evolución de la gestión residencial.
                         Ahorra tiempo, reduce costos operativos y mejora significativamente la calidad de vida
                         de tus residentes con tecnología de vanguardia.
                     </p>
@@ -907,7 +944,7 @@
                 <div class="col-lg-8 cta-content">
                     <h2 class="cta-title mb-4">¿Listo para modernizar tu comunidad?</h2>
                     <p class="lead mb-5">
-                        Únete a cientos de administradores que ya confían en URBELIX para gestionar
+                        Únete a cientos de administradores que ya confían en Urbelix para gestionar
                         sus torres residenciales de manera eficiente y moderna.
                         Configura tu comunidad en minutos y mantén todos los procesos bajo control.
                     </p>
@@ -922,9 +959,9 @@
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <h5 class="text-white mb-3">URBELIX</h5>
+                    <h5 class="text-white mb-3">Urbelix</h5>
                     <p class="mb-3">La plataforma líder en gestión inteligente de comunidades residenciales en Colombia.</p>
-                    <p class="mb-0">&copy; 2024 URBELIX. Todos los derechos reservados.</p>
+                    <p class="mb-0">&copy; 2026 Urbelix. Todos los derechos reservados.</p>
                 </div>
             </div>
         </div>

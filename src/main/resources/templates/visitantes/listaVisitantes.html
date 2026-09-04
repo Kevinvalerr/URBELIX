@@ -1,72 +1,56 @@
-﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layout/base :: page">
-    <div th:fragment="content" th:with="titulo='Visitantes | URBELIX'">
-        <!-- Page Header -->
-        <div class="dashboard-welcome-header" style="margin-bottom: 2rem; padding: 2rem;">
-            <div class="welcome-content" style="gap: 2rem;">
-                <div class="welcome-avatar" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(6, 182, 212, 0.15));">
-                    <i class="bi bi-person-badge"></i>
-                </div>
-                <div class="welcome-text">
-                    <h1 class="welcome-title">Control de Visitantes</h1>
-                    <p class="welcome-subtitle">Registra entradas y salidas de visitantes</p>
-                </div>
-            </div>
-            <div class="welcome-stats">
-                <div class="stat-item">
-                    <div class="stat-number" th:text="${visitantes.size()}">0</div>
-                    <div class="stat-label">Total</div>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{layout/base :: page}">
+<div th:fragment="content">
+    <section class="page-top-section mb-4">
+        <div>
+            <h1 th:text="${esResidente ? 'Mis solicitudes de visitantes' : 'Control de visitantes'}">Control de visitantes</h1>
+            <p class="text-muted" th:text="${esResidente ? 'Solicita accesos y consulta el estado de tus visitantes.' : 'Revisa solicitudes y registra los accesos autorizados.'}">Gestiona el acceso de visitantes.</p>
         </div>
-
-        <!-- Register Visitor Button -->
-        <div style="margin-bottom: 2rem;">
-            <a th:href="@{/visitantes/nuevo}" class="btn btn-primary" style="background: linear-gradient(135deg, #2563EB, #06B6D4); border: none; padding: 0.75rem 2rem; border-radius: 12px; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: all 0.3s ease;">
-                <i class="bi bi-person-plus"></i>
-                Registrar Visitante
-            </a>
+        <div class="page-actions" sec:authorize="hasRole('RESIDENTE')">
+            <a th:href="@{/visitantes/nuevo}" class="btn btn-primary"><i class="bi bi-person-plus me-2"></i>Solicitar visitante</a>
         </div>
+    </section>
 
-        <!-- Visitors Table -->
-        <div class="timeline-container" style="padding: 2rem;">
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; background: transparent;">
-                    <thead>
-                        <tr style="border-bottom: 2px solid rgba(37, 99, 235, 0.1);">
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Nombre</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Documento</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Apartamento</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Entrada</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Salida</th>
-                            <th style="padding: 1rem; text-align: center; font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="visitante : ${visitantes}" style="border-bottom: 1px solid rgba(37, 99, 235, 0.06); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(37, 99, 235, 0.02)'" onmouseout="this.style.backgroundColor='transparent'">
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${visitante.nombre}"></td>
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${visitante.documento}"></td>
-                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;" th:text="${visitante.apartamento.numero}"></td>
-                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${visitante.fechaEntrada}"></td>
-                            <td style="padding: 1rem; color: var(--text-secondary); font-weight: 500;" th:text="${visitante.fechaSalida} ?: '—'"></td>
-                            <td style="padding: 1rem; text-align: center;">
-                                <a th:if="${visitante.fechaSalida == null}" th:href="@{/visitantes/salida/{id}(id=${visitante.id})}" style="background: rgba(34, 197, 94, 0.1); color: #16A34A; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(34, 197, 94, 0.2)'" onmouseout="this.style.background='rgba(34, 197, 94, 0.1)'">
-                                    <i class="bi bi-box-arrow-right"></i> Registrar Salida
-                                </a>
-                                <span th:if="${visitante.fechaSalida != null}" style="background: rgba(148, 163, 184, 0.1); color: #64748B; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Finalizado</span>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(visitantes)}" style="border-bottom: none;">
-                            <td colspan="6" style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
-                                <i class="bi bi-person-badge" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-                                <br>
-                                No hay visitantes registrados
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="row g-3 mb-4 toolbar-filter">
+        <div class="col-md-8"><input class="form-control" data-filter-search="visitantes" oninput="filterRows('visitantes')" placeholder="Buscar por nombre, documento o apartamento"></div>
+        <div class="col-md-4"><select class="form-select" data-filter-status="visitantes" onchange="filterRows('visitantes')"><option value="ALL">Todos los estados</option><option value="PENDIENTE">Pendientes</option><option value="APROBADA">Aprobadas</option><option value="RECHAZADA">Rechazadas</option><option value="DENTRO">Dentro</option><option value="FINALIZADA">Finalizadas</option></select></div>
+    </div>
+
+    <div class="timeline-container table-surface">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Visitante</th><th>Documento</th><th>Apartamento</th><th>Estado</th><th>Entrada</th><th>Salida</th><th sec:authorize="hasRole('PORTERIA')">Acciones</th></tr></thead>
+                <tbody>
+                <tr th:each="visitante : ${visitantes}" data-filter-row="visitantes" th:attr="data-status=${visitante.estado != null ? visitante.estado.name() : 'PENDIENTE'}">
+                    <td><strong th:text="${visitante.nombre}">Visitante</strong><div th:if="${visitante.motivoRechazo}" class="small text-danger" th:text="${visitante.motivoRechazo}"></div></td>
+                    <td th:text="${visitante.documento}">00000000</td>
+                    <td th:text="${visitante.apartamento != null ? visitante.apartamento.numero : 'Sin apartamento'}">101</td>
+                    <td>
+                        <span th:if="${visitante.estado != null and visitante.estado.name() == 'PENDIENTE'}" class="badge text-bg-warning">Pendiente</span>
+                        <span th:if="${visitante.estado != null and visitante.estado.name() == 'APROBADA'}" class="badge text-bg-primary">Aprobada</span>
+                        <span th:if="${visitante.estado != null and visitante.estado.name() == 'RECHAZADA'}" class="badge text-bg-danger">Rechazada</span>
+                        <span th:if="${visitante.estado != null and visitante.estado.name() == 'DENTRO'}" class="badge text-bg-success">Dentro</span>
+                        <span th:if="${visitante.estado != null and visitante.estado.name() == 'FINALIZADA'}" class="badge text-bg-secondary">Finalizada</span>
+                    </td>
+                    <td th:text="${visitante.fechaEntrada != null ? #temporals.format(visitante.fechaEntrada, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+                    <td th:text="${visitante.fechaSalida != null ? #temporals.format(visitante.fechaSalida, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+                    <td sec:authorize="hasRole('PORTERIA')">
+                        <div th:if="${visitante.estado != null and visitante.estado.name() == 'PENDIENTE'}" class="d-flex gap-1 flex-wrap">
+                            <form th:action="@{/visitantes/{id}/aprobar(id=${visitante.id})}" method="post"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"><button type="submit" class="btn btn-sm btn-outline-success">Aprobar</button></form>
+                            <form th:action="@{/visitantes/{id}/rechazar(id=${visitante.id})}" method="post" class="d-flex gap-1"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"><input name="motivo" class="form-control form-control-sm" maxlength="500" placeholder="Motivo" required><button type="submit" class="btn btn-sm btn-outline-danger">Rechazar</button></form>
+                        </div>
+                        <form th:if="${visitante.estado != null and visitante.estado.name() == 'APROBADA'}" th:action="@{/visitantes/{id}/entrada(id=${visitante.id})}" method="post"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"><button type="submit" class="btn btn-sm btn-outline-primary">Registrar entrada</button></form>
+                        <form th:if="${visitante.estado != null and visitante.estado.name() == 'DENTRO'}" th:action="@{/visitantes/salida/{id}(id=${visitante.id})}" method="post"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"><button type="submit" class="btn btn-sm btn-outline-danger">Registrar salida</button></form>
+                        <span th:if="${visitante.estado != null and (visitante.estado.name() == 'RECHAZADA' or visitante.estado.name() == 'FINALIZADA')}" class="text-muted small">Sin acciones</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(visitantes)}"><td colspan="7" class="text-center text-muted py-5">No hay solicitudes ni visitas para mostrar.</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 </html>
-

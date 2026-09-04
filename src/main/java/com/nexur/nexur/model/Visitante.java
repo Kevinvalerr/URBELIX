@@ -34,7 +34,7 @@ public class Visitante {
     @ManyToOne
     @JoinColumn(name = "apartamento_id")
     private Apartamento apartamento;
-
+    
     public Visitante() {}
 
     public Long getId() {
@@ -55,7 +55,7 @@ public class Visitante {
 
     public String getDocumento() {
         return documento;
-
+    
     }
 
     public void setDocumento(String documento ) {
@@ -109,5 +109,5 @@ public class Visitante {
 
     }
 
-
+    
 }

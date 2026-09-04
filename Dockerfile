@@ -1,60 +1,40 @@
-# syntax=docker/dockerfile:1
-
-# ---------------------------------------------------------------------------
-# Etapa 1: compilar el JAR de Spring Boot
-# ---------------------------------------------------------------------------
 FROM maven:3.9-eclipse-temurin-21 AS build
 
-WORKDIR /build
+WORKDIR /workspace
 
-# Se copia primero el POM para que la capa de dependencias se reutilice
-# mientras no cambien las dependencias del proyecto.
-COPY pom.xml .
-RUN mvn -B -q dependency:go-offline
+COPY pom.xml ./
 
-COPY src ./src
-RUN mvn -B -q -DskipTests package \
-    && mv target/urbelix-*.jar target/urbelix.jar
+COPY src src
 
-# ---------------------------------------------------------------------------
-# Etapa 2: imagen de ejecucion con JRE 21 + Python para el servicio de reportes
-# ---------------------------------------------------------------------------
-FROM eclipse-temurin:21-jre-noble
+RUN mvn -B package -Dmaven.test.skip=true \
+    && cp target/*SNAPSHOT.jar /tmp/urbelix.jar
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+FROM eclipse-temurin:21-jre
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends python3 python3-venv curl \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system app \
+    && useradd --system --gid app --home-dir /app --create-home app
 
 WORKDIR /app
 
-# Entorno virtual aislado para FastAPI/ReportLab.
-COPY requirements-fastapi.txt .
-RUN python3 -m venv /opt/venv \
-    && /opt/venv/bin/pip install --no-cache-dir --upgrade pip \
-    && /opt/venv/bin/pip install --no-cache-dir -r requirements-fastapi.txt
-ENV PATH="/opt/venv/bin:${PATH}"
+COPY --from=build /tmp/urbelix.jar /app/app.jar
 
-COPY fastapi_reportes.py .
-COPY --from=build /build/target/urbelix.jar ./urbelix.jar
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN mkdir -p /app/data/uploads \
+    && chown -R app:app /app
 
-# Usuario sin privilegios; necesita escribir el SQLite de FastAPI en /app.
-RUN useradd --system --create-home --uid 10001 urbelix \
-    && chown -R urbelix:urbelix /app
-USER urbelix
+USER app
 
-# Render inyecta PORT; 8080 es solo el valor por defecto para uso local.
-ENV PORT=8080 \
-    SPRING_PROFILES_ACTIVE=prod \
-    FASTAPI_PORT=8000 \
-    FASTAPI_URL=http://127.0.0.1:8000 \
-    JAVA_OPTS="-XX:MaxRAMPercentage=65 -XX:+UseSerialGC"
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
+ENV SPRING_PROFILES_ACTIVE=prod
+ENV UPLOAD_DIR=/app/data/uploads
 
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+VOLUME ["/app/data"]
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
+    CMD curl --fail --silent http://127.0.0.1:8080/login > /dev/null || exit 1
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
