@@ -8,7 +8,13 @@ target/
 *.mv.db
 *.trace.db
 *.log
+hs_err_pid*.log
+replay_pid*.log
 /data/
+
+### Local build and diagnostic reports ###
+compile_check.txt
+compile_out*.txt
 
 ### Spring Tools Suite ###
 .apt_generated
