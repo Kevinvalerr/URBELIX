@@ -3,6 +3,7 @@ package com.urbelix.urbelix.config;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.urbelix.urbelix.model.Apartamento;
 import com.urbelix.urbelix.model.Residente;
@@ -14,6 +15,9 @@ import com.urbelix.urbelix.repository.UsuarioRepository;
 import java.util.List;
 
 @Configuration
+// Datos minimos para desarrollo local. El perfil "demo" usa DemoDataInitializer
+// y en "prod" no debe sembrarse nada automaticamente.
+@Profile("!prod & !demo")
 public class DataInitializer {
 
     @Bean

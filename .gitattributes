@@ -1,2 +1,9 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+
+# Ficheros que se ejecutan dentro del contenedor Linux: deben conservar
+# finales de linea LF aunque se commiteen desde Windows. Con CRLF el
+# contenedor falla con "bash\r: No such file or directory".
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.sql text eol=lf

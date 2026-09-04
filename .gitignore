@@ -47,3 +47,8 @@ __pycache__/
 ### IDE / sistema ###
 .DS_Store
 Thumbs.db
+
+### Variables de entorno (credenciales) ###
+.env
+.env.*
+!.env.example
